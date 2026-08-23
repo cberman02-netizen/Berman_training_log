@@ -1,0 +1,40 @@
+name: Sync Strava
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Pull new activities from Strava
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+        run: python sync_strava.py
+
+      # sync_strava.py can pick up a rotated Strava refresh token, but it only
+      # persists that to a local .env (gitignored) — it has no way to update the
+      # STRAVA_REFRESH_TOKEN secret itself. If Strava ever rotates it, this step's
+      # sync still succeeds, but future runs will start failing until the
+      # STRAVA_REFRESH_TOKEN secret is updated by hand (Settings > Secrets > Actions).
+      - name: Commit new activity data
+        run: |
+          git config user.name "training-log-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/
+          git diff --quiet --staged || git commit -m "Sync new Strava activities"
+          git push

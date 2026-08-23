@@ -454,6 +454,7 @@
     <div class="header-right">
       <span class="strava-sync-status" id="strava-sync-status"></span>
       <button class="wchip strava-sync-btn" id="strava-sync-btn" style="display:none;">Sync Strava</button>
+      <button class="wchip strava-sync-btn" id="gh-connect-btn" style="display:none;">Connect GitHub</button>
       <div class="updated" id="updated"></div>
       <button class="theme-toggle-btn" id="theme-toggle-btn" title="Toggle light/dark mode" aria-label="Toggle theme">&#9728;</button>
     </div>
@@ -769,6 +770,29 @@
     </div>
     <div class="window-row" id="stream-toggle-row" style="margin-top:12px;"></div>
     <div class="modal-chart"><canvas id="m-chart"></canvas></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="gh-connect-modal-bg">
+  <div class="modal">
+    <button class="close-btn" id="gh-connect-modal-close">&times;</button>
+    <h3>Connect GitHub</h3>
+    <div class="modal-meta">Lets you upload erg screenshots and sync Strava from this page, without running anything locally.</div>
+    <div class="erg-form">
+      <p class="erg-hint">
+        Create a personal access token with <b>repo</b> and <b>workflow</b> scopes.
+        It's stored only in this browser (localStorage) and sent only to GitHub's API — never anywhere else.
+        <br><a href="https://github.com/settings/tokens/new?scopes=repo,workflow&description=Training+Log+site" target="_blank" rel="noopener">Create a token on GitHub &rarr;</a>
+      </p>
+      <label>Personal access token
+        <input type="password" id="gh-pat-input" placeholder="ghp_...">
+      </label>
+      <div class="erg-form-actions">
+        <button class="wchip active" id="gh-pat-save-btn" type="button">Save</button>
+        <button class="wchip" id="gh-pat-clear-btn" type="button" style="display:none;">Disconnect</button>
+      </div>
+      <p class="erg-hint" id="gh-pat-status"></p>
+    </div>
   </div>
 </div>
 
@@ -1950,44 +1974,252 @@ function openModal(id){
 document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal-bg').classList.remove('open'));
 document.getElementById('modal-bg').addEventListener('click', e => { if(e.target.id==='modal-bg') e.currentTarget.classList.remove('open'); });
 
-// ---- Erg screenshot upload (only active when served locally by serve.py —
-// the static GitHub Pages build has no backend, so /api/health fails and
-// this stays hidden, leaving the public site pixel-identical to today) ----
+// ---- Erg screenshot upload + Strava sync ----
+// Two ways this becomes active:
+//  - SERVER_MODE: served locally by serve.py (/api/health succeeds) — talks to
+//    its local Flask endpoints, same as before.
+//  - GITHUB_MODE: served statically (e.g. the published GitHub Pages site) but
+//    the visitor has connected a GitHub personal access token — talks to
+//    GitHub's REST API directly from the browser, driving the same three
+//    workflows under .github/workflows/ (extract_erg / sync_strava / rebuild_site).
+// Neither active: the upload/sync buttons stay hidden, same as the site always
+// has, so a visitor without a token sees a plain read-only page.
 let currentModalActivityId = null;
 let SERVER_MODE = false;
+let GITHUB_MODE = false;
+let ghUploadedFileNames = [];
+
+const GH_OWNER = 'cberman02-netizen';
+const GH_REPO = 'Berman_training_log';
+const GH_API = 'https://api.github.com';
+const GH_PAT_KEY = 'trainingLogGhPat_v1';
+
+function getGhPat(){ try { return localStorage.getItem(GH_PAT_KEY) || ''; } catch(e){ return ''; } }
+function setGhPat(v){ try { if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); } catch(e){} }
+
+function utf8ToBase64(str){
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+function base64ToUtf8(b64){
+  const binary = atob(b64.replace(/\n/g, ''));
+  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function ghApi(path, opts){
+  opts = opts || {};
+  const resp = await fetch(`${GH_API}${path}`, {
+    ...opts,
+    headers: {
+      'Authorization': `Bearer ${getGhPat()}`,
+      'Accept': 'application/vnd.github+json',
+      ...(opts.headers || {}),
+    },
+  });
+  if(!resp.ok){
+    let msg = `GitHub API error (${resp.status})`;
+    try { const j = await resp.json(); if(j.message) msg += `: ${j.message}`; } catch(e){}
+    throw new Error(msg);
+  }
+  return resp.status === 204 ? null : resp.json();
+}
+async function ghGetFile(path){
+  try { return await ghApi(`/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`); }
+  catch(e) { if(e.message.includes('(404)')) return null; throw e; }
+}
+async function ghPutFile(path, base64Content, message, sha){
+  const body = {message, content: base64Content, branch: 'main'};
+  if(sha) body.sha = sha;
+  return ghApi(`/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`, {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body),
+  });
+}
+async function ghDeleteFile(path, sha, message){
+  return ghApi(`/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`, {
+    method: 'DELETE', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({message, sha, branch: 'main'}),
+  });
+}
+async function ghDispatchWorkflow(workflowFile, inputs){
+  return ghApi(`/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${workflowFile}/dispatches`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ref: 'main', inputs: inputs || {}}),
+  });
+}
+async function ghWaitForWorkflowRun(workflowFile, sinceISO, onTick){
+  for(let i = 0; i < 45; i++){
+    await new Promise(r => setTimeout(r, 4000));
+    let run = null;
+    try {
+      const data = await ghApi(`/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${workflowFile}/runs?per_page=5`);
+      run = data.workflow_runs.find(r => new Date(r.created_at) >= new Date(sinceISO)) || null;
+    } catch(e) { /* transient — keep polling */ }
+    if(onTick) onTick(run);
+    if(run && run.status === 'completed') return run;
+  }
+  throw new Error(`Timed out waiting for the "${workflowFile}" GitHub Actions run to finish`);
+}
+
+async function ghExtractFlow(activityId, files, device, onProgress){
+  ghUploadedFileNames = files.map(f => f.name);
+  onProgress('Uploading photo(s)…');
+  for(const file of files){
+    const b64 = await fileToBase64(file);
+    await ghPutFile(`uploads/${activityId}/${file.name}`, b64, `Upload erg photo for activity ${activityId}`);
+  }
+
+  onProgress('Starting extraction…');
+  const dispatchedAt = new Date().toISOString();
+  await ghDispatchWorkflow('extract_erg.yml', {activity_id: activityId, device: device || ''});
+
+  const run = await ghWaitForWorkflowRun('extract_erg.yml', dispatchedAt, r => {
+    onProgress(r ? `Extracting… (${r.status})` : 'Extracting… starting');
+  });
+  if(run.conclusion !== 'success'){
+    throw new Error(`Extraction workflow finished with status "${run.conclusion}" — check the repo's Actions tab`);
+  }
+
+  onProgress('Fetching result…');
+  const pending = await ghGetFile(`data/pending/${activityId}.json`);
+  if(!pending) throw new Error('Extraction finished but no result file was found — check the Actions tab for errors');
+  return JSON.parse(base64ToUtf8(pending.content));
+}
+
+async function ghSaveFlow(activityId, entry, uploadedFileNames){
+  const current = await ghGetFile('data/erg_captures.json');
+  const captures = current ? JSON.parse(base64ToUtf8(current.content)) : {};
+  captures[activityId] = entry;
+  await ghPutFile(
+    'data/erg_captures.json',
+    utf8ToBase64(JSON.stringify(captures, null, 1)),
+    `Save erg capture for activity ${activityId}`,
+    current ? current.sha : undefined,
+  );
+
+  try {
+    const pending = await ghGetFile(`data/pending/${activityId}.json`);
+    if(pending) await ghDeleteFile(`data/pending/${activityId}.json`, pending.sha, `Clean up pending erg data for ${activityId}`);
+  } catch(e) { /* best-effort cleanup */ }
+  for(const name of (uploadedFileNames || [])){
+    try {
+      const f = await ghGetFile(`uploads/${activityId}/${name}`);
+      if(f) await ghDeleteFile(`uploads/${activityId}/${name}`, f.sha, `Remove processed erg photo for ${activityId}`);
+    } catch(e) { /* best-effort cleanup */ }
+  }
+}
+
+async function ghSyncStravaFlow(onStatus){
+  const dispatchedAt = new Date().toISOString();
+  await ghDispatchWorkflow('sync_strava.yml', {});
+  onStatus('Syncing on GitHub Actions…');
+  const syncRun = await ghWaitForWorkflowRun('sync_strava.yml', dispatchedAt, r => {
+    onStatus(r ? `Syncing… (${r.status})` : 'Starting…');
+  });
+  if(syncRun.conclusion !== 'success'){
+    throw new Error(`Sync workflow finished with status "${syncRun.conclusion}" — check the repo's Actions tab`);
+  }
+  onStatus('Rebuilding site…');
+  try {
+    await ghWaitForWorkflowRun('rebuild_site.yml', dispatchedAt, r => {
+      onStatus(r ? `Rebuilding… (${r.status})` : 'Rebuilding…');
+    });
+  } catch(e) { /* best-effort — reload regardless */ }
+  onStatus('Done — reloading…');
+}
+
+function updateActionVisibility(){
+  const active = SERVER_MODE || GITHUB_MODE;
+  document.getElementById('erg-upload-row').style.display = active ? '' : 'none';
+  document.getElementById('strava-sync-btn').style.display = active ? '' : 'none';
+  document.getElementById('gh-connect-btn').style.display = active ? 'none' : '';
+}
 
 fetch('/api/health').then(r => r.ok ? r.json() : Promise.reject())
-  .then(() => {
-    SERVER_MODE = true;
-    document.getElementById('erg-upload-row').style.display = '';
-    document.getElementById('strava-sync-btn').style.display = '';
-  })
-  .catch(() => { SERVER_MODE = false; });
+  .then(() => { SERVER_MODE = true; updateActionVisibility(); })
+  .catch(() => { SERVER_MODE = false; GITHUB_MODE = !!getGhPat(); updateActionVisibility(); });
+
+document.getElementById('gh-connect-btn').addEventListener('click', () => {
+  document.getElementById('gh-pat-input').value = getGhPat();
+  document.getElementById('gh-pat-clear-btn').style.display = getGhPat() ? '' : 'none';
+  document.getElementById('gh-pat-status').textContent = '';
+  document.getElementById('gh-connect-modal-bg').classList.add('open');
+});
+document.getElementById('gh-connect-modal-close').addEventListener('click', () => document.getElementById('gh-connect-modal-bg').classList.remove('open'));
+document.getElementById('gh-connect-modal-bg').addEventListener('click', e => { if(e.target.id === 'gh-connect-modal-bg') e.currentTarget.classList.remove('open'); });
+
+document.getElementById('gh-pat-save-btn').addEventListener('click', async () => {
+  const val = document.getElementById('gh-pat-input').value.trim();
+  const statusEl = document.getElementById('gh-pat-status');
+  if(!val){ statusEl.textContent = 'Enter a token first'; return; }
+  statusEl.textContent = 'Checking…';
+  setGhPat(val);
+  try {
+    await ghApi(`/repos/${GH_OWNER}/${GH_REPO}`);
+    GITHUB_MODE = true;
+    updateActionVisibility();
+    statusEl.textContent = 'Connected';
+    setTimeout(() => document.getElementById('gh-connect-modal-bg').classList.remove('open'), 800);
+  } catch(e) {
+    setGhPat('');
+    GITHUB_MODE = false;
+    statusEl.textContent = 'Could not access the repo with that token: ' + e.message;
+  }
+});
+document.getElementById('gh-pat-clear-btn').addEventListener('click', () => {
+  setGhPat('');
+  GITHUB_MODE = false;
+  updateActionVisibility();
+  document.getElementById('gh-connect-modal-bg').classList.remove('open');
+});
 
 document.getElementById('strava-sync-btn').addEventListener('click', async () => {
   const btn = document.getElementById('strava-sync-btn');
   const status = document.getElementById('strava-sync-status');
   btn.disabled = true;
-  btn.textContent = 'Syncing…';
   status.textContent = '';
-  try {
-    const resp = await fetch('/api/sync-strava', {method: 'POST'});
-    const json = await resp.json();
-    if(!resp.ok) throw new Error(json.error || 'Sync failed');
-    if(json.added > 0){
-      status.textContent = `Added ${json.added} — reloading…`;
-      setTimeout(() => location.reload(), 800);
-    } else {
+
+  if(SERVER_MODE){
+    btn.textContent = 'Syncing…';
+    try {
+      const resp = await fetch('/api/sync-strava', {method: 'POST'});
+      const json = await resp.json();
+      if(!resp.ok) throw new Error(json.error || 'Sync failed');
+      if(json.added > 0){
+        status.textContent = `Added ${json.added} — reloading…`;
+        setTimeout(() => location.reload(), 800);
+      } else {
+        btn.textContent = 'Sync Strava';
+        btn.disabled = false;
+        status.textContent = 'Up to date';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      }
+    } catch(e) {
       btn.textContent = 'Sync Strava';
       btn.disabled = false;
-      status.textContent = 'Up to date';
-      setTimeout(() => { status.textContent = ''; }, 3000);
+      status.textContent = 'Sync failed';
+      alert('Strava sync failed: ' + e.message);
     }
-  } catch(e) {
-    btn.textContent = 'Sync Strava';
-    btn.disabled = false;
-    status.textContent = 'Sync failed';
-    alert('Strava sync failed: ' + e.message);
+  } else if(GITHUB_MODE){
+    try {
+      await ghSyncStravaFlow(msg => { status.textContent = msg; });
+      setTimeout(() => location.reload(), 800);
+    } catch(e) {
+      btn.textContent = 'Sync Strava';
+      btn.disabled = false;
+      status.textContent = 'Sync failed';
+      alert('Strava sync failed: ' + e.message);
+    }
   }
 });
 
@@ -1999,7 +2231,7 @@ function resetErgUploadUI(){
   document.getElementById('erg-upload-device').value = '';
   document.getElementById('erg-review-warnings').innerHTML = '';
   document.getElementById('erg-int-table').querySelectorAll('.erg-int-row:not(.header)').forEach(r => r.remove());
-  document.getElementById('erg-upload-row').style.display = SERVER_MODE ? '' : 'none';
+  document.getElementById('erg-upload-row').style.display = (SERVER_MODE || GITHUB_MODE) ? '' : 'none';
   document.getElementById('erg-saved-msg').classList.remove('show');
 }
 
@@ -2058,20 +2290,24 @@ document.getElementById('erg-upload-extract-btn').addEventListener('click', asyn
 
   const btn = document.getElementById('erg-upload-extract-btn');
   const originalText = btn.textContent;
-  btn.textContent = 'Extracting…';
   btn.disabled = true;
-
-  const fd = new FormData();
-  fd.append('activity_id', currentModalActivityId);
-  Array.from(filesInput.files).forEach(f => fd.append('photos', f));
   const device = document.getElementById('erg-upload-device').value;
-  if(device) fd.append('device', device);
 
   try {
-    const resp = await fetch('/api/extract', {method:'POST', body: fd});
-    const json = await resp.json();
-    if(!resp.ok) throw new Error(json.error || 'Extraction failed');
-    populateErgReview(json.data, json.warnings || []);
+    if(SERVER_MODE){
+      btn.textContent = 'Extracting…';
+      const fd = new FormData();
+      fd.append('activity_id', currentModalActivityId);
+      Array.from(filesInput.files).forEach(f => fd.append('photos', f));
+      if(device) fd.append('device', device);
+      const resp = await fetch('/api/extract', {method:'POST', body: fd});
+      const json = await resp.json();
+      if(!resp.ok) throw new Error(json.error || 'Extraction failed');
+      populateErgReview(json.data, json.warnings || []);
+    } else if(GITHUB_MODE){
+      const json = await ghExtractFlow(currentModalActivityId, Array.from(filesInput.files), device, msg => { btn.textContent = msg; });
+      populateErgReview(json.data, json.warnings || []);
+    }
   } catch(e) {
     alert('Extraction failed: ' + e.message);
   } finally {
@@ -2132,27 +2368,36 @@ document.getElementById('erg-review-save-btn').addEventListener('click', async (
 
   const btn = document.getElementById('erg-review-save-btn');
   const originalText = btn.textContent;
-  btn.textContent = 'Saving…';
   btn.disabled = true;
 
   try {
-    const resp = await fetch('/api/save', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({activity_id: currentModalActivityId, entry}),
-    });
-    const json = await resp.json();
-    if(!resp.ok) throw new Error(json.error || 'Save failed');
+    let savedEntry = entry;
+    if(SERVER_MODE){
+      btn.textContent = 'Saving…';
+      const resp = await fetch('/api/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({activity_id: currentModalActivityId, entry}),
+      });
+      const json = await resp.json();
+      if(!resp.ok) throw new Error(json.error || 'Save failed');
+      savedEntry = json.entry;
+    } else if(GITHUB_MODE){
+      btn.textContent = 'Saving to GitHub…';
+      await ghSaveFlow(currentModalActivityId, entry, ghUploadedFileNames);
+      ghUploadedFileNames = [];
+    }
 
     const a = DATA.activities.find(x => x.id === currentModalActivityId);
     if(a){
-      a.ergCapture = json.entry;
+      a.ergCapture = savedEntry;
       renderPM5Panel(a);
     }
     resetErgUploadUI();
     const savedMsg = document.getElementById('erg-saved-msg');
+    savedMsg.textContent = GITHUB_MODE ? 'Saved — site finishes rebuilding in ~1 min' : 'Saved';
     savedMsg.classList.add('show');
-    setTimeout(() => savedMsg.classList.remove('show'), 2000);
+    setTimeout(() => savedMsg.classList.remove('show'), GITHUB_MODE ? 4000 : 2000);
   } catch(e) {
     alert('Save failed: ' + e.message);
   } finally {
