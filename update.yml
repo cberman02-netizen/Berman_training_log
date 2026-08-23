@@ -1,0 +1,49 @@
+name: Update training log
+
+on:
+  schedule:
+    # Runs daily at 11:00 UTC (~6/7am US Eastern depending on DST).
+    # Adjust to whenever your last training session of the day is usually done.
+    - cron: '0 11 * * *'
+  workflow_dispatch: {}  # lets you trigger it manually from the Actions tab too
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install stravalib pandas numpy requests
+
+      - name: Pull latest activity summaries
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+        run: python export_full_history.py
+
+      - name: Pull latest streams
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+        run: python export_streams.py
+
+      - name: Rebuild site
+        run: python build_site.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "training-log-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html data/
+          git diff --quiet --staged || git commit -m "Daily training log update"
+          git push

@@ -1,0 +1,9 @@
+flask
+pytesseract
+opencv-python-headless
+numpy
+pillow
+requests
+
+# only needed if you switch serve.py back to extract_erg.py (Anthropic vision API)
+# anthropic
