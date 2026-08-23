@@ -4049,12 +4049,5 @@
     "spm": 28
    }
   ]
- },
- "e2etest123": {
-  "source_image": "test.png",
-  "device": "RowErg",
-  "workout_type": "e2e-test",
-  "total_time_sec": 60,
-  "total_meters": 200
  }
 }
