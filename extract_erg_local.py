@@ -462,21 +462,7 @@ def _dedup_intervals(all_intervals):
     return merged
 
 
-def extract_erg_data(image_paths, device_hint=None):
-    """
-    image_paths: list of file paths, all photos of ONE workout (1+ photos).
-    device_hint: optional "RowErg" or "BikeErg" if the caller already knows it.
-
-    Returns {"data": {...erg_captures.json-shaped entry...}, "warnings": [...], "raw_text": "..."}
-    """
-    if not image_paths:
-        raise ValueError("extract_erg_data requires at least one image path")
-
-    warnings = []
-    header_fields = {}
-    all_intervals = []
-    raw_text_parts = []
-
+def _ocr_all_images(image_paths):
     all_text_for_device = ""
     per_image = []
     for path in image_paths:
@@ -486,17 +472,31 @@ def extract_erg_data(image_paths, device_hint=None):
         text = "\n".join(l["text"] for l in lines)
         all_text_for_device += "\n" + text
         per_image.append((path, lines, text, variant_used))
+    return per_image, all_text_for_device
 
+
+def _detect_device_with_warning(all_text_for_device, device_hint, warnings):
     device = _detect_device(all_text_for_device, device_hint) or "RowErg"
-    if not device_hint and "RowErg" == device and "500m" not in all_text_for_device.lower() and "s/m" not in all_text_for_device.lower():
+    if not device_hint and device == "RowErg" and "500m" not in all_text_for_device.lower() and "s/m" not in all_text_for_device.lower():
         warnings.append("Could not confirm device type from the photo (no '/500m' or 's/m' text found) — defaulted to RowErg, please verify")
+    return device
 
+
+def _extract_single_workout(image_paths, device_hint, warnings, raw_text_parts):
+    # Default mode: all photos are the SAME workout, possibly spanning a scrolled/
+    # paginated interval table (lesson #2) — merge headers (first photo wins) and
+    # dedupe overlapping rows across photos.
+    per_image, all_text_for_device = _ocr_all_images(image_paths)
+    device = _detect_device_with_warning(all_text_for_device, device_hint, warnings)
+
+    header_fields = {}
+    all_intervals = []
     any_header_found = False
     for path, lines, text, variant_used in per_image:
         raw_text_parts.append(f"--- {os.path.basename(path)} (variant: {variant_used}) ---\n{text}")
 
         # A photo may legitimately have no header (a continuation page of a scrolled
-        # interval table, lesson #2) — that's normal, not worth a warning on its own.
+        # interval table) — that's normal, not worth a warning on its own.
         header_line = _find_header_line(lines)
         if header_line is not None:
             any_header_found = True
@@ -514,11 +514,7 @@ def extract_erg_data(image_paths, device_hint=None):
     if not merged_intervals:
         warnings.append("No interval rows were confidently parsed — you'll likely need to fill these in by hand")
 
-    data = {
-        "device": device,
-        "workout_type": "",
-        **header_fields,
-    }
+    data = {"device": device, "workout_type": "", **header_fields}
     if merged_intervals:
         data["intervals"] = merged_intervals
 
@@ -527,6 +523,123 @@ def extract_erg_data(image_paths, device_hint=None):
     if "total_meters" not in data:
         warnings.append("Could not read total_meters from any photo — please fill in manually")
 
+    return data
+
+
+def _extract_multi_piece_workout(image_paths, device_hint, warnings, raw_text_parts):
+    # Multi-piece mode: each photo is its OWN complete, self-contained piece — e.g.
+    # a "2x20:00/4:00r" done as two separately-started PM5 sessions instead of one
+    # interval-mode workout. Each photo's header becomes one rep in the combined
+    # intervals list (never merged/deduped against another photo's header, since
+    # they're genuinely different data, not overlapping fragments of one table),
+    # and the top-level totals are summed/recomputed across all reps.
+    per_image, all_text_for_device = _ocr_all_images(image_paths)
+    device = _detect_device_with_warning(all_text_for_device, device_hint, warnings)
+
+    intervals = []
+    total_time_sec = 0.0
+    total_meters = 0.0
+    spms, watts_list, rpms = [], [], []
+    have_time = have_meters = False
+
+    for i, (path, lines, text, variant_used) in enumerate(per_image):
+        rep = i + 1
+        raw_text_parts.append(f"--- {os.path.basename(path)} (variant: {variant_used}) ---\n{text}")
+
+        header_line = _find_header_line(lines)
+        if header_line is None:
+            warnings.append(f"Photo {rep}: could not identify a summary row for this piece — its numbers will need to be filled in manually")
+            continue
+
+        piece = _parse_header(header_line, device, warnings)
+        row = {"label": str(rep)}
+        if device == "RowErg":
+            if "avg_split_sec" in piece:
+                row["split_sec"] = piece["avg_split_sec"]
+            if "avg_spm" in piece:
+                row["spm"] = piece["avg_spm"]
+                spms.append(piece["avg_spm"])
+        else:
+            if "avg_watts" in piece:
+                row["watts"] = piece["avg_watts"]
+                watts_list.append(piece["avg_watts"])
+            if "avg_rpm" in piece:
+                row["rpm"] = piece["avg_rpm"]
+                rpms.append(piece["avg_rpm"])
+        row["hr"] = None
+        if "split_sec" in row or "watts" in row:
+            intervals.append(row)
+        else:
+            warnings.append(f"Photo {rep}: found a summary row but couldn't read its split/watts — please fill in row {rep} by hand")
+
+        if "total_time_sec" in piece:
+            total_time_sec += piece["total_time_sec"]
+            have_time = True
+        if "total_meters" in piece:
+            total_meters += piece["total_meters"]
+            have_meters = True
+
+        # Sub-splits within this piece (e.g. periodic markers inside a single 20:00
+        # effort) are real data too — keep them, scoped under this rep's label so
+        # they don't collide with another piece's "5:00" marker.
+        sub_lines = [l for l in lines if l is not header_line]
+        for sub in _parse_table_rows(sub_lines, device, warnings):
+            sub["label"] = f"{rep}.{sub['label']}"
+            intervals.append(sub)
+
+    data = {"device": device, "workout_type": ""}
+    if have_time:
+        data["total_time_sec"] = round(total_time_sec, 1)
+    if have_meters:
+        data["total_meters"] = round(total_meters, 1)
+    if have_time and have_meters and total_meters > 0:
+        data["avg_split_sec"] = round(total_time_sec / (total_meters / 500), 1)
+        if device == "RowErg":
+            data["avg_watts"] = _watts_from_split(data["avg_split_sec"])
+    if device == "RowErg" and spms:
+        data["avg_spm"] = round(sum(spms) / len(spms), 1)
+    if device == "BikeErg":
+        if watts_list:
+            data["avg_watts"] = round(sum(watts_list) / len(watts_list), 1)
+        if rpms:
+            data["avg_rpm"] = round(sum(rpms) / len(rpms), 1)
+
+    if intervals:
+        data["intervals"] = intervals
+    else:
+        warnings.append("No piece summaries were confidently parsed — you'll likely need to fill these in by hand")
+
+    warnings.append(
+        f"Multi-piece mode: total_time_sec/total_meters are the sum of all {len(image_paths)} photos' own "
+        "readings and do NOT include rest between pieces — add rest time by hand if you want total_time_sec "
+        "to reflect wall-clock duration."
+    )
+    return data
+
+
+def extract_erg_data(image_paths, device_hint=None, multi_piece=False):
+    """
+    image_paths: file paths for one workout (1+ photos).
+    device_hint: optional "RowErg" or "BikeErg" if the caller already knows it.
+    multi_piece: False (default) — photos are the SAME workout, possibly a scrolled
+        interval table spanning multiple screens; overlapping rows get deduped.
+        True — each photo is its OWN separately-recorded piece (e.g. a "2x20:00/4:00r"
+        done as two standalone PM5 sessions instead of one interval-mode workout);
+        each photo's header becomes one rep, and totals are summed across photos.
+
+    Returns {"data": {...erg_captures.json-shaped entry...}, "warnings": [...], "raw_text": "..."}
+    """
+    if not image_paths:
+        raise ValueError("extract_erg_data requires at least one image path")
+
+    warnings = []
+    raw_text_parts = []
+
+    if multi_piece:
+        data = _extract_multi_piece_workout(image_paths, device_hint, warnings, raw_text_parts)
+    else:
+        data = _extract_single_workout(image_paths, device_hint, warnings, raw_text_parts)
+
     return {"data": data, "warnings": warnings, "raw_text": "\n\n".join(raw_text_parts)}
 
 
@@ -534,6 +647,8 @@ def main():
     ap = argparse.ArgumentParser(description="Extract erg data from photo(s) of one workout using local OCR only")
     ap.add_argument("images", nargs="+", help="image file(s) or glob pattern(s)")
     ap.add_argument("--device", choices=["RowErg", "BikeErg"], default=None)
+    ap.add_argument("--multi-piece", action="store_true",
+                     help="each photo is its own separately-recorded piece (e.g. 2x20:00/4:00r done as two standalone sessions), not a scrolled table of one workout")
     ap.add_argument("--debug", action="store_true", help="print raw OCR text in addition to parsed result")
     args = ap.parse_args()
 
@@ -546,7 +661,7 @@ def main():
         print(f"File(s) not found: {', '.join(missing)}", file=sys.stderr)
         sys.exit(1)
 
-    result = extract_erg_data(paths, device_hint=args.device)
+    result = extract_erg_data(paths, device_hint=args.device, multi_piece=args.multi_piece)
 
     if args.debug:
         print(result["raw_text"])

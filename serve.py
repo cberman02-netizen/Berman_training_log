@@ -93,6 +93,7 @@ def api_extract():
         return jsonify({"error": "no photos uploaded"}), 400
 
     device_hint = request.form.get("device") or None
+    multi_piece = request.form.get("multi_piece") in ("1", "true", "on")
 
     act_dir = os.path.join(CAPTURES_DIR, activity_id)
     os.makedirs(act_dir, exist_ok=True)
@@ -106,7 +107,7 @@ def api_extract():
         saved_paths.append(dest)
 
     try:
-        result = extract_erg_data(saved_paths, device_hint=device_hint)
+        result = extract_erg_data(saved_paths, device_hint=device_hint, multi_piece=multi_piece)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

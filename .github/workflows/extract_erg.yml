@@ -11,6 +11,11 @@ on:
         description: "Device hint: RowErg, BikeErg, or blank to auto-detect"
         required: false
         type: string
+      multi_piece:
+        description: "Each photo is its own separately-recorded piece (e.g. 2x20:00/4:00r done as two standalone sessions)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -32,7 +37,7 @@ jobs:
         run: pip install pytesseract opencv-python-headless numpy pillow
 
       - name: Run OCR extraction
-        run: python process_erg_upload.py --activity-id "${{ inputs.activity_id }}" --device "${{ inputs.device }}"
+        run: python process_erg_upload.py --activity-id "${{ inputs.activity_id }}" --device "${{ inputs.device }}" --multi-piece "${{ inputs.multi_piece }}"
 
       - name: Commit extracted data
         run: |

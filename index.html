@@ -417,6 +417,8 @@
   .erg-form-row > label{flex:1; min-width:140px;}
   .erg-form-actions{display:flex; gap:10px; margin-top:2px;}
   .erg-hint{font-family:var(--sans); font-size:11.5px; color:var(--text-faint); margin:0;}
+  .erg-checkbox-row{display:flex; flex-direction:row !important; align-items:flex-start; gap:8px; font-family:var(--sans) !important; font-size:12.5px !important; color:var(--text-dim) !important; text-transform:none !important; letter-spacing:0 !important;}
+  .erg-checkbox-row input{flex:none; width:auto; margin-top:2px;}
   .erg-warn{
     background:var(--panel); border:1px solid var(--run); color:var(--run); border-radius:8px;
     padding:10px 14px; margin-bottom:14px; font-family:var(--sans); font-size:12px;
@@ -734,6 +736,10 @@
             </select>
           </label>
         </div>
+        <label class="erg-checkbox-row">
+          <input type="checkbox" id="erg-upload-multi-piece">
+          <span>Each photo is its own separate piece (e.g. 2x20:00/4:00r recorded as two standalone efforts, not one interval-mode workout)</span>
+        </label>
         <p class="erg-hint">Extraction runs locally (OCR, no API calls). For best results, fill the frame with the screen, shoot straight-on, and avoid glare over the numbers.</p>
         <div class="erg-form-actions">
           <button class="wchip active" id="erg-upload-extract-btn" type="button">Extract</button>
@@ -2060,7 +2066,6 @@ document.getElementById('modal-bg').addEventListener('click', e => { if(e.target
 let currentModalActivityId = null;
 let SERVER_MODE = false;
 let GITHUB_MODE = false;
-let ghUploadedFileNames = [];
 
 const GH_OWNER = 'cberman02-netizen';
 const GH_REPO = 'Berman_training_log';
@@ -2144,8 +2149,7 @@ async function ghWaitForWorkflowRun(workflowFile, sinceISO, onTick){
   throw new Error(`Timed out waiting for the "${workflowFile}" GitHub Actions run to finish`);
 }
 
-async function ghExtractFlow(activityId, files, device, onProgress){
-  ghUploadedFileNames = files.map(f => f.name);
+async function ghExtractFlow(activityId, files, device, multiPiece, onProgress){
   onProgress('Uploading photo(s)…');
   for(const file of files){
     const b64 = await fileToBase64(file);
@@ -2154,7 +2158,7 @@ async function ghExtractFlow(activityId, files, device, onProgress){
 
   onProgress('Starting extraction…');
   const dispatchedAt = new Date().toISOString();
-  await ghDispatchWorkflow('extract_erg.yml', {activity_id: activityId, device: device || ''});
+  await ghDispatchWorkflow('extract_erg.yml', {activity_id: activityId, device: device || '', multi_piece: !!multiPiece});
 
   const run = await ghWaitForWorkflowRun('extract_erg.yml', dispatchedAt, r => {
     onProgress(r ? `Extracting… (${r.status})` : 'Extracting… starting');
@@ -2181,7 +2185,7 @@ async function ghSaveTitleFlow(activityId, title){
   );
 }
 
-async function ghSaveFlow(activityId, entry, uploadedFileNames){
+async function ghSaveFlow(activityId, entry){
   const current = await ghGetFile('data/erg_captures.json');
   const captures = current ? JSON.parse(base64ToUtf8(current.content)) : {};
   captures[activityId] = entry;
@@ -2196,12 +2200,17 @@ async function ghSaveFlow(activityId, entry, uploadedFileNames){
     const pending = await ghGetFile(`data/pending/${activityId}.json`);
     if(pending) await ghDeleteFile(`data/pending/${activityId}.json`, pending.sha, `Clean up pending erg data for ${activityId}`);
   } catch(e) { /* best-effort cleanup */ }
-  for(const name of (uploadedFileNames || [])){
-    try {
-      const f = await ghGetFile(`uploads/${activityId}/${name}`);
-      if(f) await ghDeleteFile(`uploads/${activityId}/${name}`, f.sha, `Remove processed erg photo for ${activityId}`);
-    } catch(e) { /* best-effort cleanup */ }
-  }
+  // Look up whatever's actually in uploads/<id>/ via the API (a directory GET
+  // returns its listing) rather than relying on in-memory state from the extract
+  // step — that state is lost if the page reloads between extract and save
+  // (e.g. during the ~1-2 min Actions wait), which was leaving photos undeleted.
+  try {
+    const listing = await ghApi(`/repos/${GH_OWNER}/${GH_REPO}/contents/uploads/${activityId}`);
+    const files = Array.isArray(listing) ? listing : [];
+    for(const f of files){
+      await ghDeleteFile(`uploads/${activityId}/${f.name}`, f.sha, `Remove processed erg photo for ${activityId}`);
+    }
+  } catch(e) { /* best-effort cleanup */ }
 }
 
 async function ghSyncStravaFlow(onStatus){
@@ -2314,6 +2323,7 @@ function resetErgUploadUI(){
   document.getElementById('erg-upload-form').style.display = '';
   document.getElementById('erg-upload-files').value = '';
   document.getElementById('erg-upload-device').value = '';
+  document.getElementById('erg-upload-multi-piece').checked = false;
   document.getElementById('erg-review-warnings').innerHTML = '';
   document.getElementById('erg-int-table').querySelectorAll('.erg-int-row:not(.header)').forEach(r => r.remove());
   document.getElementById('erg-upload-row').style.display = (SERVER_MODE || GITHUB_MODE) ? '' : 'none';
@@ -2377,6 +2387,7 @@ document.getElementById('erg-upload-extract-btn').addEventListener('click', asyn
   const originalText = btn.textContent;
   btn.disabled = true;
   const device = document.getElementById('erg-upload-device').value;
+  const multiPiece = document.getElementById('erg-upload-multi-piece').checked;
 
   try {
     if(SERVER_MODE){
@@ -2385,12 +2396,13 @@ document.getElementById('erg-upload-extract-btn').addEventListener('click', asyn
       fd.append('activity_id', currentModalActivityId);
       Array.from(filesInput.files).forEach(f => fd.append('photos', f));
       if(device) fd.append('device', device);
+      if(multiPiece) fd.append('multi_piece', '1');
       const resp = await fetch('/api/extract', {method:'POST', body: fd});
       const json = await resp.json();
       if(!resp.ok) throw new Error(json.error || 'Extraction failed');
       populateErgReview(json.data, json.warnings || []);
     } else if(GITHUB_MODE){
-      const json = await ghExtractFlow(currentModalActivityId, Array.from(filesInput.files), device, msg => { btn.textContent = msg; });
+      const json = await ghExtractFlow(currentModalActivityId, Array.from(filesInput.files), device, multiPiece, msg => { btn.textContent = msg; });
       populateErgReview(json.data, json.warnings || []);
     }
   } catch(e) {
@@ -2469,8 +2481,7 @@ document.getElementById('erg-review-save-btn').addEventListener('click', async (
       savedEntry = json.entry;
     } else if(GITHUB_MODE){
       btn.textContent = 'Saving to GitHub…';
-      await ghSaveFlow(currentModalActivityId, entry, ghUploadedFileNames);
-      ghUploadedFileNames = [];
+      await ghSaveFlow(currentModalActivityId, entry);
     }
 
     const a = DATA.activities.find(x => x.id === currentModalActivityId);

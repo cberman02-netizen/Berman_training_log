@@ -11,7 +11,7 @@ erg_captures.json directly, so nothing is saved without the user reviewing it
 first, same as the local flow.
 
 CLI:
-    python process_erg_upload.py --activity-id 12345 [--device RowErg]
+    python process_erg_upload.py --activity-id 12345 [--device RowErg] [--multi-piece]
 """
 
 import argparse
@@ -33,6 +33,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--activity-id", required=True)
     ap.add_argument("--device", default="")
+    ap.add_argument("--multi-piece", default="")
     args = ap.parse_args()
 
     activity_id = args.activity_id.strip()
@@ -45,7 +46,8 @@ def main():
         sys.exit(1)
 
     device_hint = args.device.strip() or None
-    result = extract_erg_data(paths, device_hint=device_hint)
+    multi_piece = args.multi_piece.strip().lower() in ("1", "true", "on", "yes")
+    result = extract_erg_data(paths, device_hint=device_hint, multi_piece=multi_piece)
 
     data = result["data"]
     data["source_image"] = ", ".join(os.path.basename(p) for p in paths)
