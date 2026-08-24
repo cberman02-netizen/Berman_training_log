@@ -1,0 +1,74 @@
+{
+ "data": {
+  "device": "RowErg",
+  "workout_type": "",
+  "avg_split_sec": 328,
+  "avg_watts": 9.9,
+  "total_meters": 1278.0,
+  "avg_spm": 19.0,
+  "intervals": [
+   {
+    "label": "2\u201d",
+    "split_sec": 328,
+    "hr": null
+   },
+   {
+    "label": "5:00.00",
+    "split_sec": 90.6,
+    "hr": null
+   },
+   {
+    "label": "12",
+    "split_sec": 122.6,
+    "hr": null
+   },
+   {
+    "label": "[2000.0",
+    "split_sec": 318.9,
+    "hr": 186.0
+   },
+   {
+    "label": "5000",
+    "split_sec": 87.4,
+    "spm": 22.0,
+    "hr": null
+   },
+   {
+    "label": "10:00.0",
+    "split_sec": 117.3,
+    "spm": 22.0,
+    "hr": null
+   },
+   {
+    "label": "15000",
+    "split_sec": 115.2,
+    "spm": 24.0,
+    "hr": 133.0
+   },
+   {
+    "label": "2000.0",
+    "split_sec": 93.6,
+    "spm": 26.0,
+    "hr": null
+   }
+  ],
+  "source_image": "IMG_2260.jpeg, IMG_2261 2.jpeg"
+ },
+ "warnings": [
+  "Could not confirm device type from the photo (no '/500m' or 's/m' text found) \u2014 defaulted to RowErg, please verify",
+  "avg_split_sec read as '528' with low OCR confidence (52%) \u2014 please verify",
+  "interval 2\u201d split_sec read as '528' with low OCR confidence (52%) \u2014 please verify",
+  "total_meters read as '1278' with low OCR confidence (63%) \u2014 please verify",
+  "avg_spm read as '19c' with low OCR confidence (20%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 318.9) \u2014 shown as '[2000.0', please fix",
+  "interval 5000 split_sec read as '1274' with low OCR confidence (60%) \u2014 please verify",
+  "interval 5000 spm read as '22' with low OCR confidence (45%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 87.4) \u2014 shown as '5000', please fix",
+  "interval 10:00.0 split_sec read as '157.3' with low OCR confidence (60%) \u2014 please verify",
+  "interval 15000 split_sec read as '155.2' with low OCR confidence (48%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 115.2) \u2014 shown as '15000', please fix",
+  "interval 2000.0 split_sec read as '1336' with low OCR confidence (63%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 93.6) \u2014 shown as '2000.0', please fix",
+  "Could not read total_time_sec from any photo \u2014 please fill in manually"
+ ]
+}
