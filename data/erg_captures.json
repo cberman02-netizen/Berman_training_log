@@ -2,20 +2,20 @@
  "18839990739": {
   "source_image": "IMG_1998-1999.jpeg",
   "total_time_sec": 2592.6,
-  "total_meters": 7500.0,
+  "total_meters": 7500,
   "workout_type": "15x500m/1:00r",
   "avg_split_sec": 112.8,
-  "avg_spm": 25.0,
+  "avg_spm": 25,
   "device": "RowErg",
   "avg_watts": 243.9
  },
  "17744880073": {
   "source_image": "IMG_1536.jpeg",
-  "total_time_sec": 5940.0,
-  "total_meters": 20780.0,
+  "total_time_sec": 5940,
+  "total_meters": 20780,
   "workout_type": "6x15:00/1:30r",
   "avg_split_sec": 129.9,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 159.7,
   "intervals": [
@@ -53,17 +53,17 @@
  },
  "17534332602": {
   "source_image": "IMG_1452.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14015.0,
+  "total_time_sec": 3960,
+  "total_meters": 14015,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 128.4,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 165.3,
   "intervals": [
    {
     "label": "1",
-    "split_sec": 128.0,
+    "split_sec": 128,
     "hr": null
    },
    {
@@ -80,11 +80,11 @@
  },
  "17474000508": {
   "source_image": "IMG_1428.jpeg",
-  "total_time_sec": 5940.0,
-  "total_meters": 21059.0,
+  "total_time_sec": 5940,
+  "total_meters": 21059,
   "workout_type": "6x15:00/1:30r",
   "avg_split_sec": 128.2,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 166.1,
   "intervals": [
@@ -122,11 +122,11 @@
  },
  "17366228174": {
   "source_image": "IMG_1405.jpeg",
-  "total_time_sec": 4950.0,
-  "total_meters": 17785.0,
+  "total_time_sec": 4950,
+  "total_meters": 17785,
   "workout_type": "5x15:00/1:30r",
   "avg_split_sec": 126.5,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 172.9,
   "intervals": [
@@ -147,7 +147,7 @@
    },
    {
     "label": "4",
-    "split_sec": 126.0,
+    "split_sec": 126,
     "hr": null
    },
    {
@@ -159,13 +159,13 @@
  },
  "17363155379": {
   "source_image": "IMG_1403.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14284.0,
+  "total_time_sec": 3960,
+  "total_meters": 14284,
   "workout_type": "3x20:00/2:00r",
-  "avg_split_sec": 126.0,
-  "avg_spm": 20.0,
+  "avg_split_sec": 126,
+  "avg_spm": 20,
   "device": "RowErg",
-  "avg_watts": 175.0,
+  "avg_watts": 175,
   "intervals": [
    {
     "label": "1",
@@ -186,11 +186,11 @@
  },
  "17286659816": {
   "source_image": "IMG_1394.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14269.0,
+  "total_time_sec": 3960,
+  "total_meters": 14269,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 126.1,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 174.6,
   "intervals": [
@@ -213,17 +213,17 @@
  },
  "17263996950": {
   "source_image": "IMG_1393.jpeg",
-  "total_time_sec": 5280.0,
-  "total_meters": 19020.0,
+  "total_time_sec": 5280,
+  "total_meters": 19020,
   "workout_type": "4x20:00/2:00r",
   "avg_split_sec": 126.1,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 174.6,
   "intervals": [
    {
     "label": "1",
-    "split_sec": 126.0,
+    "split_sec": 126,
     "hr": null
    },
    {
@@ -238,18 +238,18 @@
    },
    {
     "label": "4",
-    "split_sec": 126.0,
+    "split_sec": 126,
     "hr": null
    }
   ]
  },
  "17209770295": {
   "source_image": "IMG_1368.jpeg",
-  "total_time_sec": 5940.0,
-  "total_meters": 21351.0,
+  "total_time_sec": 5940,
+  "total_meters": 21351,
   "workout_type": "6x15:00/1:30r",
   "avg_split_sec": 126.4,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 173.3,
   "intervals": [
@@ -287,11 +287,11 @@
  },
  "17027653950": {
   "source_image": "IMG_1336.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9544.0,
+  "total_time_sec": 2640,
+  "total_meters": 9544,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 125.7,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 176.2,
   "intervals": [
@@ -309,11 +309,11 @@
  },
  "17027634735": {
   "source_image": "IMG_1312.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9482.0,
+  "total_time_sec": 2640,
+  "total_meters": 9482,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 126.5,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 172.9,
   "intervals": [
@@ -331,11 +331,11 @@
  },
  "16947445912": {
   "source_image": "IMG_1307.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9425.0,
+  "total_time_sec": 2640,
+  "total_meters": 9425,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 127.3,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 169.7,
   "intervals": [
@@ -353,13 +353,13 @@
  },
  "16947446090": {
   "source_image": "IMG_1302.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14277.0,
+  "total_time_sec": 3960,
+  "total_meters": 14277,
   "workout_type": "3x20:00/2:00r",
-  "avg_split_sec": 126.0,
-  "avg_spm": 20.0,
+  "avg_split_sec": 126,
+  "avg_spm": 20,
   "device": "RowErg",
-  "avg_watts": 175.0,
+  "avg_watts": 175,
   "intervals": [
    {
     "label": "1",
@@ -368,7 +368,7 @@
    },
    {
     "label": "2",
-    "split_sec": 126.0,
+    "split_sec": 126,
     "hr": null
    },
    {
@@ -380,11 +380,11 @@
  },
  "16837667983": {
   "source_image": "IMG_1281.jpeg",
-  "total_time_sec": 3600.0,
-  "total_meters": 16168.0,
+  "total_time_sec": 3600,
+  "total_meters": 16168,
   "workout_type": "HOUR_OF_POWER_ANCHOR 1:00:00",
   "avg_split_sec": 111.3,
-  "avg_spm": 26.0,
+  "avg_spm": 26,
   "device": "RowErg",
   "avg_watts": 253.9,
   "intervals": [
@@ -400,7 +400,7 @@
    },
    {
     "label": "WU 3:00",
-    "split_sec": 114.0,
+    "split_sec": 114,
     "hr": null
    },
    {
@@ -447,11 +447,11 @@
  },
  "16832219548": {
   "source_image": "IMG_1276.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9579.0,
+  "total_time_sec": 2640,
+  "total_meters": 9579,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 125.2,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 178.3,
   "intervals": [
@@ -462,18 +462,18 @@
    },
    {
     "label": "2",
-    "split_sec": 125.0,
+    "split_sec": 125,
     "hr": null
    }
   ]
  },
  "16814435272": {
   "source_image": "IMG_1266.jpeg",
-  "total_time_sec": 3360.0,
-  "total_meters": 10956.0,
+  "total_time_sec": 3360,
+  "total_meters": 10956,
   "workout_type": "4x10:00/4:00r",
   "avg_split_sec": 109.5,
-  "avg_spm": 26.0,
+  "avg_spm": 26,
   "device": "RowErg",
   "avg_watts": 266.6,
   "intervals": [
@@ -501,11 +501,11 @@
  },
  "16780271161": {
   "source_image": "IMG_1258.jpeg",
-  "total_time_sec": 4800.0,
-  "total_meters": 18241.0,
+  "total_time_sec": 4800,
+  "total_meters": 18241,
   "workout_type": "4x18:00/2:00r",
   "avg_split_sec": 118.4,
-  "avg_spm": 22.0,
+  "avg_spm": 22,
   "device": "RowErg",
   "avg_watts": 210.9,
   "intervals": [
@@ -533,13 +533,13 @@
  },
  "16762215988": {
   "source_image": "IMG_1251.jpeg",
-  "total_time_sec": 4200.0,
-  "total_meters": 13632.0,
+  "total_time_sec": 4200,
+  "total_meters": 13632,
   "workout_type": "5x10:00/4:00r",
-  "avg_split_sec": 110.0,
-  "avg_spm": 25.0,
+  "avg_split_sec": 110,
+  "avg_spm": 25,
   "device": "RowErg",
-  "avg_watts": 263.0,
+  "avg_watts": 263,
   "intervals": [
    {
     "label": "1",
@@ -570,11 +570,11 @@
  },
  "16697612783": {
   "source_image": "IMG_1228.jpeg",
-  "total_time_sec": 5040.0,
-  "total_meters": 16318.0,
+  "total_time_sec": 5040,
+  "total_meters": 16318,
   "workout_type": "6x10:00/4:00r",
   "avg_split_sec": 110.3,
-  "avg_spm": 24.0,
+  "avg_spm": 24,
   "device": "RowErg",
   "avg_watts": 260.8,
   "intervals": [
@@ -605,7 +605,7 @@
    },
    {
     "label": "6",
-    "split_sec": 107.0,
+    "split_sec": 107,
     "hr": null
    }
   ]
@@ -613,10 +613,10 @@
  "16688362980": {
   "source_image": "IMG_1223-1224.jpeg",
   "total_time_sec": 2513.8,
-  "total_meters": 10011.0,
+  "total_meters": 10011,
   "workout_type": "41:53 steady [2 screens]",
   "avg_split_sec": 125.5,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 177.1,
   "intervals": [
@@ -664,71 +664,71 @@
  },
  "16650697238": {
   "source_image": "IMG_1215.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14796.0,
+  "total_time_sec": 3960,
+  "total_meters": 14796,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 121.6,
-  "avg_spm": 21.0,
+  "avg_spm": 21,
   "device": "RowErg",
   "avg_watts": 194.7
  },
  "16642121752": {
   "source_image": "IMG_1212-1213.jpeg",
   "total_time_sec": 3605.5,
-  "total_meters": 14412.0,
+  "total_meters": 14412,
   "workout_type": "1:00:05 steady [2 screens]",
-  "avg_split_sec": 125.0,
-  "avg_spm": 19.0,
+  "avg_split_sec": 125,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 179.2
  },
  "16629061852": {
   "source_image": "IMG_1207.jpeg",
-  "total_time_sec": 5040.0,
-  "total_meters": 16174.0,
+  "total_time_sec": 5040,
+  "total_meters": 16174,
   "workout_type": "6x10:00/4:00r",
   "avg_split_sec": 111.2,
-  "avg_spm": 24.0,
+  "avg_spm": 24,
   "device": "RowErg",
   "avg_watts": 254.5
  },
  "16584132188": {
   "source_image": "IMG_1202.jpeg",
-  "total_time_sec": 2400.0,
-  "total_meters": 10664.0,
+  "total_time_sec": 2400,
+  "total_meters": 10664,
   "workout_type": "40:00 steady",
   "avg_split_sec": 112.5,
-  "avg_spm": 24.0,
+  "avg_spm": 24,
   "device": "RowErg",
   "avg_watts": 245.8
  },
  "16578140034": {
   "source_image": "IMG_1201.jpeg",
-  "total_time_sec": 4770.0,
-  "total_meters": 17926.0,
+  "total_time_sec": 4770,
+  "total_meters": 17926,
   "workout_type": "3x24:00/2:30r",
   "avg_split_sec": 120.4,
-  "avg_spm": 21.0,
+  "avg_spm": 21,
   "device": "RowErg",
   "avg_watts": 200.5
  },
  "16565957471": {
   "source_image": "IMG_1187.jpeg",
-  "total_time_sec": 4680.0,
-  "total_meters": 16118.0,
+  "total_time_sec": 4680,
+  "total_meters": 16118,
   "workout_type": "6x10:00/3:00r",
   "avg_split_sec": 111.6,
-  "avg_spm": 23.0,
+  "avg_spm": 23,
   "device": "RowErg",
   "avg_watts": 251.8
  },
  "16553664600": {
   "source_image": "IMG_1184-1185.jpeg",
   "total_time_sec": 3604.3,
-  "total_meters": 14368.0,
+  "total_meters": 14368,
   "workout_type": "1:00:04 steady [2 screens]",
   "avg_split_sec": 125.4,
-  "avg_spm": 18.0,
+  "avg_spm": 18,
   "device": "RowErg",
   "avg_watts": 177.5,
   "intervals": [
@@ -774,7 +774,7 @@
    },
    {
     "label": "45:00",
-    "split_sec": 125.0,
+    "split_sec": 125,
     "hr": null
    },
    {
@@ -796,11 +796,11 @@
  },
  "16517431492": {
   "source_image": "IMG_1172.jpeg",
-  "total_time_sec": 4770.0,
-  "total_meters": 17512.0,
+  "total_time_sec": 4770,
+  "total_meters": 17512,
   "workout_type": "3x24:00/2:30r",
   "avg_split_sec": 123.3,
-  "avg_spm": 21.0,
+  "avg_spm": 21,
   "device": "RowErg",
   "avg_watts": 186.7,
   "intervals": [
@@ -823,11 +823,11 @@
  },
  "16446033185": {
   "source_image": "IMG_1129.jpeg",
-  "total_time_sec": 2400.0,
-  "total_meters": 10355.0,
+  "total_time_sec": 2400,
+  "total_meters": 10355,
   "workout_type": "40:00 steady",
   "avg_split_sec": 115.8,
-  "avg_spm": 24.0,
+  "avg_spm": 24,
   "device": "RowErg",
   "avg_watts": 225.4,
   "intervals": [
@@ -843,12 +843,12 @@
    },
    {
     "label": "15:00",
-    "split_sec": 118.0,
+    "split_sec": 118,
     "hr": null
    },
    {
     "label": "20:00",
-    "split_sec": 118.0,
+    "split_sec": 118,
     "hr": null
    },
    {
@@ -858,7 +858,7 @@
    },
    {
     "label": "30:00",
-    "split_sec": 117.0,
+    "split_sec": 117,
     "hr": null
    },
    {
@@ -875,11 +875,11 @@
  },
  "16426184771": {
   "source_image": "IMG_1122.jpeg",
-  "total_time_sec": 3240.0,
-  "total_meters": 9770.0,
+  "total_time_sec": 3240,
+  "total_meters": 9770,
   "workout_type": "3x12:00/6:00r",
   "avg_split_sec": 110.5,
-  "avg_spm": 22.0,
+  "avg_spm": 22,
   "device": "RowErg",
   "avg_watts": 259.4,
   "intervals": [
@@ -903,10 +903,10 @@
  "16426151847": {
   "source_image": "IMG_1120-1121.jpeg",
   "total_time_sec": 3607.3,
-  "total_meters": 14318.0,
+  "total_meters": 14318,
   "workout_type": "1:00:07 steady [2 screens]",
   "avg_split_sec": 125.9,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 175.4,
   "intervals": [
@@ -975,10 +975,10 @@
  "16375491445": {
   "source_image": "IMG_1103-1104.jpeg",
   "total_time_sec": 2705.5,
-  "total_meters": 10724.0,
+  "total_meters": 10724,
   "workout_type": "45:05 steady [2 screens]",
   "avg_split_sec": 126.1,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 174.6,
   "intervals": [
@@ -1026,11 +1026,11 @@
  },
  "16305665582": {
   "source_image": "IMG_1087.jpeg",
-  "total_time_sec": 3240.0,
-  "total_meters": 9745.0,
+  "total_time_sec": 3240,
+  "total_meters": 9745,
   "workout_type": "3x12:00/6:00r",
   "avg_split_sec": 110.8,
-  "avg_spm": 22.0,
+  "avg_spm": 22,
   "device": "RowErg",
   "avg_watts": 257.3,
   "intervals": [
@@ -1041,7 +1041,7 @@
    },
    {
     "label": "2",
-    "split_sec": 111.0,
+    "split_sec": 111,
     "hr": null
    },
    {
@@ -1054,12 +1054,12 @@
  "16296207683": {
   "source_image": "IMG_1082-1083.jpeg",
   "total_time_sec": 2703.9,
-  "total_meters": 10727.0,
+  "total_meters": 10727,
   "workout_type": "45:03 steady [2 screens]",
-  "avg_split_sec": 126.0,
-  "avg_spm": 19.0,
+  "avg_split_sec": 126,
+  "avg_spm": 19,
   "device": "RowErg",
-  "avg_watts": 175.0,
+  "avg_watts": 175,
   "intervals": [
    {
     "label": "5:00",
@@ -1083,7 +1083,7 @@
    },
    {
     "label": "25:00",
-    "split_sec": 126.0,
+    "split_sec": 126,
     "hr": null
    },
    {
@@ -1105,11 +1105,11 @@
  },
  "16285417288": {
   "source_image": "IMG_1076.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14179.0,
+  "total_time_sec": 3960,
+  "total_meters": 14179,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 126.9,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 171.3,
   "intervals": [
@@ -1132,11 +1132,11 @@
  },
  "16244304071": {
   "source_image": "IMG_1056.jpeg",
-  "total_time_sec": 3240.0,
-  "total_meters": 9702.0,
+  "total_time_sec": 3240,
+  "total_meters": 9702,
   "workout_type": "3x12:00/6:00r",
   "avg_split_sec": 111.3,
-  "avg_spm": 22.0,
+  "avg_spm": 22,
   "device": "RowErg",
   "avg_watts": 253.9,
   "intervals": [
@@ -1159,11 +1159,11 @@
  },
  "16165701061": {
   "source_image": "IMG_1035-1036.jpeg",
-  "total_time_sec": 2478.0,
-  "total_meters": 10015.0,
+  "total_time_sec": 2478,
+  "total_meters": 10015,
   "workout_type": "41:18 steady [2 screens]",
   "avg_split_sec": 123.7,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 184.9,
   "intervals": [
@@ -1211,13 +1211,13 @@
  },
  "16098718523": {
   "source_image": "IMG_1004.jpeg",
-  "total_time_sec": 2700.0,
-  "total_meters": 8292.0,
+  "total_time_sec": 2700,
+  "total_meters": 8292,
   "workout_type": "3x10:00/5:00r",
   "avg_split_sec": 108.5,
-  "avg_spm": 26.0,
+  "avg_spm": 26,
   "device": "RowErg",
-  "avg_watts": 274.0,
+  "avg_watts": 274,
   "intervals": [
    {
     "label": "1",
@@ -1226,7 +1226,7 @@
    },
    {
     "label": "2",
-    "split_sec": 109.0,
+    "split_sec": 109,
     "hr": null
    },
    {
@@ -1238,11 +1238,11 @@
  },
  "16087432570": {
   "source_image": "IMG_0991.jpeg",
-  "total_time_sec": 4207.0,
-  "total_meters": 16724.0,
+  "total_time_sec": 4207,
+  "total_meters": 16724,
   "workout_type": "1:10:07 steady",
   "avg_split_sec": 125.7,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 176.2,
   "intervals": [
@@ -1273,7 +1273,7 @@
    },
    {
     "label": "1:00:00",
-    "split_sec": 126.0,
+    "split_sec": 126,
     "hr": null
    },
    {
@@ -1286,10 +1286,10 @@
  "16087423399": {
   "source_image": "IMG_0987.jpeg",
   "total_time_sec": 3139.4,
-  "total_meters": 12519.0,
+  "total_meters": 12519,
   "workout_type": "52:19 steady",
   "avg_split_sec": 125.3,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 177.9,
   "intervals": [
@@ -1333,10 +1333,10 @@
  "16023037431": {
   "source_image": "IMG_0957-0958.jpeg",
   "total_time_sec": 3607.1,
-  "total_meters": 14410.0,
+  "total_meters": 14410,
   "workout_type": "1:00:07 steady [2 screens]",
   "avg_split_sec": 125.1,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 178.8,
   "intervals": [
@@ -1377,7 +1377,7 @@
    },
    {
     "label": "40:00",
-    "split_sec": 125.0,
+    "split_sec": 125,
     "hr": null
    },
    {
@@ -1387,7 +1387,7 @@
    },
    {
     "label": "50:00",
-    "split_sec": 125.0,
+    "split_sec": 125,
     "hr": null
    },
    {
@@ -1404,11 +1404,11 @@
  },
  "16001419583": {
   "source_image": "IMG_0939.jpeg",
-  "total_time_sec": 2700.0,
-  "total_meters": 8254.0,
+  "total_time_sec": 2700,
+  "total_meters": 8254,
   "workout_type": "3x10:00/5:00r",
-  "avg_split_sec": 109.0,
-  "avg_spm": 25.0,
+  "avg_split_sec": 109,
+  "avg_spm": 25,
   "device": "RowErg",
   "avg_watts": 270.3,
   "intervals": [
@@ -1432,12 +1432,12 @@
  "15945176204": {
   "source_image": "IMG_0911.jpeg",
   "total_time_sec": 4206.4,
-  "total_meters": 16681.0,
+  "total_meters": 16681,
   "workout_type": "1:10:06 steady",
-  "avg_split_sec": 126.0,
-  "avg_spm": 19.0,
+  "avg_split_sec": 126,
+  "avg_spm": 19,
   "device": "RowErg",
-  "avg_watts": 175.0,
+  "avg_watts": 175,
   "intervals": [
    {
     "label": "10:00",
@@ -1479,12 +1479,12 @@
  "15868210761": {
   "source_image": "IMG_0841-0842-0843",
   "total_time_sec": 3323.2,
-  "total_meters": 10000.0,
+  "total_meters": 10000,
   "workout_type": "20x500m/1:00r [3 screens, 20 intervals]",
   "avg_split_sec": 106.1,
-  "avg_spm": 25.0,
+  "avg_spm": 25,
   "device": "RowErg",
-  "avg_watts": 293.0,
+  "avg_watts": 293,
   "intervals": [
    {
     "label": "1",
@@ -1543,7 +1543,7 @@
    },
    {
     "label": "12",
-    "split_sec": 105.0,
+    "split_sec": 105,
     "hr": null
    },
    {
@@ -1590,11 +1590,11 @@
  },
  "15868206962": {
   "source_image": "IMG_0832.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9921.0,
+  "total_time_sec": 2640,
+  "total_meters": 9921,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 120.9,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 198.1,
   "intervals": [
@@ -1612,11 +1612,11 @@
  },
  "15834945175": {
   "source_image": "IMG_0827.jpeg",
-  "total_time_sec": 1920.0,
-  "total_meters": 7217.0,
+  "total_time_sec": 1920,
+  "total_meters": 7217,
   "workout_type": "1x30:00/2:00r",
   "avg_split_sec": 124.7,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 180.5,
   "intervals": [
@@ -1629,11 +1629,11 @@
  },
  "15778371118": {
   "source_image": "IMG_0790.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9711.0,
+  "total_time_sec": 2640,
+  "total_meters": 9711,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 123.5,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 185.8,
   "intervals": [
@@ -1651,11 +1651,11 @@
  },
  "15695264021": {
   "source_image": "IMG_0732.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9849.0,
+  "total_time_sec": 2640,
+  "total_meters": 9849,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 121.8,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 193.7,
   "intervals": [
@@ -1666,24 +1666,24 @@
    },
    {
     "label": "2",
-    "split_sec": 121.0,
+    "split_sec": 121,
     "hr": null
    }
   ]
  },
  "15695258839": {
   "source_image": "IMG_0726.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9353.0,
+  "total_time_sec": 2640,
+  "total_meters": 9353,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 128.3,
-  "avg_spm": 18.0,
+  "avg_spm": 18,
   "device": "RowErg",
   "avg_watts": 165.7,
   "intervals": [
    {
     "label": "1",
-    "split_sec": 128.0,
+    "split_sec": 128,
     "hr": 166
    },
    {
@@ -1695,11 +1695,11 @@
  },
  "15672169338": {
   "source_image": "IMG_0722.jpeg",
-  "total_time_sec": 3840.0,
-  "total_meters": 14069.0,
+  "total_time_sec": 3840,
+  "total_meters": 14069,
   "workout_type": "2x30:00/2:00r",
   "avg_split_sec": 127.9,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 167.3,
   "intervals": [
@@ -1717,13 +1717,13 @@
  },
  "15604974500": {
   "source_image": "IMG_0668.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14005.0,
+  "total_time_sec": 3960,
+  "total_meters": 14005,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 128.5,
-  "avg_spm": 18.0,
+  "avg_spm": 18,
   "device": "RowErg",
-  "avg_watts": 165.0,
+  "avg_watts": 165,
   "intervals": [
    {
     "label": "1",
@@ -1744,11 +1744,11 @@
  },
  "15547050003": {
   "source_image": "IMG_0658.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14042.0,
+  "total_time_sec": 3960,
+  "total_meters": 14042,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 128.1,
-  "avg_spm": 18.0,
+  "avg_spm": 18,
   "device": "RowErg",
   "avg_watts": 166.5,
   "intervals": [
@@ -1771,11 +1771,11 @@
  },
  "15529460154": {
   "source_image": "IMG_0654.jpeg",
-  "total_time_sec": 4000.0,
-  "total_meters": 14339.0,
+  "total_time_sec": 4000,
+  "total_meters": 14339,
   "workout_type": "5x12:00/1:20r",
   "avg_split_sec": 125.5,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 177.1,
   "intervals": [
@@ -1808,11 +1808,11 @@
  },
  "15517215912": {
   "source_image": "IMG_0653.jpeg",
-  "total_time_sec": 2640.0,
-  "total_meters": 9422.0,
+  "total_time_sec": 2640,
+  "total_meters": 9422,
   "workout_type": "2x20:00/2:00r",
   "avg_split_sec": 127.3,
-  "avg_spm": 18.0,
+  "avg_spm": 18,
   "device": "RowErg",
   "avg_watts": 169.7,
   "intervals": [
@@ -1823,18 +1823,18 @@
    },
    {
     "label": "2",
-    "split_sec": 127.0,
+    "split_sec": 127,
     "hr": null
    }
   ]
  },
  "15448676719": {
   "source_image": "IMG_0622.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14132.0,
+  "total_time_sec": 3960,
+  "total_meters": 14132,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 127.3,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 169.7,
   "intervals": [
@@ -1845,7 +1845,7 @@
    },
    {
     "label": "2",
-    "split_sec": 127.0,
+    "split_sec": 127,
     "hr": null
    },
    {
@@ -1857,11 +1857,11 @@
  },
  "15438750979": {
   "source_image": "IMG_0601.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14216.0,
+  "total_time_sec": 3960,
+  "total_meters": 14216,
   "workout_type": "4x15:00/1:30r",
   "avg_split_sec": 126.6,
-  "avg_spm": 18.0,
+  "avg_spm": 18,
   "device": "RowErg",
   "avg_watts": 172.5,
   "intervals": [
@@ -1889,11 +1889,11 @@
  },
  "15616971294": {
   "source_image": "IMG_0675.jpeg",
-  "total_time_sec": 2400.0,
-  "total_meters": 10052.0,
+  "total_time_sec": 2400,
+  "total_meters": 10052,
   "workout_type": "40:00 steady",
   "avg_split_sec": 119.3,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 206.1,
   "intervals": [
@@ -1926,11 +1926,11 @@
  },
  "15710688286": {
   "source_image": "IMG_0736.jpeg",
-  "total_time_sec": 2400.0,
-  "total_meters": 10253.0,
+  "total_time_sec": 2400,
+  "total_meters": 10253,
   "workout_type": "40:00 steady",
-  "avg_split_sec": 117.0,
-  "avg_spm": 19.0,
+  "avg_split_sec": 117,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 218.5,
   "intervals": [
@@ -1963,21 +1963,21 @@
  },
  "15790640457": {
   "source_image": "IMG_0795.jpeg",
-  "total_time_sec": 2400.0,
-  "total_meters": 10372.0,
+  "total_time_sec": 2400,
+  "total_meters": 10372,
   "workout_type": "40:00 steady",
   "avg_split_sec": 115.6,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 226.6
  },
  "15993665491": {
   "source_image": "IMG_0931.jpeg",
   "total_time_sec": 1204.2,
-  "total_meters": 4809.0,
+  "total_meters": 4809,
   "workout_type": "20:04 steady",
   "avg_split_sec": 125.2,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 178.3,
   "intervals": [
@@ -1988,7 +1988,7 @@
    },
    {
     "label": "10:00",
-    "split_sec": 125.0,
+    "split_sec": 125,
     "hr": null
    },
    {
@@ -2005,11 +2005,11 @@
  },
  "16151335621": {
   "source_image": "IMG_1030.jpeg",
-  "total_time_sec": 2700.0,
-  "total_meters": 8282.0,
+  "total_time_sec": 2700,
+  "total_meters": 8282,
   "workout_type": "3x10:00/5:00r",
   "avg_split_sec": 108.6,
-  "avg_spm": 26.0,
+  "avg_spm": 26,
   "device": "RowErg",
   "avg_watts": 273.3,
   "intervals": [
@@ -2032,11 +2032,11 @@
  },
  "16387454988": {
   "source_image": "IMG_1113.jpeg",
-  "total_time_sec": 3240.0,
-  "total_meters": 9726.0,
+  "total_time_sec": 3240,
+  "total_meters": 9726,
   "workout_type": "3x12:00/6:00r",
-  "avg_split_sec": 111.0,
-  "avg_spm": 22.0,
+  "avg_split_sec": 111,
+  "avg_spm": 22,
   "device": "RowErg",
   "avg_watts": 255.9,
   "intervals": [
@@ -2059,11 +2059,11 @@
  },
  "16458945334": {
   "source_image": "IMG_1134.jpeg",
-  "total_time_sec": 2400.0,
-  "total_meters": 6773.0,
+  "total_time_sec": 2400,
+  "total_meters": 6773,
   "workout_type": "4x6:00/4:00r",
   "avg_split_sec": 106.3,
-  "avg_spm": 26.0,
+  "avg_spm": 26,
   "device": "RowErg",
   "avg_watts": 291.4,
   "intervals": [
@@ -2091,17 +2091,17 @@
  },
  "16506416914": {
   "source_image": "IMG_1165.jpeg",
-  "total_time_sec": 3900.0,
-  "total_meters": 13230.0,
+  "total_time_sec": 3900,
+  "total_meters": 13230,
   "workout_type": "5x10:00/3:00r",
   "avg_split_sec": 113.3,
-  "avg_spm": 22.0,
+  "avg_spm": 22,
   "device": "RowErg",
   "avg_watts": 240.6,
   "intervals": [
    {
     "label": "1",
-    "split_sec": 116.0,
+    "split_sec": 116,
     "hr": null
    },
    {
@@ -2128,27 +2128,27 @@
  },
  "16535645198": {
   "source_image": "IMG_1176.jpeg",
-  "total_time_sec": 2400.0,
-  "total_meters": 10714.0,
+  "total_time_sec": 2400,
+  "total_meters": 10714,
   "workout_type": "40:00 steady",
-  "avg_split_sec": 112.0,
-  "avg_spm": 24.0,
+  "avg_split_sec": 112,
+  "avg_spm": 24,
   "device": "RowErg",
   "avg_watts": 249.1,
   "intervals": [
    {
     "label": "5:00",
-    "split_sec": 116.0,
+    "split_sec": 116,
     "hr": null
    },
    {
     "label": "10:00",
-    "split_sec": 116.0,
+    "split_sec": 116,
     "hr": null
    },
    {
     "label": "15:00",
-    "split_sec": 114.0,
+    "split_sec": 114,
     "hr": null
    },
    {
@@ -2158,7 +2158,7 @@
    },
    {
     "label": "25:00",
-    "split_sec": 112.0,
+    "split_sec": 112,
     "hr": null
    },
    {
@@ -2180,11 +2180,11 @@
  },
  "16724206740": {
   "source_image": "IMG_1240.jpeg",
-  "total_time_sec": 3000.0,
-  "total_meters": 13197.0,
+  "total_time_sec": 3000,
+  "total_meters": 13197,
   "workout_type": "50:00 steady",
   "avg_split_sec": 113.6,
-  "avg_spm": 25.0,
+  "avg_spm": 25,
   "device": "RowErg",
   "avg_watts": 238.7,
   "intervals": [
@@ -2195,7 +2195,7 @@
    },
    {
     "label": "20:00",
-    "split_sec": 114.0,
+    "split_sec": 114,
     "hr": null
    },
    {
@@ -2217,11 +2217,11 @@
  },
  "16787982823": {
   "source_image": "IMG_1396.jpeg",
-  "total_time_sec": 3120.0,
-  "total_meters": 10617.0,
+  "total_time_sec": 3120,
+  "total_meters": 10617,
   "workout_type": "4x10:00/3:00r",
-  "avg_split_sec": 113.0,
-  "avg_spm": 23.0,
+  "avg_split_sec": 113,
+  "avg_spm": 23,
   "device": "RowErg",
   "avg_watts": 242.6,
   "intervals": [
@@ -2250,37 +2250,37 @@
  "18853823688": {
   "source_image": "IMG_2002-2003.jpeg",
   "total_time_sec": 3647.8,
-  "total_meters": 26497.0,
+  "total_meters": 26497,
   "workout_type": "BIKEERG 1:00:47 [2 screens]",
-  "avg_watts": 134.0,
-  "avg_rpm": 82.0,
+  "avg_watts": 134,
+  "avg_rpm": 82,
   "device": "BikeErg"
  },
  "18311394387": {
   "source_image": "IMG_1759.jpeg",
   "total_time_sec": 2403.5,
-  "total_meters": 17756.0,
+  "total_meters": 17756,
   "workout_type": "BIKEERG 40:03",
-  "avg_watts": 141.0,
-  "avg_rpm": 83.0,
+  "avg_watts": 141,
+  "avg_rpm": 83,
   "device": "BikeErg"
  },
  "18272320845": {
   "source_image": "IMG_1737.jpeg",
   "total_time_sec": 1803.8,
-  "total_meters": 13281.0,
+  "total_meters": 13281,
   "workout_type": "BIKEERG 30:03 (2nd same day)",
-  "avg_watts": 140.0,
-  "avg_rpm": 80.0,
+  "avg_watts": 140,
+  "avg_rpm": 80,
   "device": "BikeErg"
  },
  "18046203187": {
   "source_image": "IMG_1678-1679.jpeg",
   "total_time_sec": 3604.1,
-  "total_meters": 26897.0,
+  "total_meters": 26897,
   "workout_type": "BIKEERG 1:00:04 [2 screens]",
-  "avg_watts": 145.0,
-  "avg_rpm": 80.0,
+  "avg_watts": 145,
+  "avg_rpm": 80,
   "device": "BikeErg",
   "intervals": [
    {
@@ -2347,11 +2347,11 @@
  },
  "18005840460": {
   "source_image": "IMG_1665-1666.jpeg",
-  "total_time_sec": 3600.0,
-  "total_meters": 28273.0,
+  "total_time_sec": 3600,
+  "total_meters": 28273,
   "workout_type": "BIKEERG 1:00:00 structured [2 screens]",
-  "avg_watts": 170.0,
-  "avg_rpm": 81.0,
+  "avg_watts": 170,
+  "avg_rpm": 81,
   "device": "BikeErg",
   "intervals": [
    {
@@ -2418,11 +2418,11 @@
  },
  "18005830186": {
   "source_image": "IMG_1610-1611.jpeg",
-  "total_time_sec": 3605.0,
-  "total_meters": 27015.0,
+  "total_time_sec": 3605,
+  "total_meters": 27015,
   "workout_type": "BIKEERG 1:00:05 [2 screens]",
-  "avg_watts": 147.0,
-  "avg_rpm": 79.0,
+  "avg_watts": 147,
+  "avg_rpm": 79,
   "device": "BikeErg",
   "intervals": [
    {
@@ -2490,10 +2490,10 @@
  "18005717367": {
   "source_image": "IMG_1602.jpeg",
   "total_time_sec": 4220.1,
-  "total_meters": 31513.0,
+  "total_meters": 31513,
   "workout_type": "BIKEERG 1:10:20",
-  "avg_watts": 146.0,
-  "avg_rpm": 80.0,
+  "avg_watts": 146,
+  "avg_rpm": 80,
   "device": "BikeErg",
   "intervals": [
    {
@@ -2536,10 +2536,10 @@
  "17300549164": {
   "source_image": "IMG_1443-1444.jpeg",
   "total_time_sec": 3605.6,
-  "total_meters": 28711.0,
+  "total_meters": 28711,
   "workout_type": "BIKEERG 1:00:05 [2 screens]",
-  "avg_watts": 177.0,
-  "avg_rpm": 83.0,
+  "avg_watts": 177,
+  "avg_rpm": 83,
   "device": "BikeErg",
   "intervals": [
    {
@@ -2607,10 +2607,10 @@
  "18005851389": {
   "source_image": "IMG_1670.jpeg",
   "total_time_sec": 2405.1,
-  "total_meters": 17830.0,
+  "total_meters": 17830,
   "workout_type": "BIKEERG 40:05 (2nd same day)",
-  "avg_watts": 143.0,
-  "avg_rpm": 81.0,
+  "avg_watts": 143,
+  "avg_rpm": 81,
   "device": "BikeErg",
   "intervals": [
    {
@@ -2698,30 +2698,30 @@
  "18112386880": {
   "source_image": "IMG_1686.jpeg",
   "total_time_sec": 2424.1,
-  "total_meters": 18017.0,
+  "total_meters": 18017,
   "workout_type": "BIKEERG 40:24",
-  "avg_watts": 144.0,
-  "avg_rpm": 80.0,
+  "avg_watts": 144,
+  "avg_rpm": 80,
   "device": "BikeErg"
  },
  "18769329089": {
   "source_image": "IMG_1871.jpeg",
   "total_time_sec": 1206.3,
-  "total_meters": 8816.0,
+  "total_meters": 8816,
   "workout_type": "BIKEERG 20:06",
-  "avg_watts": 137.0,
-  "avg_rpm": 82.0,
+  "avg_watts": 137,
+  "avg_rpm": 82,
   "device": "BikeErg"
  },
  "16822424274": {
   "source_image": "IMG_1271.jpeg",
   "total_time_sec": 1804.5,
-  "total_meters": 7017.0,
+  "total_meters": 7017,
   "workout_type": "30:04 steady",
   "avg_split_sec": 128.5,
-  "avg_spm": 17.0,
+  "avg_spm": 17,
   "device": "RowErg",
-  "avg_watts": 165.0,
+  "avg_watts": 165,
   "intervals": [
    {
     "label": "5:00",
@@ -2780,7 +2780,7 @@
    },
    {
     "label": "1:00:00",
-    "split_sec": 128.0,
+    "split_sec": 128,
     "hr": null
    }
   ]
@@ -2788,10 +2788,10 @@
  "16141719541": {
   "source_image": "IMG_1019.jpeg",
   "total_time_sec": 1207.3,
-  "total_meters": 4809.0,
+  "total_meters": 4809,
   "workout_type": "20:07 steady",
   "avg_split_sec": 125.5,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 177.1,
   "intervals": [
@@ -2820,10 +2820,10 @@
  "16751998650": {
   "source_image": "IMG_1247.jpeg",
   "total_time_sec": 1803.5,
-  "total_meters": 7159.0,
+  "total_meters": 7159,
   "workout_type": "30:03 steady",
   "avg_split_sec": 125.9,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 175.4,
   "intervals": [
@@ -2834,7 +2834,7 @@
    },
    {
     "label": "10:00",
-    "split_sec": 126.0,
+    "split_sec": 126,
     "hr": null
    },
    {
@@ -2862,10 +2862,10 @@
  "17153587679": {
   "source_image": "IMG_1363.jpeg",
   "total_time_sec": 2103.3,
-  "total_meters": 8286.0,
+  "total_meters": 8286,
   "workout_type": "35:03 steady",
   "avg_split_sec": 126.9,
-  "avg_spm": 20.0,
+  "avg_spm": 20,
   "device": "RowErg",
   "avg_watts": 171.3,
   "intervals": [
@@ -2921,23 +2921,23 @@
    },
    {
     "label": "55:00",
-    "split_sec": 127.0,
+    "split_sec": 127,
     "hr": null
    },
    {
     "label": "1:00:00",
-    "split_sec": 125.0,
+    "split_sec": 125,
     "hr": null
    }
   ]
  },
  "15297892580": {
   "source_image": "IMG_1422.jpeg",
-  "total_time_sec": 3960.0,
-  "total_meters": 14179.0,
+  "total_time_sec": 3960,
+  "total_meters": 14179,
   "workout_type": "3x20:00/2:00r",
   "avg_split_sec": 126.9,
-  "avg_spm": 19.0,
+  "avg_spm": 19,
   "device": "RowErg",
   "avg_watts": 171.3,
   "intervals": [
@@ -2948,7 +2948,7 @@
    },
    {
     "label": "2",
-    "split_sec": 128.0,
+    "split_sec": 128,
     "hr": null
    },
    {
@@ -2970,7 +2970,7 @@
   "intervals": [
    {
     "label": "2:00",
-    "split_sec": 129.0,
+    "split_sec": 129,
     "hr": 150,
     "spm": 20
    },
@@ -2988,7 +2988,7 @@
    },
    {
     "label": "8:00",
-    "split_sec": 125.0,
+    "split_sec": 125,
     "hr": 167,
     "spm": 20
    },
@@ -3005,7 +3005,7 @@
   "total_time_sec": 2784,
   "total_meters": 8000,
   "workout_type": "16x500m/1:00r",
-  "avg_split_sec": 114.0,
+  "avg_split_sec": 114,
   "avg_spm": 24,
   "device": "RowErg",
   "avg_watts": 236.2,
@@ -3030,7 +3030,7 @@
    },
    {
     "label": "4",
-    "split_sec": 114.0,
+    "split_sec": 114,
     "hr": 178,
     "spm": 25
    },
@@ -3198,7 +3198,7 @@
    },
    {
     "label": "14",
-    "split_sec": 113.0,
+    "split_sec": 113,
     "hr": 182,
     "spm": 26
    },
@@ -3236,7 +3236,7 @@
   "avg_split_sec": 113.4,
   "avg_spm": 26,
   "device": "RowErg",
-  "avg_watts": 240.0,
+  "avg_watts": 240,
   "intervals": [
    {
     "label": "1",
@@ -3252,7 +3252,7 @@
    },
    {
     "label": "3",
-    "split_sec": 113.0,
+    "split_sec": 113,
     "hr": 177,
     "spm": 25
    },
@@ -3396,7 +3396,7 @@
    },
    {
     "label": "5",
-    "split_sec": 113.0,
+    "split_sec": 113,
     "hr": 179,
     "spm": 24
    },
@@ -3432,7 +3432,7 @@
    },
    {
     "label": "11",
-    "split_sec": 113.0,
+    "split_sec": 113,
     "hr": 183,
     "spm": 24
    },
@@ -3456,7 +3456,7 @@
    },
    {
     "label": "15",
-    "split_sec": 113.0,
+    "split_sec": 113,
     "hr": 185,
     "spm": 24
    }
@@ -3474,7 +3474,7 @@
   "intervals": [
    {
     "label": "1",
-    "split_sec": 110.0,
+    "split_sec": 110,
     "hr": 170,
     "spm": 26
    },
@@ -3624,7 +3624,7 @@
   "intervals": [
    {
     "label": "1",
-    "split_sec": 109.0,
+    "split_sec": 109,
     "hr": 168,
     "spm": 26
    },
@@ -3684,7 +3684,7 @@
    },
    {
     "label": "11",
-    "split_sec": 109.0,
+    "split_sec": 109,
     "hr": 186,
     "spm": 26
    },
@@ -3914,11 +3914,11 @@
   "avg_split_sec": 109.3,
   "avg_spm": 26,
   "device": "RowErg",
-  "avg_watts": 268.0,
+  "avg_watts": 268,
   "intervals": [
    {
     "label": "1",
-    "split_sec": 111.0,
+    "split_sec": 111,
     "hr": 170,
     "spm": 25
    },
@@ -3954,7 +3954,7 @@
    },
    {
     "label": "7",
-    "split_sec": 110.0,
+    "split_sec": 110,
     "hr": 179,
     "spm": 26
    },
@@ -4047,6 +4047,118 @@
     "split_sec": 103.7,
     "hr": 189,
     "spm": 28
+   }
+  ]
+ },
+ "19671510508": {
+  "source_image": "IMG_2219.jpeg, IMG_2220.jpeg",
+  "device": "RowErg",
+  "total_meters": 10000,
+  "avg_spm": 25,
+  "intervals": [
+   {
+    "label": "09",
+    "split_sec": 122.6,
+    "hr": null
+   },
+   {
+    "label": "37:49.1",
+    "split_sec": 113.4,
+    "spm": 25,
+    "hr": 178
+   },
+   {
+    "label": "3479",
+    "split_sec": 113.5,
+    "spm": 25,
+    "hr": null
+   },
+   {
+    "label": "348.9",
+    "split_sec": 114.4,
+    "spm": 25,
+    "hr": 170
+   },
+   {
+    "label": "3485",
+    "split_sec": 180,
+    "spm": 25,
+    "hr": 174
+   },
+   {
+    "label": "348.2",
+    "split_sec": 240,
+    "hr": null
+   },
+   {
+    "label": "«348.0",
+    "split_sec": 114,
+    "spm": 26,
+    "hr": 179
+   },
+   {
+    "label": "347.7",
+    "split_sec": 113.8,
+    "spm": 26,
+    "hr": null
+   },
+   {
+    "label": "347.2",
+    "split_sec": 113.6,
+    "spm": 26,
+    "hr": 180
+   },
+   {
+    "label": "346.7",
+    "split_sec": 113.3,
+    "spm": 26,
+    "hr": null
+   },
+   {
+    "label": "37:49.",
+    "split_sec": 113.4,
+    "spm": 25,
+    "hr": 178
+   },
+   {
+    "label": "3:48.5",
+    "split_sec": 180,
+    "spm": 25,
+    "hr": 174
+   },
+   {
+    "label": "348.2",
+    "split_sec": 114.1,
+    "spm": 25,
+    "hr": 175
+   },
+   {
+    "label": "348.0",
+    "split_sec": 114,
+    "spm": 26,
+    "hr": 179
+   },
+   {
+    "label": "347.7",
+    "split_sec": 113.8,
+    "hr": null
+   },
+   {
+    "label": "346.7",
+    "split_sec": 113.5,
+    "spm": 26,
+    "hr": null
+   },
+   {
+    "label": "3:46.00",
+    "split_sec": 113,
+    "hr": null
+   },
+   {
+    "label": "1",
+    "split_sec": 109.9,
+    "spm": 28,
+    "hr": 192
    }
   ]
  }
