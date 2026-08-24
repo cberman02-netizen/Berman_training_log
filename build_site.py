@@ -137,6 +137,7 @@ def f(x):
 
 
 ERG_CAPTURES_PATH = os.path.join(DATA_DIR, "erg_captures.json")
+TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
 
 
 def build_data():
@@ -151,6 +152,11 @@ def build_data():
         with open(ERG_CAPTURES_PATH) as fh:
             erg_captures = json.load(fh)
 
+    title_overrides = {}
+    if os.path.exists(TITLE_OVERRIDES_PATH):
+        with open(TITLE_OVERRIDES_PATH) as fh:
+            title_overrides = json.load(fh)
+
     activities = []
     for m in master:
         aid = m["id"]
@@ -158,7 +164,8 @@ def build_data():
         dur = f(m["duration_moving_min"]) or 0
         spd = f(m["average_speed_mph"])
         entry = {
-            "id": aid, "title": m["title"], "type": m["activity_type"],
+            "id": aid, "title": title_overrides.get(aid) or m["title"], "type": m["activity_type"],
+            "desc": m.get("description") or "",
             "date": dt.strftime("%Y-%m-%d"), "ts": dt.strftime("%Y-%m-%dT%H:%M:%S"),
             "dur": dur, "dist": f(m["distance_miles"]), "elev": f(m["total_elevation_gain_ft"]),
             "hr": f(m["avg_hr"]), "maxhr": f(m["max_hr"]), "hrsd": f(m["hr_std"]),

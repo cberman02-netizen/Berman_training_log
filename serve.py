@@ -33,22 +33,39 @@ REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 CAPTURES_DIR = os.path.join(DATA_DIR, "captures")
 ERG_CAPTURES_PATH = os.path.join(DATA_DIR, "erg_captures.json")
+TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
 
 app = Flask(__name__)
 
 
-def load_erg_captures():
-    if not os.path.exists(ERG_CAPTURES_PATH):
+def _load_json(path):
+    if not os.path.exists(path):
         return {}
-    with open(ERG_CAPTURES_PATH) as fh:
+    with open(path) as fh:
         return json.load(fh)
 
 
-def save_erg_captures(captures):
-    tmp_path = ERG_CAPTURES_PATH + ".tmp"
+def _save_json(path, data):
+    tmp_path = path + ".tmp"
     with open(tmp_path, "w") as fh:
-        json.dump(captures, fh, indent=1)
-    os.replace(tmp_path, ERG_CAPTURES_PATH)
+        json.dump(data, fh, indent=1)
+    os.replace(tmp_path, path)
+
+
+def load_erg_captures():
+    return _load_json(ERG_CAPTURES_PATH)
+
+
+def save_erg_captures(captures):
+    _save_json(ERG_CAPTURES_PATH, captures)
+
+
+def load_title_overrides():
+    return _load_json(TITLE_OVERRIDES_PATH)
+
+
+def save_title_overrides(overrides):
+    _save_json(TITLE_OVERRIDES_PATH, overrides)
 
 
 @app.route("/")
@@ -105,6 +122,21 @@ def api_sync_strava():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     return jsonify(result)
+
+
+@app.route("/api/save-title", methods=["POST"])
+def api_save_title():
+    payload = request.get_json(force=True, silent=True) or {}
+    activity_id = str(payload.get("activity_id", "")).strip()
+    title = str(payload.get("title", "")).strip()
+    if not activity_id or not title:
+        return jsonify({"error": "missing activity_id or title"}), 400
+
+    overrides = load_title_overrides()
+    overrides[activity_id] = title
+    save_title_overrides(overrides)
+
+    return jsonify({"ok": True, "title": title})
 
 
 @app.route("/api/save", methods=["POST"])

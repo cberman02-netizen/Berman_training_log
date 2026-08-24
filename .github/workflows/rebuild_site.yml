@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'data/erg_captures.json'
+      - 'data/title_overrides.json'
       - 'data/strava_activities_*.csv'
       - 'data/streams/**'
       - 'template.html'
