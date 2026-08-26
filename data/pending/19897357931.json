@@ -1,0 +1,77 @@
+{
+ "data": {
+  "device": "RowErg",
+  "workout_type": "",
+  "avg_spm": 25.0,
+  "intervals": [
+   {
+    "label": "1",
+    "split_sec": 114.9,
+    "spm": 25.0,
+    "hr": null
+   },
+   {
+    "label": "1.25",
+    "split_sec": 122.6,
+    "hr": null
+   },
+   {
+    "label": "1.1208",
+    "split_sec": 114.6,
+    "spm": 26.0,
+    "hr": 170.0
+   },
+   {
+    "label": "1.1000.0",
+    "split_sec": 115.2,
+    "spm": 25.0,
+    "hr": 177.0
+   },
+   {
+    "label": "1.is00,0",
+    "split_sec": 175.0,
+    "spm": 25.0,
+    "hr": 181.0
+   },
+   {
+    "label": "1.7",
+    "split_sec": 90.8,
+    "spm": 20.0,
+    "hr": null
+   },
+   {
+    "label": "2",
+    "split_sec": 300,
+    "hr": null
+   },
+   {
+    "label": "2.10.",
+    "split_sec": 115.0,
+    "spm": 25.0,
+    "hr": null
+   },
+   {
+    "label": "2.1iS:00.0",
+    "split_sec": 124.7,
+    "hr": null
+   }
+  ],
+  "source_image": "IMG_2273.jpeg, IMG_2274.jpeg"
+ },
+ "warnings": [
+  "avg_split_sec read as '154.9' with low OCR confidence (38%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 114.6) \u2014 shown as '1208', please fix",
+  "interval 1000.0 split_sec read as '1:55.23' with low OCR confidence (2%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 115.2) \u2014 shown as '1000.0', please fix",
+  "interval is00,0 split_sec read as '255.0' with low OCR confidence (14%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 175.0) \u2014 shown as 'is00,0', please fix",
+  "interval 7 spm read as '20:00,0' with low OCR confidence (27%) \u2014 please verify",
+  "avg_split_sec read as '500' with low OCR confidence (16%) \u2014 please verify",
+  "interval 10. split_sec read as '1:55.0' with low OCR confidence (45%) \u2014 please verify",
+  "interval 10. spm read as '25' with low OCR confidence (53%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 115.0) \u2014 shown as '10.', please fix",
+  "interval 1iS:00.0 split_sec read as '1647' with low OCR confidence (37%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 124.7) \u2014 shown as '1iS:00.0', please fix",
+  "Multi-piece mode: total_time_sec/total_meters are the sum of all 2 photos' own readings and do NOT include rest between pieces \u2014 add rest time by hand if you want total_time_sec to reflect wall-clock duration."
+ ]
+}
