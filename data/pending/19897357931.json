@@ -1,0 +1,90 @@
+{
+ "data": {
+  "device": "RowErg",
+  "workout_type": "",
+  "avg_split_sec": 295.0,
+  "total_meters": 61304.0,
+  "avg_spm": 25.0,
+  "avg_watts": 13.6,
+  "total_time_sec": 1200.0,
+  "intervals": [
+   {
+    "label": "25",
+    "split_sec": 122.6,
+    "hr": null
+   },
+   {
+    "label": "5219",
+    "split_sec": 114.3,
+    "spm": 25.0,
+    "hr": 173.0
+   },
+   {
+    "label": "cO0D",
+    "split_sec": 114.6,
+    "hr": null
+   },
+   {
+    "label": "10:00,0",
+    "split_sec": 115.3,
+    "spm": 25.0,
+    "hr": 177.0
+   },
+   {
+    "label": "1500.0",
+    "split_sec": 295.0,
+    "spm": 25.0,
+    "hr": 101.0
+   },
+   {
+    "label": "2000.0",
+    "split_sec": 90.8,
+    "spm": 25.0,
+    "hr": 184.0
+   },
+   {
+    "label": "20:00.0",
+    "split_sec": 114.1,
+    "hr": null
+   },
+   {
+    "label": "5000",
+    "split_sec": 90.5,
+    "hr": null
+   },
+   {
+    "label": "10:00.0",
+    "split_sec": 115.0,
+    "spm": 25.0,
+    "hr": null
+   },
+   {
+    "label": "15:00,.0",
+    "split_sec": 90.7,
+    "spm": 22.0,
+    "hr": null
+   },
+   {
+    "label": "20:00.0",
+    "split_sec": 94.1,
+    "hr": null
+   }
+  ],
+  "source_image": "IMG_2273.jpeg, IMG_2274.jpeg"
+ },
+ "warnings": [
+  "Could not confirm device type from the photo (no '/500m' or 's/m' text found) \u2014 defaulted to RowErg, please verify",
+  "avg_split_sec read as '455.0' with low OCR confidence (54%) \u2014 please verify",
+  "total_meters read as '61304' with low OCR confidence (49%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 114.3) \u2014 shown as '5219', please fix",
+  "interval cO0D split_sec read as '154.6' with low OCR confidence (60%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 114.6) \u2014 shown as 'cO0D', please fix",
+  "interval 1500.0 split_sec read as '455.0' with low OCR confidence (54%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 295.0) \u2014 shown as '1500.0', please fix",
+  "interval 2000.0 spm read as '25' with low OCR confidence (60%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 90.8) \u2014 shown as '2000.0', please fix",
+  "total_time_sec read as '20:00,0' with low OCR confidence (25%) \u2014 please verify",
+  "Could not confidently read the label for a row (split 90.5) \u2014 shown as '5000', please fix",
+  "interval 15:00,.0 spm read as '22' with low OCR confidence (41%) \u2014 please verify"
+ ]
+}
