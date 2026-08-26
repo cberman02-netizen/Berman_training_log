@@ -4161,5 +4161,72 @@
     "hr": 192
    }
   ]
+ },
+ "19897357931": {
+  "source_image": "IMG_2273.jpeg, IMG_2274.jpeg",
+  "device": "RowErg",
+  "avg_spm": 25,
+  "intervals": [
+   {
+    "label": "1",
+    "split_sec": 114.9,
+    "spm": 25,
+    "hr": 178
+   },
+   {
+    "label": "1.05",
+    "split_sec": 114.6,
+    "spm": 25,
+    "hr": 170
+   },
+   {
+    "label": "1.1",
+    "split_sec": 115.3,
+    "spm": 25,
+    "hr": 177
+   },
+   {
+    "label": "1.15",
+    "split_sec": 115,
+    "spm": 25,
+    "hr": 181
+   },
+   {
+    "label": "1.2",
+    "split_sec": 114.6,
+    "spm": 25,
+    "hr": 184
+   },
+   {
+    "label": "2",
+    "split_sec": 114.1,
+    "spm": 25,
+    "hr": null
+   },
+   {
+    "label": "2.05",
+    "split_sec": 114.9,
+    "spm": 25,
+    "hr": null
+   },
+   {
+    "label": "2.1",
+    "split_sec": 115,
+    "spm": 25,
+    "hr": null
+   },
+   {
+    "label": "2.15",
+    "split_sec": 114.7,
+    "spm": 26,
+    "hr": null
+   },
+   {
+    "label": "2.2",
+    "split_sec": 111.8,
+    "spm": 27,
+    "hr": null
+   }
+  ]
  }
 }
