@@ -718,6 +718,7 @@
 
     <div class="erg-upload-row" id="erg-upload-row" style="display:none;">
       <button class="wchip" id="erg-upload-launcher-btn">Upload erg screenshot</button>
+      <button class="wchip" id="erg-manual-entry-btn">Enter manually</button>
       <span class="erg-saved-msg" id="erg-saved-msg">Saved</span>
     </div>
 
@@ -750,7 +751,7 @@
       <div id="erg-review-section" style="display:none;">
         <div id="erg-review-warnings"></div>
 
-        <div class="erg-review-title">Review before saving</div>
+        <div class="erg-review-title" id="erg-review-title">Review before saving</div>
         <div class="erg-form">
           <div class="erg-review-grid">
             <label>Device
@@ -760,9 +761,9 @@
               </select>
             </label>
             <label>Workout type<input type="text" id="erg-r-workout-type"></label>
-            <label>Total time (sec)<input type="number" step="0.1" id="erg-r-total-time"></label>
+            <label>Total time (m:ss)<input type="text" id="erg-r-total-time" placeholder="42:03.2"></label>
             <label>Total meters<input type="number" step="0.1" id="erg-r-total-meters"></label>
-            <label>Avg split (s/500m)<input type="number" step="0.1" id="erg-r-avg-split"></label>
+            <label>Avg split (/500m)<input type="text" id="erg-r-avg-split" placeholder="2:06.6"></label>
             <label>Avg spm<input type="number" step="0.1" id="erg-r-avg-spm"></label>
             <label>Avg watts<input type="number" step="0.1" id="erg-r-avg-watts"></label>
             <label>Avg rpm<input type="number" step="0.1" id="erg-r-avg-rpm"></label>
@@ -1782,6 +1783,31 @@ function fmtErgSplit(sec){
   const m = Math.floor(sec/60), s = (sec%60).toFixed(1).padStart(4,'0');
   return `${m}:${s}`;
 }
+
+// Editable-form time fields take/show "m:ss.s" (or "h:mm:ss.s") the way it reads
+// on the PM5 screen, not raw seconds — much easier to type/verify by eye than e.g.
+// "2523.2". Internally still stored/saved as seconds, matching erg_captures.json.
+function formatSecToTime(sec){
+  if(sec == null || isNaN(sec)) return '';
+  const neg = sec < 0;
+  sec = Math.abs(sec);
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = (sec % 60).toFixed(1).padStart(4, '0');
+  const body = h > 0 ? `${h}:${String(m).padStart(2,'0')}:${s}` : `${m}:${s}`;
+  return neg ? `-${body}` : body;
+}
+function parseTimeToSec(str){
+  str = (str || '').trim();
+  if(!str) return null;
+  const parts = str.split(':').map(p => p.trim());
+  if(parts.some(p => p === '' || isNaN(parseFloat(p)))) return null;
+  const nums = parts.map(parseFloat);
+  if(nums.length === 1) return nums[0];
+  if(nums.length === 2) return nums[0] * 60 + nums[1];
+  if(nums.length === 3) return nums[0] * 3600 + nums[1] * 60 + nums[2];
+  return null;
+}
 function renderPM5Panel(a){
   const ec = a.ergCapture;
   const pm5 = document.getElementById('pm5-readout');
@@ -2334,6 +2360,12 @@ document.getElementById('erg-upload-launcher-btn').addEventListener('click', () 
   document.getElementById('erg-upload-row').style.display = 'none';
   document.getElementById('erg-upload-panel').style.display = '';
 });
+document.getElementById('erg-manual-entry-btn').addEventListener('click', () => {
+  document.getElementById('erg-upload-row').style.display = 'none';
+  document.getElementById('erg-upload-panel').style.display = '';
+  populateErgReview({device: 'RowErg'}, [], 'Enter erg data');
+  addErgIntervalRow();
+});
 document.getElementById('erg-upload-cancel-btn').addEventListener('click', resetErgUploadUI);
 document.getElementById('erg-review-cancel-btn').addEventListener('click', resetErgUploadUI);
 
@@ -2343,8 +2375,8 @@ function addErgIntervalRow(iv){
   row.className = 'erg-int-row';
   const v = x => x != null ? x : '';
   row.innerHTML = `
-    <input type="text" class="erg-iv-label" value="${v(iv.label)}">
-    <input type="number" step="0.1" class="erg-iv-split" value="${v(iv.split_sec)}">
+    <input type="text" class="erg-iv-label" value="${v(iv.label)}" placeholder="1">
+    <input type="text" class="erg-iv-split" value="${v(iv.split_sec != null ? formatSecToTime(iv.split_sec) : '')}" placeholder="1:57.3">
     <input type="number" step="0.1" class="erg-iv-spm" value="${v(iv.spm)}">
     <input type="number" step="0.1" class="erg-iv-watts" value="${v(iv.watts)}">
     <input type="number" step="0.1" class="erg-iv-rpm" value="${v(iv.rpm)}">
@@ -2355,7 +2387,8 @@ function addErgIntervalRow(iv){
 }
 document.getElementById('erg-int-add-btn').addEventListener('click', () => addErgIntervalRow());
 
-function populateErgReview(data, warnings){
+function populateErgReview(data, warnings, title){
+  document.getElementById('erg-review-title').textContent = title || 'Review before saving';
   const warnEl = document.getElementById('erg-review-warnings');
   warnEl.innerHTML = (warnings && warnings.length)
     ? `<div class="erg-warn"><strong>Extraction warnings — double-check before saving</strong><ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul></div>`
@@ -2363,9 +2396,9 @@ function populateErgReview(data, warnings){
 
   document.getElementById('erg-r-device').value = data.device || 'RowErg';
   document.getElementById('erg-r-workout-type').value = data.workout_type || '';
-  document.getElementById('erg-r-total-time').value = data.total_time_sec != null ? data.total_time_sec : '';
+  document.getElementById('erg-r-total-time').value = formatSecToTime(data.total_time_sec);
   document.getElementById('erg-r-total-meters').value = data.total_meters != null ? data.total_meters : '';
-  document.getElementById('erg-r-avg-split').value = data.avg_split_sec != null ? data.avg_split_sec : '';
+  document.getElementById('erg-r-avg-split').value = formatSecToTime(data.avg_split_sec);
   document.getElementById('erg-r-avg-spm').value = data.avg_spm != null ? data.avg_spm : '';
   document.getElementById('erg-r-avg-watts').value = data.avg_watts != null ? data.avg_watts : '';
   document.getElementById('erg-r-avg-rpm').value = data.avg_rpm != null ? data.avg_rpm : '';
@@ -2425,11 +2458,11 @@ document.getElementById('erg-review-save-btn').addEventListener('click', async (
     source_image: document.getElementById('erg-review-section').dataset.sourceImage || '',
     device,
     workout_type: document.getElementById('erg-r-workout-type').value.trim(),
-    total_time_sec: num('erg-r-total-time'),
+    total_time_sec: parseTimeToSec(document.getElementById('erg-r-total-time').value),
     total_meters: num('erg-r-total-meters'),
   };
   if(device === 'RowErg'){
-    entry.avg_split_sec = num('erg-r-avg-split');
+    entry.avg_split_sec = parseTimeToSec(document.getElementById('erg-r-avg-split').value);
     const spm = num('erg-r-avg-spm');
     if(spm != null) entry.avg_spm = spm;
   }
@@ -2447,7 +2480,7 @@ document.getElementById('erg-review-save-btn').addEventListener('click', async (
     const g = cls => { const v = row.querySelector(cls).value.trim(); return v === '' ? null : parseFloat(v); };
     const iv = {label};
     if(device === 'RowErg'){
-      iv.split_sec = g('.erg-iv-split');
+      iv.split_sec = parseTimeToSec(row.querySelector('.erg-iv-split').value);
       const spm = g('.erg-iv-spm');
       if(spm != null) iv.spm = spm;
     } else {

@@ -100,6 +100,31 @@ def _parse_split_no_colon(token, allow_ambiguous=False):
     return int(mi) * 60 + int(s) + (int(tenth) / 10 if tenth else 0)
 
 
+NO_COLON_TOTAL_TIME_RE = re.compile(r"^(\d{2})(\d{2})(\d)$")
+
+
+def _parse_total_time_no_colon(token):
+    # A longer total_time like "35:23.2" losing BOTH its colon and decimal point to
+    # OCR reads as "35232" — distinct from _parse_split_no_colon's pattern because a
+    # /500m split's minutes digit is (almost) always single-digit, while a workout's
+    # total time routinely runs into double-digit minutes. Only ever used for the
+    # header's total_time candidate, never for splits, and rejects an implausible
+    # seconds field (>59). Also rejects an exact whole-minute-to-the-tenth reading
+    # (seconds AND tenths both "0", e.g. "10000") — a real stopwatch total essentially
+    # never lands there, but a round meters value like 10000m does, and without this
+    # guard a token like that gets wrongly claimed as a time, hiding it from meters.
+    normalized = _normalize_digits(token)
+    m = NO_COLON_TOTAL_TIME_RE.match(normalized)
+    if not m:
+        return None
+    mi, s, tenth = m.groups()
+    if int(s) > 59:
+        return None
+    if s == "00" and tenth == "0":
+        return None
+    return int(mi) * 60 + int(s) + int(tenth) / 10
+
+
 def _watts_from_split(split_sec):
     return round(2.80 / (split_sec / 500) ** 3, 1)
 
@@ -146,13 +171,14 @@ def _load_gray(path):
     if img is None:
         raise ValueError(f"Could not decode image: {path}")
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = _crop_to_screen(gray)
+    return _crop_to_screen(gray)
+
+
+def _resize_to(gray, target_dim):
     h, w = gray.shape
-    max_dim = 2200
-    if max(h, w) < max_dim:
-        scale = max_dim / max(h, w)
-        gray = cv2.resize(gray, (round(w * scale), round(h * scale)), interpolation=cv2.INTER_CUBIC)
-    return gray
+    scale = target_dim / max(h, w)
+    interp = cv2.INTER_AREA if scale < 1 else cv2.INTER_CUBIC
+    return cv2.resize(gray, (round(w * scale), round(h * scale)), interpolation=interp)
 
 
 def _preprocess_variants(gray):
@@ -203,15 +229,31 @@ def _score(tokens):
     return sum(1 for t in tokens if t["conf"] >= MIN_TOKEN_CONF and NUMERIC_TOKEN_RE.match(t["text"]))
 
 
-def _best_ocr(gray):
-    variants = _preprocess_variants(gray)
-    best_tokens, best_score, best_name = [], -1, None
-    for name, img in variants.items():
-        tokens = _ocr_variant(img)
-        score = _score(tokens)
-        if score > best_score:
-            best_tokens, best_score, best_name = tokens, score, name
-    return best_tokens, best_name
+# Real photos vary hugely in native crop resolution (a tight close-up of just the
+# screen vs. a wider shot). Counter-intuitively, feeding Tesseract an ultra-high-res
+# crop of this dot-matrix font often makes recognition WORSE — the gaps between a
+# digit's individual dot segments become individually resolvable and read as noise
+# rather than blending into a glyph — so try a couple of target resolutions per photo
+# (on top of the existing threshold variants) and keep whichever combination scores
+# best, rather than assuming higher resolution is always better.
+TARGET_DIMS = (1600, 1200)
+
+
+def _best_ocr(gray, top_n=3):
+    # The single highest-scoring (variant, resolution) combo overall sometimes still
+    # misses one specific row entirely (observed: a header row cleanly legible to the
+    # eye that one combo's line-segmentation dropped, while two other combos scoring
+    # only slightly lower read it fine) — so keep the top few candidates, not just the
+    # winner, and let the caller fall back through them for header detection specifically.
+    scored = []
+    for target_dim in TARGET_DIMS:
+        resized = _resize_to(gray, target_dim)
+        variants = _preprocess_variants(resized)
+        for name, img in variants.items():
+            tokens = _ocr_variant(img)
+            scored.append((_score(tokens), tokens, f"{name}@{target_dim}"))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [(tokens, name) for _, tokens, name in scored[:top_n]]
 
 
 def _group_lines(tokens):
@@ -240,35 +282,59 @@ def _detect_device(all_text, device_hint):
     return None
 
 
-def _line_has_time_and_meters(line):
+HEADER_DOMINANCE_RATIO = 1.4  # a real header's meters total must clearly exceed any single row's
+
+
+def _line_time_and_meters(line):
     # The PM5's summary/totals row is the one line with BOTH a time value and a
     # meters value together — the title line above it ("40:00") has time but no
-    # meters, and the "Sep 05 2025" / column-label lines have neither.
+    # meters, and the "Sep 05 2025" / column-label lines have neither. Returns
+    # (has_both, meters_value) — meters_value is used to rank candidates, since
+    # a plain INTERVAL row (or even a date line, where the year can look like a
+    # meters reading) has exactly the same time+meters shape as a real header.
     has_time = False
-    has_meters = False
+    meters_val = None
     for t in line["tokens"]:
-        if _parse_time_to_sec(t["text"]) is not None or _parse_split_no_colon(t["text"]) is not None:
+        if (_parse_time_to_sec(t["text"]) is not None or _parse_split_no_colon(t["text"]) is not None
+                or _parse_total_time_no_colon(t["text"]) is not None):
             has_time = True
         v = _leading_int(t["text"])
         if v is not None and METERS_RANGE[0] <= v <= METERS_RANGE[1] and v > 60:
-            has_meters = True
-    return has_time and has_meters
+            if meters_val is None or v > meters_val:
+                meters_val = v
+    return has_time and meters_val is not None, meters_val
 
 
 def _find_header_line(lines):
     # Real PM5 screens don't reliably make the summary row visually bigger than the
     # interval rows below it (only the workout title above it is) — so try content
     # first (a line with both a time and a meters value is almost certainly the
-    # totals row), and only fall back to the "clearly taller line" heuristic
-    # (lesson #5) when content matching finds nothing.
+    # totals row) — but a plain interval row (or a date line, where the year can
+    # read as a meters value) has the exact same shape, so when several lines
+    # qualify, only trust the one whose meters value clearly dominates the rest
+    # (a real total should dwarf any single segment) rather than just taking
+    # whichever came first on screen. Falls back to the "clearly taller line"
+    # heuristic (lesson #5) only when content matching finds nothing at all.
     digit_lines = [l for l in lines if any(c.isdigit() for c in l["text"])]
     pool = digit_lines or lines
     if not pool:
         return None
 
-    for line in sorted(pool, key=lambda l: l["top"]):
-        if _line_has_time_and_meters(line):
-            return line
+    candidates = []
+    for line in pool:
+        has_both, meters_val = _line_time_and_meters(line)
+        if has_both:
+            candidates.append((line, meters_val))
+
+    if len(candidates) == 1:
+        return candidates[0][0]
+    if len(candidates) > 1:
+        candidates.sort(key=lambda p: p[1], reverse=True)
+        top_line, top_meters = candidates[0]
+        _, runner_up_meters = candidates[1]
+        if top_meters >= HEADER_DOMINANCE_RATIO * runner_up_meters:
+            return top_line
+        return None  # ambiguous — safer to leave totals blank than guess wrong
 
     if len(pool) < 2:
         return None
@@ -287,22 +353,47 @@ def _low_conf_note(field, tok):
 
 def _parse_header(line, device, warnings):
     out = {}
-    time_toks = [(t, _parse_time_to_sec(t["text"])) for t in line["tokens"] if _parse_time_to_sec(t["text"]) is not None]
-    if not time_toks:
-        # colon dropped by OCR entirely — fall back to the no-colon split reading
-        time_toks = [(t, _parse_split_no_colon(t["text"])) for t in line["tokens"] if _parse_split_no_colon(t["text"]) is not None]
+    # A header row commonly carries TWO time-shaped values — total_time (usually
+    # colon-intact, e.g. "45:03.9") and avg_split (often losing its colon to OCR,
+    # e.g. "2106.0" for "2:06.0"). Merging both sources unconditionally (rather than
+    # only falling back to the no-colon reading when NO strict match exists at all)
+    # matters a lot here: with only the strict total_time token present, the old
+    # single-candidate path couldn't tell split from total and silently kept neither.
+    strict_time_toks = [(t, _parse_time_to_sec(t["text"])) for t in line["tokens"] if _parse_time_to_sec(t["text"]) is not None]
+    strict_ids = {id(t) for t, _ in strict_time_toks}
+    loose_time_toks = [
+        (t, _parse_split_no_colon(t["text"])) for t in line["tokens"]
+        if id(t) not in strict_ids and _parse_split_no_colon(t["text"]) is not None
+    ]
+    loose_ids = strict_ids | {id(t) for t, _ in loose_time_toks}
+    # The PM5 header's column order is always time, meter, split, rate (left to
+    # right) — so a no-colon total_time reading (which shares its digit-length
+    # range with plenty of plausible meters values, e.g. "16168" reads equally
+    # well as 16:16.8) is only trustworthy for the LEFTMOST token on the line,
+    # never for one further right that the column order says should be meters.
+    leftmost_tok = min(line["tokens"], key=lambda t: t["left"]) if line["tokens"] else None
+    total_time_toks = [
+        (t, _parse_total_time_no_colon(t["text"])) for t in line["tokens"]
+        if id(t) not in loose_ids and t is leftmost_tok and _parse_total_time_no_colon(t["text"]) is not None
+    ]
+    time_toks = strict_time_toks + loose_time_toks + total_time_toks
     time_toks.sort(key=lambda p: p[1])
 
     if device == "RowErg" and time_toks:
-        split_tok, split_val = min(
-            time_toks, key=lambda p: abs(p[1] - sum(SPLIT_SEC_RANGE) / 2)
-        ) if len(time_toks) == 1 else time_toks[0]
-        total_tok, total_val = time_toks[-1]
-        if SPLIT_SEC_RANGE[0] <= split_val <= SPLIT_SEC_RANGE[1]:
+        # The split is whichever candidate actually falls in a plausible /500m split
+        # range — not just "the smaller of however many candidates we found". A lone
+        # candidate outside that range (e.g. a 35-minute total_time_sec) is unambiguously
+        # the total, not a "maybe-split" that blocks total_time_sec from being set too.
+        split_candidates = [(t, v) for t, v in time_toks if SPLIT_SEC_RANGE[0] <= v <= SPLIT_SEC_RANGE[1]]
+        split_tok = None
+        if split_candidates:
+            split_tok, split_val = split_candidates[0]
             out["avg_split_sec"] = round(split_val, 1)
             if split_tok["conf"] < LOW_CONF_WARN:
                 warnings.append(_low_conf_note("avg_split_sec", split_tok))
-        if total_val != split_val:
+        remaining = [(t, v) for t, v in time_toks if t is not split_tok]
+        if remaining:
+            total_tok, total_val = remaining[-1]
             out["total_time_sec"] = round(total_val, 1)
             if total_tok["conf"] < LOW_CONF_WARN:
                 warnings.append(_low_conf_note("total_time_sec", total_tok))
@@ -463,16 +554,30 @@ def _dedup_intervals(all_intervals):
 
 
 def _ocr_all_images(image_paths):
+    # Each image carries its top few (candidate_lines) OCR readings, not just the
+    # single best-scoring one — header detection falls back through them (see
+    # _find_header_across_candidates) since the top overall scorer can still miss
+    # one row that a close second/third candidate reads fine. Interval-row parsing
+    # keeps using just the top candidate, which is already reliable for that.
     all_text_for_device = ""
     per_image = []
     for path in image_paths:
         gray = _load_gray(path)
-        tokens, variant_used = _best_ocr(gray)
-        lines = _group_lines(tokens)
-        text = "\n".join(l["text"] for l in lines)
+        candidates = _best_ocr(gray)
+        candidate_lines = [(_group_lines(tokens), name) for tokens, name in candidates]
+        primary_lines, primary_name = candidate_lines[0]
+        text = "\n".join(l["text"] for l in primary_lines)
         all_text_for_device += "\n" + text
-        per_image.append((path, lines, text, variant_used))
+        per_image.append((path, candidate_lines, text, primary_name))
     return per_image, all_text_for_device
+
+
+def _find_header_across_candidates(candidate_lines):
+    for lines, _name in candidate_lines:
+        header_line = _find_header_line(lines)
+        if header_line is not None:
+            return header_line
+    return None
 
 
 def _detect_device_with_warning(all_text_for_device, device_hint, warnings):
@@ -492,19 +597,20 @@ def _extract_single_workout(image_paths, device_hint, warnings, raw_text_parts):
     header_fields = {}
     all_intervals = []
     any_header_found = False
-    for path, lines, text, variant_used in per_image:
+    for path, candidate_lines, text, variant_used in per_image:
         raw_text_parts.append(f"--- {os.path.basename(path)} (variant: {variant_used}) ---\n{text}")
 
         # A photo may legitimately have no header (a continuation page of a scrolled
         # interval table) — that's normal, not worth a warning on its own.
-        header_line = _find_header_line(lines)
+        header_line = _find_header_across_candidates(candidate_lines)
         if header_line is not None:
             any_header_found = True
             parsed_header = _parse_header(header_line, device, warnings)
             for k, v in parsed_header.items():
                 header_fields.setdefault(k, v)
 
-        intervals = _parse_table_rows(lines, device, warnings)
+        primary_lines = candidate_lines[0][0]
+        intervals = _parse_table_rows(primary_lines, device, warnings)
         all_intervals.extend(intervals)
 
     if not any_header_found:
@@ -542,11 +648,11 @@ def _extract_multi_piece_workout(image_paths, device_hint, warnings, raw_text_pa
     spms, watts_list, rpms = [], [], []
     have_time = have_meters = False
 
-    for i, (path, lines, text, variant_used) in enumerate(per_image):
+    for i, (path, candidate_lines, text, variant_used) in enumerate(per_image):
         rep = i + 1
         raw_text_parts.append(f"--- {os.path.basename(path)} (variant: {variant_used}) ---\n{text}")
 
-        header_line = _find_header_line(lines)
+        header_line = _find_header_across_candidates(candidate_lines)
         if header_line is None:
             warnings.append(f"Photo {rep}: could not identify a summary row for this piece — its numbers will need to be filled in manually")
             continue
@@ -582,7 +688,8 @@ def _extract_multi_piece_workout(image_paths, device_hint, warnings, raw_text_pa
         # Sub-splits within this piece (e.g. periodic markers inside a single 20:00
         # effort) are real data too — keep them, scoped under this rep's label so
         # they don't collide with another piece's "5:00" marker.
-        sub_lines = [l for l in lines if l is not header_line]
+        primary_lines = candidate_lines[0][0]
+        sub_lines = [l for l in primary_lines if l is not header_line]
         for sub in _parse_table_rows(sub_lines, device, warnings):
             sub["label"] = f"{rep}.{sub['label']}"
             intervals.append(sub)
