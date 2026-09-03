@@ -4252,5 +4252,72 @@
     "hr": 154
    }
   ]
+ },
+ "20006650539": {
+  "device": "RowErg",
+  "workout_type": "2x25'/4'r",
+  "total_time_sec": 3240,
+  "intervals": [
+   {
+    "label": "1.1",
+    "split_sec": 116.7,
+    "spm": 22,
+    "hr": 168
+   },
+   {
+    "label": "1.2",
+    "split_sec": 116.9,
+    "spm": 22,
+    "hr": null
+   },
+   {
+    "label": "1.3",
+    "split_sec": 114.7,
+    "spm": 24,
+    "hr": 182
+   },
+   {
+    "label": "1.4",
+    "split_sec": 114.6,
+    "spm": 24,
+    "hr": 187
+   },
+   {
+    "label": "1.5",
+    "split_sec": 112.6,
+    "spm": 26,
+    "hr": 192
+   },
+   {
+    "label": "2.1",
+    "split_sec": 116.6,
+    "spm": 22,
+    "hr": 181
+   },
+   {
+    "label": "2.2",
+    "split_sec": 116.7,
+    "spm": 22,
+    "hr": 184
+   },
+   {
+    "label": "2.3",
+    "split_sec": 114.7,
+    "spm": 24,
+    "hr": 188
+   },
+   {
+    "label": "2.4",
+    "split_sec": 114.5,
+    "spm": 24,
+    "hr": 189
+   },
+   {
+    "label": "2.5",
+    "split_sec": 110.9,
+    "spm": 26,
+    "hr": 198
+   }
+  ]
  }
 }
