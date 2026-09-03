@@ -514,7 +514,13 @@
   </section>
 
   <section class="panel">
-    <div class="section-title" id="zones-title">Time in HR Zones — 4W</div>
+    <div class="chart-header">
+      <div class="section-title" id="zones-title">Time in HR Zones — 4W</div>
+      <label class="planned-toggle" style="margin-bottom:0;">
+        <input type="checkbox" id="zones-pct-checkbox">
+        <span>Show as %</span>
+      </label>
+    </div>
     <div class="chart-box"><canvas id="zones-chart"></canvas></div>
   </section>
 
@@ -1114,6 +1120,20 @@ document.querySelectorAll('#window-chips .wchip').forEach(chip => {
   });
 });
 
+// ---- Zones % toggle ----
+const ZONES_PCT_KEY = 'trainingLogZonesPct_v1';
+function loadZonesPct(){
+  try { return localStorage.getItem(ZONES_PCT_KEY) === '1'; } catch(e){ return false; }
+}
+function saveZonesPct(v){
+  try { localStorage.setItem(ZONES_PCT_KEY, v ? '1' : '0'); } catch(e){ /* storage unavailable */ }
+}
+document.getElementById('zones-pct-checkbox').checked = loadZonesPct();
+document.getElementById('zones-pct-checkbox').addEventListener('change', e => {
+  saveZonesPct(e.target.checked);
+  renderZonesChart();
+});
+
 // ---- Stat readouts ----
 const COUNT_COMMUTES_KEY = 'trainingLogCountCommutes_v1';
 function loadCountCommutes(){
@@ -1347,6 +1367,12 @@ function renderZonesChart(){
     for(let i=0;i<5;i++) totals[i] += (a.zones[i]||0)/60;
   });
 
+  const showPct = document.getElementById('zones-pct-checkbox').checked;
+  const totalHours = totals.reduce((a,b)=>a+b, 0);
+  const chartVals = showPct
+    ? totals.map(t => totalHours > 0 ? +(t/totalHours*100).toFixed(1) : 0)
+    : totals.map(t => +t.toFixed(2));
+
   const wLabel = WINDOWS.find(w=>w.id===currentWindow).label;
   document.getElementById('zones-title').textContent = `Time in HR Zones (max HR 200) — ${wLabel}`;
 
@@ -1357,7 +1383,7 @@ function renderZonesChart(){
     data:{
       labels: ZONE_LABELS,
       datasets:[{
-        data: totals.map(t => +t.toFixed(2)),
+        data: chartVals,
         backgroundColor: zoneColors(),
         borderRadius: 4,
       }]
@@ -1366,9 +1392,12 @@ function renderZonesChart(){
       responsive:true, maintainAspectRatio:false,
       scales:{
         x:{grid:{display:false}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}}},
-        y:{grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}}, title:{display:true, text:'hours', color:ac.title}}
+        y:{grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}, callback: v => showPct ? v+'%' : v}, title:{display:true, text: showPct ? '% of total time' : 'hours', color:ac.title}}
       },
-      plugins:{legend:{display:false}}
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label: ctx => showPct ? `${ctx.parsed.y}%` : `${ctx.parsed.y} hrs`}}
+      }
     }
   });
 }
@@ -1844,24 +1873,49 @@ function parseTimeToSec(str){
   if(nums.length === 3) return nums[0] * 3600 + nums[1] * 60 + nums[2];
   return null;
 }
+// When a workout is entered as separate pieces (e.g. 3x20') with no top-level
+// avg_* filled in, derive averages from the per-piece values instead of
+// showing blanks — so manually-entered multi-piece workouts still get an
+// average watts/rate readout.
+function ergIntervalAverages(ec){
+  if(!ec || !ec.intervals || !ec.intervals.length) return {};
+  const avg = arr => arr.length ? arr.reduce((x,y)=>x+y,0)/arr.length : null;
+  if(ec.device === 'BikeErg'){
+    const watts = ec.intervals.map(iv => iv.watts != null ? iv.watts : iv.split_sec).filter(v => v != null);
+    const rpm = ec.intervals.map(iv => iv.rpm).filter(v => v != null);
+    return { avg_watts: avg(watts), avg_rpm: avg(rpm) };
+  }
+  const splits = ec.intervals.map(iv => iv.split_sec).filter(v => v != null);
+  const spms = ec.intervals.map(iv => iv.spm).filter(v => v != null);
+  const watts = ec.intervals.map(iv => {
+    if(iv.watts != null) return iv.watts;
+    return (iv.split_sec != null && iv.split_sec > 0) ? 2.80 / Math.pow(iv.split_sec/500, 3) : null;
+  }).filter(v => v != null);
+  return { avg_split_sec: avg(splits), avg_spm: avg(spms), avg_watts: avg(watts) };
+}
 function renderPM5Panel(a){
   const ec = a.ergCapture;
   const pm5 = document.getElementById('pm5-readout');
   if(ec){
+    const ivAvg = ergIntervalAverages(ec);
     let digits;
     if(ec.device === 'BikeErg'){
+      const watts = ec.avg_watts != null ? ec.avg_watts : ivAvg.avg_watts;
+      const rpm = ec.avg_rpm != null ? ec.avg_rpm : ivAvg.avg_rpm;
       digits = [
         {label:'Time', val: fmtErgTime(ec.total_time_sec)},
         {label:'Meters', val: ec.total_meters ? Math.round(ec.total_meters).toLocaleString() : '—'},
-        {label:'Watt', val: ec.avg_watts ? ec.avg_watts.toFixed(0) : '—'},
-        {label:'RPM', val: ec.avg_rpm ? ec.avg_rpm.toFixed(0) : '—'},
+        {label:'Watt', val: watts ? watts.toFixed(0) : '—'},
+        {label:'RPM', val: rpm ? rpm.toFixed(0) : '—'},
       ];
     } else {
+      const split = ec.avg_split_sec != null ? ec.avg_split_sec : ivAvg.avg_split_sec;
+      const spm = ec.avg_spm != null ? ec.avg_spm : ivAvg.avg_spm;
       digits = [
         {label:'Time', val: fmtErgTime(ec.total_time_sec)},
         {label:'Meters', val: ec.total_meters ? Math.round(ec.total_meters).toLocaleString() : '—'},
-        {label:'/500m', val: fmtErgSplit(ec.avg_split_sec)},
-        {label:'S/M', val: ec.avg_spm ? ec.avg_spm.toFixed(0) : '—'},
+        {label:'/500m', val: fmtErgSplit(split)},
+        {label:'S/M', val: spm ? spm.toFixed(0) : '—'},
       ];
     }
     document.getElementById('pm5-digits').innerHTML = digits.map(d =>
@@ -2035,16 +2089,7 @@ function openModal(id){
   const ec = a.ergCapture;
   let power, wattsSourceLabel;
   if(ec){
-    if(ec.intervals && ec.intervals.length){
-      const ivWatts = ec.intervals.map(iv => {
-        if(iv.watts != null) return iv.watts;
-        if(ec.device === 'BikeErg') return iv.split_sec;
-        return (iv.split_sec != null && iv.split_sec > 0) ? 2.80 / Math.pow(iv.split_sec/500, 3) : null;
-      }).filter(w => w != null);
-      power = ivWatts.length ? ivWatts.reduce((x,y)=>x+y,0)/ivWatts.length : ec.avg_watts;
-    } else {
-      power = ec.avg_watts;
-    }
+    power = ec.avg_watts != null ? ec.avg_watts : ergIntervalAverages(ec).avg_watts;
     wattsSourceLabel = null;
   } else {
     power = a.rowW || a.watts;
@@ -2632,18 +2677,19 @@ function openIntervalOverlay(ec){
   const isBike = ec.device === 'BikeErg';
   const hrVals = ec.intervals.map(iv => iv.hr).filter(v => v != null);
   const avgHr = hrVals.length ? Math.round(hrVals.reduce((a,b)=>a+b,0)/hrVals.length) : null;
+  const ivAvg = ergIntervalAverages(ec);
 
   const avgDigits = isBike ? [
     {label:'Time', val: fmtTime(ec.total_time_sec)},
     {label:'Meters', val: ec.total_meters ? Math.round(ec.total_meters).toLocaleString() : '—'},
-    {label:'Avg Watt', val: ec.avg_watts ? ec.avg_watts.toFixed(0) : '—'},
-    {label:'Avg RPM', val: ec.avg_rpm ? ec.avg_rpm.toFixed(0) : '—'},
+    {label:'Avg Watt', val: (ec.avg_watts != null ? ec.avg_watts : ivAvg.avg_watts) ? Math.round(ec.avg_watts != null ? ec.avg_watts : ivAvg.avg_watts) : '—'},
+    {label:'Avg RPM', val: (ec.avg_rpm != null ? ec.avg_rpm : ivAvg.avg_rpm) ? Math.round(ec.avg_rpm != null ? ec.avg_rpm : ivAvg.avg_rpm) : '—'},
     {label:'Avg HR', val: avgHr != null ? avgHr : '—'},
   ] : [
     {label:'Time', val: fmtTime(ec.total_time_sec)},
     {label:'Meters', val: ec.total_meters ? Math.round(ec.total_meters).toLocaleString() : '—'},
-    {label:'Avg /500m', val: fmtSplit(ec.avg_split_sec)},
-    {label:'Avg S/M', val: ec.avg_spm ? ec.avg_spm.toFixed(0) : '—'},
+    {label:'Avg /500m', val: fmtSplit(ec.avg_split_sec != null ? ec.avg_split_sec : ivAvg.avg_split_sec)},
+    {label:'Avg S/M', val: (ec.avg_spm != null ? ec.avg_spm : ivAvg.avg_spm) ? Math.round(ec.avg_spm != null ? ec.avg_spm : ivAvg.avg_spm) : '—'},
     {label:'Avg HR', val: avgHr != null ? avgHr : '—'},
   ];
   const avgHtml = `<div class="pm5-avg-summary">${avgDigits.map(d =>
