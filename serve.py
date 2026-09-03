@@ -4,11 +4,11 @@ Local dev server for the training log.
 Serves the SAME template.html the public site uses, with live data (including
 erg captures) computed fresh on every request via build_site.build_data() —
 so localhost:5055 looks and behaves identically to training-log.html, with
-two added capabilities, both wired up client-side in template.html and only
-shown when /api/health succeeds (the static GitHub Pages build has no
-backend and so never shows them): an "Upload erg screenshot" button inside
-each activity's detail view, and a "Sync Strava" button that pulls any new
-activities since the last one in the CSV.
+several added capabilities, all wired up client-side in template.html and
+only shown when /api/health succeeds (the static GitHub Pages build has no
+backend and so never shows them): uploading/entering erg data, a "Sync
+Strava" button, editable activity titles, and a commute checkbox per
+activity.
 
 Run:
     venv/bin/python serve.py
@@ -34,6 +34,7 @@ DATA_DIR = os.path.join(REPO_ROOT, "data")
 CAPTURES_DIR = os.path.join(DATA_DIR, "captures")
 ERG_CAPTURES_PATH = os.path.join(DATA_DIR, "erg_captures.json")
 TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
+COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
 
 app = Flask(__name__)
 
@@ -66,6 +67,14 @@ def load_title_overrides():
 
 def save_title_overrides(overrides):
     _save_json(TITLE_OVERRIDES_PATH, overrides)
+
+
+def load_commute_overrides():
+    return _load_json(COMMUTE_OVERRIDES_PATH)
+
+
+def save_commute_overrides(overrides):
+    _save_json(COMMUTE_OVERRIDES_PATH, overrides)
 
 
 @app.route("/")
@@ -138,6 +147,24 @@ def api_save_title():
     save_title_overrides(overrides)
 
     return jsonify({"ok": True, "title": title})
+
+
+@app.route("/api/save-commute", methods=["POST"])
+def api_save_commute():
+    payload = request.get_json(force=True, silent=True) or {}
+    activity_id = str(payload.get("activity_id", "")).strip()
+    is_commute = bool(payload.get("is_commute"))
+    if not activity_id:
+        return jsonify({"error": "missing activity_id"}), 400
+
+    overrides = load_commute_overrides()
+    if is_commute:
+        overrides[activity_id] = True
+    else:
+        overrides.pop(activity_id, None)
+    save_commute_overrides(overrides)
+
+    return jsonify({"ok": True, "is_commute": is_commute})
 
 
 @app.route("/api/save", methods=["POST"])

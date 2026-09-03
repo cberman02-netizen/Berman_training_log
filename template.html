@@ -307,7 +307,15 @@
     color:var(--text); padding:3px 8px;
   }
   .m-title-input:focus{outline:none; border-color:var(--amber);}
-  .modal .modal-meta{font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-bottom:16px;}
+  .modal .modal-meta{font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-bottom:10px;}
+  .m-commute-row{
+    display:flex; align-items:center; gap:7px; margin-bottom:16px; cursor:pointer;
+    font-family:var(--sans); font-size:12.5px; color:var(--text-dim);
+  }
+  .m-commute-row input{accent-color:var(--amber); cursor:pointer;}
+  .m-commute-row input:disabled{cursor:default;}
+  .m-commute-saved{color:var(--amber); opacity:0; transition:opacity 0.3s; font-size:11px;}
+  .m-commute-saved.show{opacity:1;}
   .modal-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;}
   .m-notes-section{margin-bottom:18px;}
   .m-notes-label{
@@ -488,6 +496,10 @@
     </div>
     <div class="panel stats-panel">
       <div class="window-row" id="window-chips"></div>
+      <label class="planned-toggle" style="margin-bottom:0;">
+        <input type="checkbox" id="count-commutes-checkbox">
+        <span>Count commuting time</span>
+      </label>
       <div class="stats-row" id="stat-readouts"></div>
     </div>
   </div>
@@ -691,6 +703,11 @@
       </span>
     </div>
     <div class="modal-meta" id="m-meta"></div>
+    <label class="m-commute-row" id="m-commute-row">
+      <input type="checkbox" id="m-commute-checkbox">
+      <span>Commute (excluded from "training hours" stats)</span>
+      <span class="m-commute-saved" id="m-commute-saved">Saved</span>
+    </label>
     <div class="modal-stats" id="m-stats"></div>
     <div class="m-notes-section">
       <div class="m-notes-label">
@@ -1098,9 +1115,26 @@ document.querySelectorAll('#window-chips .wchip').forEach(chip => {
 });
 
 // ---- Stat readouts ----
+const COUNT_COMMUTES_KEY = 'trainingLogCountCommutes_v1';
+function loadCountCommutes(){
+  try { return localStorage.getItem(COUNT_COMMUTES_KEY) === '1'; } catch(e){ return false; }
+}
+function saveCountCommutes(v){
+  try { localStorage.setItem(COUNT_COMMUTES_KEY, v ? '1' : '0'); } catch(e){ /* storage unavailable */ }
+}
+document.getElementById('count-commutes-checkbox').checked = loadCountCommutes();
+document.getElementById('count-commutes-checkbox').addEventListener('change', e => {
+  saveCountCommutes(e.target.checked);
+  renderStats();
+  renderVolumeChart();
+});
+
 function renderStats(){
+  const countCommutes = document.getElementById('count-commutes-checkbox').checked;
+  const activities = countCommutes ? DATA.activities : DATA.activities.filter(a => !a.isCommute);
+
   const {start,end} = windowRange(currentWindow);
-  const inWindow = DATA.activities.filter(a => {
+  const inWindow = activities.filter(a => {
     const d = new Date(a.ts);
     return d >= start && d <= new Date(end.getTime()+86400000-1);
   });
@@ -1110,7 +1144,7 @@ function renderStats(){
   const avgHr = withHr.length ? sum(withHr, a=>a.hr)/withHr.length : null;
   const days = Math.max(1, Math.round((end-start)/86400000)+1);
   const hrsPerWeek = hrs / (days/7);
-  const allTimeHrs = sum(DATA.activities, a=>a.dur)/60;
+  const allTimeHrs = sum(activities, a=>a.dur)/60;
 
   const wLabel = WINDOWS.find(w=>w.id===currentWindow).label;
   const stats = [
@@ -1217,7 +1251,9 @@ function renderVolumeChart(){
   const days = Math.round((end-start)/86400000)+1;
   const gran = granularityFor(days);
 
-  const inRange = DATA.activities.filter(a => {
+  const countCommutes = document.getElementById('count-commutes-checkbox').checked;
+  const activitiesForChart = countCommutes ? DATA.activities : DATA.activities.filter(a => !a.isCommute);
+  const inRange = activitiesForChart.filter(a => {
     const d = new Date(a.ts);
     return d >= start && d <= endInclusive;
   });
@@ -1852,6 +1888,38 @@ function openModal(id){
   resetErgUploadUI();
   document.getElementById('m-meta').textContent = `${a.date} · ${a.type}${a.gear? ' · '+a.gear : ''}`;
 
+  const commuteCheckbox = document.getElementById('m-commute-checkbox');
+  const commuteSavedEl = document.getElementById('m-commute-saved');
+  commuteCheckbox.checked = !!a.isCommute;
+  commuteCheckbox.disabled = !(SERVER_MODE || GITHUB_MODE);
+  commuteSavedEl.classList.remove('show');
+  commuteCheckbox.onchange = async () => {
+    const newVal = commuteCheckbox.checked;
+    commuteCheckbox.disabled = true;
+    try {
+      if(SERVER_MODE){
+        const resp = await fetch('/api/save-commute', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({activity_id: id, is_commute: newVal}),
+        });
+        const json = await resp.json();
+        if(!resp.ok) throw new Error(json.error || 'Save failed');
+      } else if(GITHUB_MODE){
+        await ghSaveCommuteFlow(id, newVal);
+      }
+      a.isCommute = newVal;
+      renderStats();
+      renderVolumeChart();
+      commuteSavedEl.classList.add('show');
+      setTimeout(() => commuteSavedEl.classList.remove('show'), 2000);
+    } catch(e) {
+      commuteCheckbox.checked = !newVal;
+      alert('Failed to save: ' + e.message);
+    } finally {
+      commuteCheckbox.disabled = !(SERVER_MODE || GITHUB_MODE);
+    }
+  };
+
   const titleEl = document.getElementById('m-title');
   const titleInput = document.getElementById('m-title-input');
   const titleEditBtn = document.getElementById('m-title-edit-btn');
@@ -2207,6 +2275,19 @@ async function ghSaveTitleFlow(activityId, title){
     'data/title_overrides.json',
     utf8ToBase64(JSON.stringify(overrides, null, 1)),
     `Rename activity ${activityId}`,
+    current ? current.sha : undefined,
+  );
+}
+
+async function ghSaveCommuteFlow(activityId, isCommute){
+  const current = await ghGetFile('data/commute_overrides.json');
+  const overrides = current ? JSON.parse(base64ToUtf8(current.content)) : {};
+  if(isCommute) overrides[activityId] = true;
+  else delete overrides[activityId];
+  await ghPutFile(
+    'data/commute_overrides.json',
+    utf8ToBase64(JSON.stringify(overrides, null, 1)),
+    `Mark activity ${activityId} as ${isCommute ? '' : 'not '}commute`,
     current ? current.sha : undefined,
   );
 }
