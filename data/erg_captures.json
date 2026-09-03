@@ -4228,5 +4228,29 @@
     "hr": null
    }
   ]
+ },
+ "20023881514": {
+  "device": "RowErg",
+  "workout_type": "3x20'/2'r",
+  "intervals": [
+   {
+    "label": "1",
+    "split_sec": 131.3,
+    "spm": 18,
+    "hr": 150
+   },
+   {
+    "label": "2",
+    "split_sec": 131.4,
+    "spm": 19,
+    "hr": 155
+   },
+   {
+    "label": "3",
+    "split_sec": 132.5,
+    "spm": 18,
+    "hr": 154
+   }
+  ]
  }
 }
