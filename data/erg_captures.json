@@ -4319,5 +4319,48 @@
     "hr": 198
    }
   ]
+ },
+ "20035491439": {
+  "device": "RowErg",
+  "workout_type": "30' MI",
+  "total_time_sec": 30,
+  "intervals": [
+   {
+    "label": "1",
+    "split_sec": 119.2,
+    "spm": 20,
+    "hr": 169
+   },
+   {
+    "label": "2",
+    "split_sec": 119.2,
+    "spm": 20,
+    "hr": 174
+   },
+   {
+    "label": "3",
+    "split_sec": 117.1,
+    "spm": 22,
+    "hr": 179
+   },
+   {
+    "label": "4",
+    "split_sec": 116.9,
+    "spm": 22,
+    "hr": 183
+   },
+   {
+    "label": "5",
+    "split_sec": 114.3,
+    "spm": 24,
+    "hr": 189
+   },
+   {
+    "label": "6",
+    "split_sec": 111.8,
+    "spm": 24,
+    "hr": null
+   }
+  ]
  }
 }
