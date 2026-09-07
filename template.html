@@ -968,8 +968,10 @@ function ymd(y,m,d){
 }
 
 const actsByDate = {};
+const trainingDates = new Set();
 DATA.activities.forEach(a => {
   (actsByDate[a.date] = actsByDate[a.date] || []).push(a);
+  if(!a.isCommute) trainingDates.add(a.date);
 });
 const lastActDate = new Date(DATA.activities[DATA.activities.length-1].ts);
 const lastActDateOnly = new Date(lastActDate.getFullYear(), lastActDate.getMonth(), lastActDate.getDate());
@@ -1087,10 +1089,13 @@ function windowRange(id){
   const end = new Date(lastActDate.getFullYear(), lastActDate.getMonth(), lastActDate.getDate());
   let start;
   if(id==='since_rest'){
+    // A day counts as a rest day if it has no training activity — a day whose
+    // only activity is flagged as a commute still counts as rest, regardless
+    // of the "Count commuting time" stats toggle.
     let d = new Date(end);
     d.setDate(d.getDate()-1);
     let guard = 0;
-    while(actsByDate[ymd(d.getFullYear(), d.getMonth(), d.getDate())] && guard < 400){
+    while(trainingDates.has(ymd(d.getFullYear(), d.getMonth(), d.getDate())) && guard < 400){
       d.setDate(d.getDate()-1);
       guard++;
     }
