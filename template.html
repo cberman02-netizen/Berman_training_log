@@ -1165,8 +1165,12 @@ function renderStats(){
   });
   const sum = (arr, f) => arr.reduce((a,x)=>a+(f(x)||0), 0);
   const hrs = sum(inWindow, a=>a.dur)/60;
+  // Weighted by session duration, not a plain average-of-averages — otherwise a
+  // handful of short, high-HR pieces (e.g. warmups logged as their own short
+  // Strava activity) outvote the far more time a long steady ride spends at a
+  // lower HR, dragging the readout up above what time-in-zone actually shows.
   const withHr = inWindow.filter(a=>a.hr);
-  const avgHr = withHr.length ? sum(withHr, a=>a.hr)/withHr.length : null;
+  const avgHr = withHr.length ? sum(withHr, a=>a.hr*a.dur)/sum(withHr, a=>a.dur) : null;
   const days = Math.max(1, Math.round((end-start)/86400000)+1);
   const hrsPerWeek = hrs / (days/7);
   const allTimeHrs = sum(activities, a=>a.dur)/60;
