@@ -166,7 +166,11 @@ def build_data():
     activities = []
     for m in master:
         aid = m["id"]
-        dt = datetime.fromisoformat(m["start_date"])
+        # start_date is UTC; a late-night activity can roll into the next UTC day,
+        # so prefer start_date_local (the athlete's own wall-clock time) for the
+        # calendar date everything in the app is bucketed by. Older rows synced
+        # before this field existed fall back to start_date (UTC).
+        dt = datetime.fromisoformat(m.get("start_date_local") or m["start_date"])
         dur = f(m["duration_moving_min"]) or 0
         spd = f(m["average_speed_mph"])
         entry = {

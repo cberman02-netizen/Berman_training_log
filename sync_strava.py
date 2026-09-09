@@ -93,6 +93,15 @@ def _normalize_start_date(raw):
     return dt.strftime("%Y-%m-%d %H:%M:%S+00:00")
 
 
+def _normalize_local_date(raw):
+    # Strava's start_date_local carries the athlete's wall-clock time but is
+    # formatted with a "Z" suffix as if it were UTC — parse the digits as-is,
+    # with no timezone conversion, so late-night activities land on the right
+    # calendar day instead of rolling into the next UTC day.
+    dt = datetime.fromisoformat(raw.replace("Z", ""))
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
 def get_new_activity_ids(access_token, after_epoch, known_ids):
     ids = []
     page = 1
@@ -133,6 +142,7 @@ def build_row(access_token, activity_id, fieldnames):
         "description": d.get("description") or "",
         "activity_type": d.get("sport_type") or d.get("type") or "",
         "start_date": _normalize_start_date(d["start_date"]),
+        "start_date_local": _normalize_local_date(d["start_date_local"]),
         "duration_moving_min": round(d["moving_time"] / 60.0, 1) if d.get("moving_time") is not None else "",
         "duration_elapsed_min": round(d["elapsed_time"] / 60.0, 1) if d.get("elapsed_time") is not None else "",
         "distance_miles": round(d["distance"] / 1609.34, 2) if d.get("distance") is not None else "",
@@ -167,6 +177,9 @@ def sync_new_activities():
         fieldnames = reader.fieldnames
         existing_rows = list(reader)
     known_ids = {r["id"] for r in existing_rows}
+
+    if "start_date_local" not in fieldnames:
+        fieldnames = list(fieldnames) + ["start_date_local"]
 
     after_epoch = 0
     if existing_rows:
