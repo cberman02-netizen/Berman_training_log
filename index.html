@@ -1899,6 +1899,17 @@ document.querySelectorAll('.chip[data-t]').forEach(chip => {
 // ---- Modal ----
 let mChart = null;
 
+// a.ts has no timezone suffix, so `new Date(...)` parses it as browser-local
+// wall-clock time — the same digits build_site.py wrote from Strava's
+// start_date_local, so .getHours()/.getMinutes() reproduce them as-is.
+function fmtTimeOfDay(ts){
+  const d = new Date(ts);
+  let h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2,'0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if(h === 0) h = 12;
+  return `${h}:${m} ${ampm}`;
+}
 function fmtErgTime(sec){
   if(sec==null) return '—';
   const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.round(sec%60);
@@ -2027,7 +2038,7 @@ function openModal(id){
   if(!a) return;
   currentModalActivityId = id;
   resetErgUploadUI();
-  document.getElementById('m-meta').textContent = `${a.date} · ${a.type}${a.gear? ' · '+a.gear : ''}`;
+  document.getElementById('m-meta').textContent = `${a.date} · ${fmtTimeOfDay(a.ts)} (EST) · ${a.type}${a.gear? ' · '+a.gear : ''}`;
 
   const commuteCheckbox = document.getElementById('m-commute-checkbox');
   const commuteSavedEl = document.getElementById('m-commute-saved');
