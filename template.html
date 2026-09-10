@@ -236,7 +236,15 @@
   }
   .cal-act:hover{opacity:0.8;}
   .cal-act.dim{display:none;}
-  .cal-more{font-family:var(--mono); font-size:9px; color:var(--text-faint); padding-left:5px;}
+  .cal-more{font-family:var(--mono); font-size:9px; color:var(--text-faint); padding-left:5px; cursor:pointer;}
+  .cal-more:hover{color:var(--amber); text-decoration:underline;}
+  .day-modal-row{
+    display:flex; align-items:center; gap:8px; padding:8px 6px; border-radius:6px; cursor:pointer;
+    font-family:var(--sans); font-size:13px;
+  }
+  .day-modal-row:hover{background:var(--panel-alt);}
+  .day-modal-row-title{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .day-modal-row-meta{font-family:var(--mono); font-size:11px; color:var(--text-dim); white-space:nowrap;}
 
   /* planned session chips (used on both tabs) */
   .cal-act.planned{
@@ -878,6 +886,14 @@
     <div class="plan-form-actions">
       <button class="wchip active" id="goal-form-save">Save</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="day-modal-bg">
+  <div class="modal">
+    <button class="close-btn" id="day-modal-close">&times;</button>
+    <h3 id="day-modal-title"></h3>
+    <div id="day-modal-list" style="margin-top:12px;"></div>
   </div>
 </div>
 
@@ -1776,7 +1792,7 @@ function monthGridHtml(year, month, rangeStart, rangeEnd, todayStr, showPlanned)
       const attr = a._planned ? `data-plan-id="${a.id}"` : `data-id="${a.id}"`;
       return `<div class="cal-act ${on?'':'dim'}${plannedCls}" style="background:${c}26; color:${c};" ${attr} title="${(a.title||a.type)}">${label}</div>`;
     }).join('');
-    const moreHtml = extra > 0 ? `<div class="cal-more">+${extra} more</div>` : '';
+    const moreHtml = extra > 0 ? `<div class="cal-more" data-date="${dateStr}" data-planned="${isFuture?'1':'0'}">+${extra} more</div>` : '';
 
     const cls = ['cal-cell'];
     if(isToday) cls.push('today');
@@ -1831,9 +1847,45 @@ function renderCalendar(){
   container.innerHTML = html;
   container.querySelectorAll('.cal-act[data-id]').forEach(el => el.addEventListener('click', () => openModal(el.dataset.id)));
   container.querySelectorAll('.cal-act[data-plan-id]').forEach(el => el.addEventListener('click', () => openPlanEditor(el.dataset.planId)));
+  container.querySelectorAll('.cal-more[data-date]').forEach(el => el.addEventListener('click', () => openDayModal(el.dataset.date, el.dataset.planned === '1')));
 }
 
 document.getElementById('show-planned-checkbox').addEventListener('change', renderCalendar);
+
+// ---- Day modal: full activity list for a date that overflowed the 3-item calendar cell ----
+function openDayModal(dateStr, isPlanned){
+  const acts = isPlanned
+    ? (plannedByDate[dateStr] || []).map(p => ({id:p.id, title:p.name, type:p.type, dur:p.duration, _planned:true}))
+    : (actsByDate[dateStr] || []).map(a => ({id:a.id, title:a.title, type:a.type, dur:a.dur, isCommute:a.isCommute, _planned:false}));
+  acts.sort((a,b) => (b.dur||0)-(a.dur||0));
+
+  const dateObj = new Date(dateStr + 'T00:00:00');
+  document.getElementById('day-modal-title').textContent =
+    dateObj.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+
+  document.getElementById('day-modal-list').innerHTML = acts.map(a => {
+    const c = colorFor(a.type);
+    const durLabel = a.dur ? `${a.dur.toFixed(0)}'` : '';
+    const commuteLabel = a.isCommute ? ' · commute' : '';
+    const attr = a._planned ? `data-plan-id="${a.id}"` : `data-id="${a.id}"`;
+    return `<div class="day-modal-row" ${attr}>
+      <span class="dot" style="background:${c};"></span>
+      <span class="day-modal-row-title">${a.title || a.type}</span>
+      <span class="day-modal-row-meta">${a.type}${durLabel ? ' · ' + durLabel : ''}${commuteLabel}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('day-modal-bg').classList.add('open');
+}
+document.getElementById('day-modal-list').addEventListener('click', e => {
+  const row = e.target.closest('.day-modal-row');
+  if(!row) return;
+  document.getElementById('day-modal-bg').classList.remove('open');
+  if(row.dataset.planId) openPlanEditor(row.dataset.planId);
+  else openModal(row.dataset.id);
+});
+document.getElementById('day-modal-close').addEventListener('click', () => document.getElementById('day-modal-bg').classList.remove('open'));
+document.getElementById('day-modal-bg').addEventListener('click', e => { if(e.target.id === 'day-modal-bg') e.currentTarget.classList.remove('open'); });
 
 document.querySelectorAll('.chip[data-t]').forEach(chip => {
   chip.addEventListener('click', () => {
