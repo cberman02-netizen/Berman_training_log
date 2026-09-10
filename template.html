@@ -1938,21 +1938,47 @@ function parseTimeToSec(str){
 // avg_* filled in, derive averages from the per-piece values instead of
 // showing blanks — so manually-entered multi-piece workouts still get an
 // average watts/rate readout.
+//
+// Rows are grouped by piece using the "piece.split" label convention (e.g.
+// "1" is piece 1 entered as a single whole-piece row; "2.1".."2.5" are five
+// sub-splits within piece 2) — each piece's own rows are averaged together
+// first, THEN the per-piece averages are averaged across pieces. A piece
+// entered as sub-splits only counts once overall, no matter how many splits
+// it was broken into, so a lone whole-piece row like "1" isn't outweighed by
+// another piece's sub-splits (e.g. "2.1".."2.5" shouldn't get 5x the say
+// that "1" gets just because it was recorded in five pieces instead of one).
 function ergIntervalAverages(ec){
   if(!ec || !ec.intervals || !ec.intervals.length) return {};
   const avg = arr => arr.length ? arr.reduce((x,y)=>x+y,0)/arr.length : null;
+
+  const pieces = new Map();
+  ec.intervals.forEach(iv => {
+    const key = String(iv.label).split('.')[0];
+    if(!pieces.has(key)) pieces.set(key, []);
+    pieces.get(key).push(iv);
+  });
+
+  const pieceAvg = rows => {
+    if(ec.device === 'BikeErg'){
+      const watts = rows.map(iv => iv.watts != null ? iv.watts : iv.split_sec).filter(v => v != null);
+      const rpm = rows.map(iv => iv.rpm).filter(v => v != null);
+      return { avg_watts: avg(watts), avg_rpm: avg(rpm) };
+    }
+    const splits = rows.map(iv => iv.split_sec).filter(v => v != null);
+    const spms = rows.map(iv => iv.spm).filter(v => v != null);
+    const watts = rows.map(iv => {
+      if(iv.watts != null) return iv.watts;
+      return (iv.split_sec != null && iv.split_sec > 0) ? 2.80 / Math.pow(iv.split_sec/500, 3) : null;
+    }).filter(v => v != null);
+    return { avg_split_sec: avg(splits), avg_spm: avg(spms), avg_watts: avg(watts) };
+  };
+  const perPiece = Array.from(pieces.values()).map(pieceAvg);
+  const acrossPieces = field => avg(perPiece.map(p => p[field]).filter(v => v != null));
+
   if(ec.device === 'BikeErg'){
-    const watts = ec.intervals.map(iv => iv.watts != null ? iv.watts : iv.split_sec).filter(v => v != null);
-    const rpm = ec.intervals.map(iv => iv.rpm).filter(v => v != null);
-    return { avg_watts: avg(watts), avg_rpm: avg(rpm) };
+    return { avg_watts: acrossPieces('avg_watts'), avg_rpm: acrossPieces('avg_rpm') };
   }
-  const splits = ec.intervals.map(iv => iv.split_sec).filter(v => v != null);
-  const spms = ec.intervals.map(iv => iv.spm).filter(v => v != null);
-  const watts = ec.intervals.map(iv => {
-    if(iv.watts != null) return iv.watts;
-    return (iv.split_sec != null && iv.split_sec > 0) ? 2.80 / Math.pow(iv.split_sec/500, 3) : null;
-  }).filter(v => v != null);
-  return { avg_split_sec: avg(splits), avg_spm: avg(spms), avg_watts: avg(watts) };
+  return { avg_split_sec: acrossPieces('avg_split_sec'), avg_spm: acrossPieces('avg_spm'), avg_watts: acrossPieces('avg_watts') };
 }
 function renderPM5Panel(a){
   const ec = a.ergCapture;
