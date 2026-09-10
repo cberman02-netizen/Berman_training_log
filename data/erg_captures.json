@@ -4362,5 +4362,46 @@
     "hr": null
    }
   ]
+ },
+ "20089655003": {
+  "device": "RowErg",
+  "intervals": [
+   {
+    "label": "1",
+    "split_sec": 114.7,
+    "spm": 24,
+    "hr": 177
+   },
+   {
+    "label": "2.1",
+    "split_sec": 114.1,
+    "spm": 25,
+    "hr": 179
+   },
+   {
+    "label": "2.2",
+    "split_sec": 114.5,
+    "spm": 25,
+    "hr": 185
+   },
+   {
+    "label": "2.3",
+    "split_sec": 114.9,
+    "spm": 25,
+    "hr": 186
+   },
+   {
+    "label": "2.4",
+    "split_sec": 114.5,
+    "spm": 25,
+    "hr": 189
+   },
+   {
+    "label": "2.5",
+    "split_sec": 111.3,
+    "spm": 27,
+    "hr": 196
+   }
+  ]
  }
 }
