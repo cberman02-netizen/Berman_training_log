@@ -186,28 +186,33 @@
   }
   .an-hr-table-header div:nth-child(3), .an-hr-table-header div:nth-child(4){text-align:right;}
 
-  /* watts/beat comparison — manual work-window marking per activity */
+  /* watts/beat comparison — click-to-mark work windows on each activity's own HR chart */
   .an-wpb-row{
     background:var(--panel-alt); border:1px solid var(--border); border-radius:8px;
     padding:12px 14px; margin-bottom:10px;
   }
-  .an-wpb-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px; flex-wrap:wrap;}
+  .an-wpb-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
   .an-wpb-title{font-family:var(--sans); font-size:12.5px; color:var(--text); font-weight:600;}
   .an-wpb-title .an-wpb-date{color:var(--text-faint); font-family:var(--mono); font-weight:400; margin-right:6px;}
   .an-wpb-result{font-family:var(--mono); font-size:11.5px; color:var(--text-dim); white-space:nowrap;}
   .an-wpb-result b{color:var(--amber); font-size:13px;}
-  .an-wpb-windows{display:flex; flex-direction:column; gap:6px; margin-bottom:8px;}
-  .an-wpb-window-row{display:grid; grid-template-columns:1fr 14px 1fr 22px; gap:6px; align-items:center;}
-  .an-wpb-window-row input{
-    width:100%; font-size:11.5px; padding:5px 6px; font-family:var(--sans);
+  .an-wpb-chart-box{height:130px; margin-bottom:6px; cursor:crosshair;}
+  .an-wpb-instructions{font-family:var(--sans); font-size:11.5px; color:var(--amber); min-height:16px; margin-bottom:6px;}
+  .an-wpb-toolbar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;}
+  .an-wpb-manual-end input{
+    width:70px; font-size:11.5px; padding:5px 6px; font-family:var(--sans);
     color:var(--text); background:var(--panel); border:1px solid var(--border); border-radius:5px;
   }
-  .an-wpb-window-row span{color:var(--text-faint); text-align:center; font-family:var(--mono); font-size:10px;}
-  .an-wpb-window-del{
-    background:var(--panel); border:1px solid var(--border); color:var(--text-faint); width:22px; height:22px;
-    border-radius:5px; cursor:pointer; font-size:11px; padding:0; line-height:1;
+  .an-wpb-chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .an-wpb-chip{
+    display:inline-flex; align-items:center; gap:5px; background:var(--panel); border:1px solid var(--border);
+    border-radius:20px; padding:3px 4px 3px 10px; font-family:var(--mono); font-size:11px; color:var(--text-dim);
   }
-  .an-wpb-window-del:hover{border-color:var(--run); color:var(--run);}
+  .an-wpb-chip-del{
+    background:none; border:none; color:var(--text-faint); width:18px; height:18px; border-radius:50%;
+    cursor:pointer; font-size:11px; padding:0; line-height:1;
+  }
+  .an-wpb-chip-del:hover{background:var(--panel-alt); color:var(--run);}
 
   /* filters */
   .filters{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;}
@@ -708,7 +713,7 @@
 
   <section class="panel">
     <div class="chart-header">
-      <div class="section-title">Watts/Beat Comparison <span class="an-subtitle">— indoor rowing only; use the chart above to find where rest starts/ends, then mark each workout's work window(s) below</span></div>
+      <div class="section-title">Watts/Beat Comparison <span class="an-subtitle">— indoor rowing only; click "[ Mark work window", click a start point on the chart, then click an end point (or type a time) to close it — repeat per piece, rest is whatever's left out</span></div>
     </div>
     <div id="an-wpb-list"></div>
     <div class="an-empty" id="an-wpb-empty">Select at least one indoor rowing activity with erg data above to compare Watts/Beat.</div>
@@ -1465,6 +1470,7 @@ let anSelected = new Set();
 let anFilteredIds = [];
 let anOverlayChart = null;
 let anTrendChart = null;
+let wpbCharts = [];
 
 // ---- Saved searches (persisted in this browser's localStorage) ----
 const SAVED_SEARCHES_KEY = 'trainingLogSavedSearches_v1';
@@ -1748,41 +1754,12 @@ function wpbUpdateResult(a, windows, resultEl){
     ? `${Math.round(watts)}W / ${hr.toFixed(0)}bpm = <b>${(watts/hr).toFixed(2)}</b> W/beat`
     : 'Not enough data';
 }
-function wpbRenderWindows(a, container, windows, resultEl){
-  container.innerHTML = '';
-  windows.forEach((w, idx) => {
-    const r = document.createElement('div');
-    r.className = 'an-wpb-window-row';
-    r.innerHTML = `
-      <input type="text" class="an-wpb-start" value="${formatSecToTime(w.start)}" placeholder="0:00">
-      <span>&ndash;</span>
-      <input type="text" class="an-wpb-end" value="${formatSecToTime(w.end)}" placeholder="20:00">
-      <button type="button" class="an-wpb-window-del" title="Remove window">&times;</button>
-    `;
-    const startEl = r.querySelector('.an-wpb-start');
-    const endEl = r.querySelector('.an-wpb-end');
-    const commit = () => {
-      const s = parseTimeToSec(startEl.value);
-      const e = parseTimeToSec(endEl.value);
-      if(s != null) w.start = s;
-      if(e != null) w.end = e;
-      saveWpbWindows(wpbWindows);
-      wpbUpdateResult(a, windows, resultEl);
-    };
-    startEl.addEventListener('change', commit);
-    endEl.addEventListener('change', commit);
-    r.querySelector('.an-wpb-window-del').addEventListener('click', () => {
-      windows.splice(idx, 1);
-      if(!windows.length) windows.push(...wpbDefaultWindows(a));
-      saveWpbWindows(wpbWindows);
-      wpbRenderWindows(a, container, windows, resultEl);
-      wpbUpdateResult(a, windows, resultEl);
-    });
-    container.appendChild(r);
-  });
+function wpbChipsHtml(windows){
+  return windows.map((w, idx) => `<span class="an-wpb-chip" data-idx="${idx}">${formatSecToTime(w.start)}&ndash;${formatSecToTime(w.end)}<button type="button" class="an-wpb-chip-del" data-idx="${idx}" title="Remove window">&times;</button></span>`).join('');
 }
 function wpbRenderRow(a){
   const windows = wpbWindows[a.id] || (wpbWindows[a.id] = wpbDefaultWindows(a));
+  const totalSec = Math.round((a.dur||0)*60);
   const row = document.createElement('div');
   row.className = 'an-wpb-row';
   row.dataset.id = a.id;
@@ -1793,27 +1770,175 @@ function wpbRenderRow(a){
   row.appendChild(head);
   const resultEl = head.querySelector('.an-wpb-result');
 
-  const windowsEl = document.createElement('div');
-  windowsEl.className = 'an-wpb-windows';
-  row.appendChild(windowsEl);
+  const chartBox = document.createElement('div');
+  chartBox.className = 'an-wpb-chart-box';
+  const canvas = document.createElement('canvas');
+  chartBox.appendChild(canvas);
+  row.appendChild(chartBox);
 
-  const addBtn = document.createElement('button');
-  addBtn.type = 'button';
-  addBtn.className = 'an-btn';
-  addBtn.textContent = '+ Add work window';
-  addBtn.addEventListener('click', () => {
-    windows.push({start: 0, end: Math.round((a.dur||0)*60)});
-    saveWpbWindows(wpbWindows);
-    wpbRenderWindows(a, windowsEl, windows, resultEl);
-    wpbUpdateResult(a, windows, resultEl);
+  const instructionsEl = document.createElement('div');
+  instructionsEl.className = 'an-wpb-instructions';
+  row.appendChild(instructionsEl);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'an-wpb-toolbar';
+  toolbar.innerHTML = `
+    <button type="button" class="an-btn an-wpb-mark-btn">[ Mark work window</button>
+    <span class="an-wpb-manual-end" style="display:none;">
+      <input type="text" class="an-wpb-manual-end-input" placeholder="10:00">
+      <button type="button" class="an-btn an-wpb-manual-end-btn">] Set end</button>
+    </span>
+    <button type="button" class="an-btn an-wpb-cancel-btn" style="display:none;">Cancel</button>
+    <button type="button" class="an-btn an-wpb-clear-btn">Clear all</button>
+  `;
+  row.appendChild(toolbar);
+
+  const chipsEl = document.createElement('div');
+  chipsEl.className = 'an-wpb-chips';
+  row.appendChild(chipsEl);
+
+  const markBtn = toolbar.querySelector('.an-wpb-mark-btn');
+  const cancelBtn = toolbar.querySelector('.an-wpb-cancel-btn');
+  const clearBtn = toolbar.querySelector('.an-wpb-clear-btn');
+  const manualEndSpan = toolbar.querySelector('.an-wpb-manual-end');
+  const manualEndInput = toolbar.querySelector('.an-wpb-manual-end-input');
+  const manualEndBtn = toolbar.querySelector('.an-wpb-manual-end-btn');
+
+  // pickMode: null (idle) | 'start' (waiting for a chart click to open a
+  // window) | 'end' (waiting for a chart click, or the manual input, to
+  // close the one just opened at pendingStart).
+  let pickMode = null;
+  let pendingStart = null;
+
+  function setInstructions(){
+    instructionsEl.textContent = pickMode === 'start' ? 'Click the chart to set the start of the work window.'
+      : pickMode === 'end' ? 'Click the chart to set the end — or type a time and click "Set end".'
+      : '';
+  }
+  function redrawChips(){
+    chipsEl.innerHTML = wpbChipsHtml(windows);
+    chipsEl.querySelectorAll('.an-wpb-chip-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        windows.splice(+btn.dataset.idx, 1);
+        saveWpbWindows(wpbWindows);
+        redrawChips();
+        wpbUpdateResult(a, windows, resultEl);
+        chart.update('none');
+      });
+    });
+  }
+  function resetPicker(){
+    pickMode = null; pendingStart = null;
+    markBtn.style.display = '';
+    cancelBtn.style.display = 'none';
+    manualEndSpan.style.display = 'none';
+    setInstructions();
+  }
+  function finalizeWindow(startSec, endSec){
+    const s = Math.max(0, Math.min(startSec, endSec));
+    const e = Math.min(totalSec, Math.max(startSec, endSec));
+    if(e - s >= 1){
+      windows.push({start: Math.round(s), end: Math.round(e)});
+      saveWpbWindows(wpbWindows);
+      redrawChips();
+      wpbUpdateResult(a, windows, resultEl);
+    }
+    resetPicker();
+    chart.update('none');
+  }
+
+  markBtn.addEventListener('click', () => {
+    pickMode = 'start'; pendingStart = null;
+    markBtn.style.display = 'none';
+    cancelBtn.style.display = '';
+    manualEndSpan.style.display = 'none';
+    setInstructions();
+    chart.update('none');
   });
-  row.appendChild(addBtn);
+  cancelBtn.addEventListener('click', () => { resetPicker(); chart.update('none'); });
+  clearBtn.addEventListener('click', () => {
+    windows.length = 0;
+    windows.push(...wpbDefaultWindows(a));
+    saveWpbWindows(wpbWindows);
+    redrawChips();
+    wpbUpdateResult(a, windows, resultEl);
+    chart.update('none');
+  });
+  manualEndBtn.addEventListener('click', () => {
+    const e = parseTimeToSec(manualEndInput.value);
+    if(e == null || pendingStart == null) return;
+    finalizeWindow(pendingStart, e);
+    manualEndInput.value = '';
+  });
+  manualEndInput.addEventListener('keydown', e => { if(e.key === 'Enter') manualEndBtn.click(); });
 
-  wpbRenderWindows(a, windowsEl, windows, resultEl);
+  const ac = chartAxisColors();
+  const amberC = theme().amber;
+  const pts = a.stream.t.map((t,i) => ({x:t, y:a.stream.hr[i]})).filter(p=>p.y!=null && p.x!=null);
+
+  const chart = new Chart(canvas, {
+    type:'line',
+    data:{ datasets:[{ data: pts, borderColor: amberC, backgroundColor: amberC, fill:false, tension:0.2, pointRadius:0, borderWidth:1.5 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false, parsing:false,
+      interaction:{mode:'nearest', intersect:false},
+      scales:{
+        x:{type:'linear', min:0, max:totalSec, grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}, callback:v=>formatSecToTime(v)}},
+        y:{grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}}}
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{title:()=>'', label:item=>`${item.parsed.y} bpm at ${formatSecToTime(item.parsed.x)}`}}
+      },
+      onClick:(evt, elements, ch) => {
+        if(pickMode == null) return;
+        const xVal = ch.scales.x.getValueForPixel(evt.x);
+        if(xVal == null) return;
+        const clamped = Math.max(0, Math.min(xVal, totalSec));
+        if(pickMode === 'start'){
+          pendingStart = clamped;
+          pickMode = 'end';
+          manualEndSpan.style.display = '';
+          manualEndInput.value = '';
+          manualEndInput.focus();
+          setInstructions();
+          ch.update('none');
+        } else if(pickMode === 'end'){
+          finalizeWindow(pendingStart, clamped);
+        }
+      }
+    },
+    plugins: [{
+      id: 'wpb-marks',
+      afterDraw(ch){
+        const {ctx, chartArea, scales} = ch;
+        const x = scales.x;
+        ctx.save();
+        windows.forEach(w => {
+          const x0 = x.getPixelForValue(w.start), x1 = x.getPixelForValue(w.end);
+          ctx.fillStyle = amberC + '26';
+          ctx.fillRect(x0, chartArea.top, x1-x0, chartArea.bottom-chartArea.top);
+        });
+        if(pendingStart != null){
+          const xp = x.getPixelForValue(pendingStart);
+          ctx.strokeStyle = amberC;
+          ctx.setLineDash([4,3]);
+          ctx.beginPath(); ctx.moveTo(xp, chartArea.top); ctx.lineTo(xp, chartArea.bottom); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+        ctx.restore();
+      }
+    }]
+  });
+  wpbCharts.push(chart);
+
+  redrawChips();
   wpbUpdateResult(a, windows, resultEl);
   return row;
 }
 function anRenderWpbSection(){
+  wpbCharts.forEach(c => c.destroy());
+  wpbCharts = [];
   const sel = anGetSelectedActivities();
   const eligible = wpbEligibleActivities(sel);
   const listEl = document.getElementById('an-wpb-list');
