@@ -4403,5 +4403,40 @@
     "hr": 196
    }
   ]
+ },
+ "20130918634": {
+  "device": "RowErg",
+  "intervals": [
+   {
+    "label": "2",
+    "split_sec": 114.7,
+    "spm": 24,
+    "hr": 176
+   },
+   {
+    "label": "3",
+    "split_sec": 114.5,
+    "spm": 24,
+    "hr": 180
+   },
+   {
+    "label": "4",
+    "split_sec": 114.1,
+    "spm": 24,
+    "hr": 183
+   },
+   {
+    "label": "5",
+    "split_sec": 113.2,
+    "spm": 25,
+    "hr": 185
+   },
+   {
+    "label": "6",
+    "split_sec": 109.8,
+    "spm": 26,
+    "hr": 197
+   }
+  ]
  }
 }
