@@ -2207,6 +2207,7 @@ function openModal(id){
     {label:'Avg HR', val: a.hr || '—'},
     {label:'Max HR', val: a.maxhr || '—'},
     {label:'Watts', val: power ? Math.round(power) + (wattsSourceLabel ? ` (${wattsSourceLabel})` : '') : '—'},
+    {label:'W/Beat', val: a.wattsPerBeat != null ? a.wattsPerBeat.toFixed(2) : '—'},
     {label:'Relative Effort', val: a.effort ? a.effort.toFixed(0) : '—'},
     {label:'Distance', val: a.dist ? a.dist.toFixed(1)+' mi' : '—'},
     {label:'Avg Speed', val: a.speed ? a.speed.toFixed(1)+' mph' : '—'},
