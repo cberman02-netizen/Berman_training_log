@@ -1856,34 +1856,31 @@
   ]
  },
  "15438750979": {
-  "source_image": "IMG_0601.jpeg",
-  "total_time_sec": 3960,
-  "total_meters": 14216,
-  "workout_type": "4x15:00/1:30r",
-  "avg_split_sec": 126.6,
-  "avg_spm": 18,
   "device": "RowErg",
-  "avg_watts": 172.5,
   "intervals": [
    {
     "label": "1",
     "split_sec": 125.7,
-    "hr": null
+    "spm": 18,
+    "hr": 154
    },
    {
     "label": "2",
     "split_sec": 126.3,
-    "hr": null
+    "spm": 18,
+    "hr": 162
    },
    {
     "label": "3",
     "split_sec": 126.6,
-    "hr": null
+    "spm": 18,
+    "hr": 164
    },
    {
     "label": "4",
     "split_sec": 127.7,
-    "hr": null
+    "spm": 18,
+    "hr": 166
    }
   ]
  },
