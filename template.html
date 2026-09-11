@@ -741,6 +741,7 @@
         <span>Recorded Splits</span>
         <span class="pm5-header-right">
           <span class="pm5-src">from erg screen</span>
+          <button class="pm5-expand-btn" id="pm5-edit-btn" title="Edit this erg data" style="display:none;">&#9998;</button>
           <button class="pm5-expand-btn" id="pm5-expand-btn" title="View all intervals" style="display:none;">&#128269;</button>
         </span>
       </div>
@@ -2028,6 +2029,14 @@ function renderPM5Panel(a){
     } else {
       expandBtn.style.display = 'none';
     }
+
+    const editBtn = document.getElementById('pm5-edit-btn');
+    if(SERVER_MODE || GITHUB_MODE){
+      editBtn.style.display = '';
+      editBtn.onclick = () => openErgEditForm(ec);
+    } else {
+      editBtn.style.display = 'none';
+    }
   } else {
     pm5.style.display = 'none';
   }
@@ -2590,6 +2599,11 @@ document.getElementById('erg-manual-entry-btn').addEventListener('click', () => 
   populateErgReview({device: 'RowErg'}, [], 'Enter erg data');
   addErgIntervalRow();
 });
+function openErgEditForm(ec){
+  document.getElementById('erg-upload-row').style.display = 'none';
+  document.getElementById('erg-upload-panel').style.display = '';
+  populateErgReview(ec, [], 'Edit erg data');
+}
 document.getElementById('erg-upload-cancel-btn').addEventListener('click', resetErgUploadUI);
 document.getElementById('erg-review-cancel-btn').addEventListener('click', resetErgUploadUI);
 
