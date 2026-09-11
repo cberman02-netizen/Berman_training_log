@@ -186,6 +186,29 @@
   }
   .an-hr-table-header div:nth-child(3), .an-hr-table-header div:nth-child(4){text-align:right;}
 
+  /* watts/beat comparison — manual work-window marking per activity */
+  .an-wpb-row{
+    background:var(--panel-alt); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; margin-bottom:10px;
+  }
+  .an-wpb-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px; flex-wrap:wrap;}
+  .an-wpb-title{font-family:var(--sans); font-size:12.5px; color:var(--text); font-weight:600;}
+  .an-wpb-title .an-wpb-date{color:var(--text-faint); font-family:var(--mono); font-weight:400; margin-right:6px;}
+  .an-wpb-result{font-family:var(--mono); font-size:11.5px; color:var(--text-dim); white-space:nowrap;}
+  .an-wpb-result b{color:var(--amber); font-size:13px;}
+  .an-wpb-windows{display:flex; flex-direction:column; gap:6px; margin-bottom:8px;}
+  .an-wpb-window-row{display:grid; grid-template-columns:1fr 14px 1fr 22px; gap:6px; align-items:center;}
+  .an-wpb-window-row input{
+    width:100%; font-size:11.5px; padding:5px 6px; font-family:var(--sans);
+    color:var(--text); background:var(--panel); border:1px solid var(--border); border-radius:5px;
+  }
+  .an-wpb-window-row span{color:var(--text-faint); text-align:center; font-family:var(--mono); font-size:10px;}
+  .an-wpb-window-del{
+    background:var(--panel); border:1px solid var(--border); color:var(--text-faint); width:22px; height:22px;
+    border-radius:5px; cursor:pointer; font-size:11px; padding:0; line-height:1;
+  }
+  .an-wpb-window-del:hover{border-color:var(--run); color:var(--run);}
+
   /* filters */
   .filters{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;}
   .chip{
@@ -681,6 +704,14 @@
     </div>
     <div id="an-hr-table" class="an-hr-table"></div>
     <div class="an-empty" id="an-hr-summary-empty">No HR data for the selected activities.</div>
+  </section>
+
+  <section class="panel">
+    <div class="chart-header">
+      <div class="section-title">Watts/Beat Comparison <span class="an-subtitle">— indoor rowing only; use the chart above to find where rest starts/ends, then mark each workout's work window(s) below</span></div>
+    </div>
+    <div id="an-wpb-list"></div>
+    <div class="an-empty" id="an-wpb-empty">Select at least one indoor rowing activity with erg data above to compare Watts/Beat.</div>
   </section>
 
   <section class="panel">
@@ -1596,6 +1627,7 @@ function anGetSelectedActivities(){
 function anRenderCharts(){
   anRenderOverlayChart();
   anRenderHrSummaryChart();
+  anRenderWpbSection();
   anRenderTrendChart();
 }
 
@@ -1669,6 +1701,130 @@ function anRenderHrSummaryChart(){
       <div class="an-hr-max">${a.maxhr!=null ? a.maxhr.toFixed(0) : '—'}</div>
     </div>
   `).join('');
+}
+
+// ---- Watts/Beat comparison — manual work-window marking, replacing the old
+// automatic rest-detection (which guessed piece boundaries from the workout
+// name and was unreliable whenever a recording had extra warmup/cooldown
+// baked in). The user marks which stretches of each selected activity count
+// as "work" by eye (using the overlay chart above for reference); everything
+// else is treated as rest and excluded. Windows persist per-activity in this
+// browser's localStorage.
+const WPB_WINDOWS_KEY = 'trainingLogWpbWindows_v1';
+function loadWpbWindows(){
+  try { return JSON.parse(localStorage.getItem(WPB_WINDOWS_KEY) || '{}'); } catch(e){ return {}; }
+}
+function saveWpbWindows(map){
+  try { localStorage.setItem(WPB_WINDOWS_KEY, JSON.stringify(map)); } catch(e){ /* storage unavailable */ }
+}
+let wpbWindows = loadWpbWindows();
+
+function wpbEligibleActivities(sel){
+  return sel.filter(a => a.type === 'Rowing' && a.ergCapture && a.ergCapture.device !== 'BikeErg' && a.stream && a.stream.t && a.stream.hr);
+}
+function wpbAvgWatts(ec){
+  if(ec.avg_watts != null) return ec.avg_watts;
+  return ergIntervalAverages(ec).avg_watts;
+}
+// a.stream.t is elapsed SECONDS (see downsample_stream in build_site.py) —
+// same units as the window start/end below, no conversion needed.
+function wpbAvgHr(a, windows){
+  if(!windows || !windows.length) return null;
+  const vals = [];
+  a.stream.t.forEach((t, i) => {
+    const hr = a.stream.hr[i];
+    if(t == null || hr == null) return;
+    if(windows.some(w => t >= w.start && t < w.end)) vals.push(hr);
+  });
+  return vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : null;
+}
+function wpbDefaultWindows(a){
+  return [{start: 0, end: Math.round((a.dur||0)*60)}];
+}
+function wpbUpdateResult(a, windows, resultEl){
+  const watts = wpbAvgWatts(a.ergCapture);
+  const hr = wpbAvgHr(a, windows);
+  resultEl.innerHTML = (watts != null && hr)
+    ? `${Math.round(watts)}W / ${hr.toFixed(0)}bpm = <b>${(watts/hr).toFixed(2)}</b> W/beat`
+    : 'Not enough data';
+}
+function wpbRenderWindows(a, container, windows, resultEl){
+  container.innerHTML = '';
+  windows.forEach((w, idx) => {
+    const r = document.createElement('div');
+    r.className = 'an-wpb-window-row';
+    r.innerHTML = `
+      <input type="text" class="an-wpb-start" value="${formatSecToTime(w.start)}" placeholder="0:00">
+      <span>&ndash;</span>
+      <input type="text" class="an-wpb-end" value="${formatSecToTime(w.end)}" placeholder="20:00">
+      <button type="button" class="an-wpb-window-del" title="Remove window">&times;</button>
+    `;
+    const startEl = r.querySelector('.an-wpb-start');
+    const endEl = r.querySelector('.an-wpb-end');
+    const commit = () => {
+      const s = parseTimeToSec(startEl.value);
+      const e = parseTimeToSec(endEl.value);
+      if(s != null) w.start = s;
+      if(e != null) w.end = e;
+      saveWpbWindows(wpbWindows);
+      wpbUpdateResult(a, windows, resultEl);
+    };
+    startEl.addEventListener('change', commit);
+    endEl.addEventListener('change', commit);
+    r.querySelector('.an-wpb-window-del').addEventListener('click', () => {
+      windows.splice(idx, 1);
+      if(!windows.length) windows.push(...wpbDefaultWindows(a));
+      saveWpbWindows(wpbWindows);
+      wpbRenderWindows(a, container, windows, resultEl);
+      wpbUpdateResult(a, windows, resultEl);
+    });
+    container.appendChild(r);
+  });
+}
+function wpbRenderRow(a){
+  const windows = wpbWindows[a.id] || (wpbWindows[a.id] = wpbDefaultWindows(a));
+  const row = document.createElement('div');
+  row.className = 'an-wpb-row';
+  row.dataset.id = a.id;
+
+  const head = document.createElement('div');
+  head.className = 'an-wpb-head';
+  head.innerHTML = `<span class="an-wpb-title"><span class="an-wpb-date">${a.date}</span>${(a.title||a.type).replace(/</g,'&lt;')}</span><span class="an-wpb-result"></span>`;
+  row.appendChild(head);
+  const resultEl = head.querySelector('.an-wpb-result');
+
+  const windowsEl = document.createElement('div');
+  windowsEl.className = 'an-wpb-windows';
+  row.appendChild(windowsEl);
+
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'an-btn';
+  addBtn.textContent = '+ Add work window';
+  addBtn.addEventListener('click', () => {
+    windows.push({start: 0, end: Math.round((a.dur||0)*60)});
+    saveWpbWindows(wpbWindows);
+    wpbRenderWindows(a, windowsEl, windows, resultEl);
+    wpbUpdateResult(a, windows, resultEl);
+  });
+  row.appendChild(addBtn);
+
+  wpbRenderWindows(a, windowsEl, windows, resultEl);
+  wpbUpdateResult(a, windows, resultEl);
+  return row;
+}
+function anRenderWpbSection(){
+  const sel = anGetSelectedActivities();
+  const eligible = wpbEligibleActivities(sel);
+  const listEl = document.getElementById('an-wpb-list');
+  const emptyEl = document.getElementById('an-wpb-empty');
+  listEl.innerHTML = '';
+  if(!eligible.length){
+    emptyEl.classList.add('show');
+    return;
+  }
+  emptyEl.classList.remove('show');
+  eligible.forEach(a => listEl.appendChild(wpbRenderRow(a)));
 }
 
 function anWattsToSplit(w){ return (w==null||w<=0)?null:500*Math.pow(2.80/w,1/3); }
@@ -2207,7 +2363,6 @@ function openModal(id){
     {label:'Avg HR', val: a.hr || '—'},
     {label:'Max HR', val: a.maxhr || '—'},
     {label:'Watts', val: power ? Math.round(power) + (wattsSourceLabel ? ` (${wattsSourceLabel})` : '') : '—'},
-    {label:'W/Beat', val: a.wattsPerBeat != null ? a.wattsPerBeat.toFixed(2) : '—'},
     {label:'Relative Effort', val: a.effort ? a.effort.toFixed(0) : '—'},
     {label:'Distance', val: a.dist ? a.dist.toFixed(1)+' mi' : '—'},
     {label:'Avg Speed', val: a.speed ? a.speed.toFixed(1)+' mph' : '—'},
