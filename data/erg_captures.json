@@ -4051,12 +4051,13 @@
   "source_image": "IMG_2219.jpeg, IMG_2220.jpeg",
   "device": "RowErg",
   "total_meters": 10000,
+  "avg_spm": 25,
   "intervals": [
    {
     "label": "1",
     "split_sec": 113.9,
     "spm": 25,
-    "hr": 192
+    "hr": null
    },
    {
     "label": "2",
