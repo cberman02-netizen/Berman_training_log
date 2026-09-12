@@ -4429,5 +4429,41 @@
     "hr": null
    }
   ]
+ },
+ "20146490525": {
+  "device": "RowErg",
+  "workout_type": "6x10' UT2",
+  "intervals": [
+   {
+    "label": "2",
+    "split_sec": 128.7,
+    "spm": 20,
+    "hr": null
+   },
+   {
+    "label": "3",
+    "split_sec": 128.5,
+    "spm": 20,
+    "hr": null
+   },
+   {
+    "label": "4",
+    "split_sec": 129.2,
+    "spm": 20,
+    "hr": null
+   },
+   {
+    "label": "5",
+    "split_sec": 128.6,
+    "spm": 20,
+    "hr": null
+   },
+   {
+    "label": "6",
+    "split_sec": 126.1,
+    "spm": 22,
+    "hr": null
+   }
+  ]
  }
 }
