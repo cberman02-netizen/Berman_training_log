@@ -4051,111 +4051,66 @@
   "source_image": "IMG_2219.jpeg, IMG_2220.jpeg",
   "device": "RowErg",
   "total_meters": 10000,
-  "avg_spm": 25,
   "intervals": [
    {
-    "label": "09",
-    "split_sec": 122.6,
-    "hr": null
-   },
-   {
-    "label": "37:49.1",
-    "split_sec": 113.4,
+    "label": "1",
+    "split_sec": 113.9,
     "spm": 25,
-    "hr": 178
+    "hr": 192
    },
    {
-    "label": "3479",
-    "split_sec": 113.5,
-    "spm": 25,
-    "hr": null
-   },
-   {
-    "label": "348.9",
+    "label": "2",
     "split_sec": 114.4,
     "spm": 25,
-    "hr": 170
-   },
-   {
-    "label": "3485",
-    "split_sec": 180,
-    "spm": 25,
-    "hr": 174
-   },
-   {
-    "label": "348.2",
-    "split_sec": 240,
     "hr": null
    },
    {
-    "label": "«348.0",
-    "split_sec": 114,
-    "spm": 26,
-    "hr": 179
+    "label": "3",
+    "split_sec": 114.2,
+    "spm": 25,
+    "hr": null
    },
    {
-    "label": "347.7",
+    "label": "4",
+    "split_sec": 114.1,
+    "spm": 25,
+    "hr": null
+   },
+   {
+    "label": "5",
+    "split_sec": 114,
+    "spm": 26,
+    "hr": null
+   },
+   {
+    "label": "6",
     "split_sec": 113.8,
     "spm": 26,
     "hr": null
    },
    {
-    "label": "347.2",
+    "label": "7",
     "split_sec": 113.6,
     "spm": 26,
-    "hr": 180
+    "hr": null
    },
    {
-    "label": "346.7",
+    "label": "8",
     "split_sec": 113.3,
     "spm": 26,
     "hr": null
    },
    {
-    "label": "37:49.",
-    "split_sec": 113.4,
-    "spm": 25,
-    "hr": 178
-   },
-   {
-    "label": "3:48.5",
-    "split_sec": 180,
-    "spm": 25,
-    "hr": 174
-   },
-   {
-    "label": "348.2",
-    "split_sec": 114.1,
-    "spm": 25,
-    "hr": 175
-   },
-   {
-    "label": "348.0",
-    "split_sec": 114,
-    "spm": 26,
-    "hr": 179
-   },
-   {
-    "label": "347.7",
-    "split_sec": 113.8,
-    "hr": null
-   },
-   {
-    "label": "346.7",
-    "split_sec": 113.5,
-    "spm": 26,
-    "hr": null
-   },
-   {
-    "label": "3:46.00",
+    "label": "9",
     "split_sec": 113,
+    "spm": 26,
     "hr": null
    },
    {
-    "label": "1",
+    "label": "10",
     "split_sec": 109.9,
     "spm": 28,
-    "hr": 192
+    "hr": null
    }
   ]
  },
