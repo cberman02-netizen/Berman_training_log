@@ -729,6 +729,7 @@
         <option value="effort">Relative Effort</option>
         <option value="dur">Duration</option>
         <option value="decoupling">Decoupling %</option>
+        <option value="wpb">Watts/Beat</option>
       </select>
     </div>
     <div class="chart-box"><canvas id="an-trend-chart"></canvas></div>
@@ -1967,6 +1968,14 @@ function anRenderTrendChart(){
     if(metric==='effort') return a.effort;
     if(metric==='dur') return a.dur;
     if(metric==='decoupling') return a.decoupling ? a.decoupling.value : null;
+    if(metric==='wpb'){
+      if(a.type !== 'Rowing' || !a.ergCapture || a.ergCapture.device === 'BikeErg') return null;
+      const windows = wpbWindows[a.id];
+      if(!windows || !windows.length) return null;
+      const watts = wpbAvgWatts(a.ergCapture);
+      const hr = wpbAvgHr(a, windows);
+      return (watts != null && hr) ? Math.round(watts/hr*100)/100 : null;
+    }
     return null;
   };
 
@@ -1975,13 +1984,15 @@ function anRenderTrendChart(){
   if(anTrendChart){ anTrendChart.destroy(); anTrendChart=null; }
   if(!pts.length){
     emptyEl.classList.add('show'); canvasEl.style.display='none';
+    if(metric==='wpb') emptyEl.textContent = 'Mark work windows in the Watts/Beat Comparison panel above for the selected activities to see this trend.';
+    else emptyEl.textContent = 'Select at least one activity above to see this chart.';
     return;
   }
   emptyEl.classList.remove('show'); canvasEl.style.display='';
 
   const ac = chartAxisColors();
   const amberC = theme().amber;
-  const yLabel = {hr:'bpm', watts:'watts', pace:'/500m (sec)', effort:'relative effort', dur:'minutes', decoupling:'%'}[metric];
+  const yLabel = {hr:'bpm', watts:'watts', pace:'/500m (sec)', effort:'relative effort', dur:'minutes', decoupling:'%', wpb:'W/beat'}[metric];
 
   anTrendChart = new Chart(canvasEl, {
     type:'line',
