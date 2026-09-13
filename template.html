@@ -94,7 +94,8 @@
   }
   .wchip:hover{color:var(--text);}
   .wchip.active{background:var(--amber); border-color:var(--amber); color:var(--bg); font-weight:600;}
-  .stats-row{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;}
+  .stats-row{display:grid; grid-template-columns:repeat(5, 1fr); gap:14px;}
+  @media (max-width:900px){ .stats-row{grid-template-columns:repeat(3,1fr);} }
   @media (max-width:700px){ .stats-row{grid-template-columns:repeat(2,1fr);} }
   .stat .label{font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px;}
   .stat .val{font-family:var(--mono); font-size:28px; font-weight:600; color:var(--text);}
@@ -1228,12 +1229,16 @@ function renderStats(){
   const days = Math.max(1, Math.round((end-start)/86400000)+1);
   const hrsPerWeek = hrs / (days/7);
   const allTimeHrs = sum(activities, a=>a.dur)/60;
+  const withEffort = inWindow.filter(a=>a.effort!=null);
+  const totalEffort = sum(withEffort, a=>a.effort);
+  const effortPerWeek = totalEffort / (days/7);
 
   const wLabel = WINDOWS.find(w=>w.id===currentWindow).label;
   const stats = [
     {label:'Sessions ('+wLabel+')', val: inWindow.length, sub: start.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' \u2013 ' + end.toLocaleDateString('en-US',{month:'short',day:'numeric'})},
     {label:'Hours ('+wLabel+')', val: hrs.toFixed(1), sub: hrsPerWeek.toFixed(1) + ' hrs/week avg'},
     {label:'Avg HR ('+wLabel+')', val: avgHr ? avgHr.toFixed(0) : '—', sub: withHr.length + ' sessions w/ HR'},
+    {label:'Effort ('+wLabel+')', val: withEffort.length ? totalEffort.toFixed(0) : '—', sub: effortPerWeek.toFixed(0) + ' /week avg'},
     {label:'All-Time Hours', val: allTimeHrs.toFixed(0), sub: 'since ' + DATA.activities[0].date},
   ];
   document.getElementById('stat-readouts').innerHTML = stats.map(s =>
