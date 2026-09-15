@@ -2,6 +2,5 @@ venv/
 __pycache__/
 *.pyc
 .env
-data/captures/
 .claude/
 .DS_Store

@@ -458,12 +458,8 @@
     font-family:var(--sans); font-size:13px; color:var(--text); background:var(--panel); border:1px solid var(--border);
     border-radius:6px; padding:8px 10px; text-transform:none; letter-spacing:normal;
   }
-  .erg-form-row{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;}
-  .erg-form-row > label{flex:1; min-width:140px;}
   .erg-form-actions{display:flex; gap:10px; margin-top:2px;}
   .erg-hint{font-family:var(--sans); font-size:11.5px; color:var(--text-faint); margin:0;}
-  .erg-checkbox-row{display:flex; flex-direction:row !important; align-items:flex-start; gap:8px; font-family:var(--sans) !important; font-size:12.5px !important; color:var(--text-dim) !important; text-transform:none !important; letter-spacing:0 !important;}
-  .erg-checkbox-row input{flex:none; width:auto; margin-top:2px;}
   .erg-warn{
     background:var(--panel); border:1px solid var(--run); color:var(--run); border-radius:8px;
     padding:10px 14px; margin-bottom:14px; font-family:var(--sans); font-size:12px;
@@ -778,7 +774,7 @@
       <div class="pm5-header">
         <span>Recorded Splits</span>
         <span class="pm5-header-right">
-          <span class="pm5-src">from erg screen</span>
+          <span class="pm5-src" id="pm5-src">from erg screen</span>
           <button class="pm5-expand-btn" id="pm5-edit-btn" title="Edit this erg data" style="display:none;">&#9998;</button>
           <button class="pm5-expand-btn" id="pm5-expand-btn" title="View all intervals" style="display:none;">&#128269;</button>
         </span>
@@ -787,36 +783,11 @@
     </div>
 
     <div class="erg-upload-row" id="erg-upload-row" style="display:none;">
-      <button class="wchip" id="erg-upload-launcher-btn">Upload erg screenshot</button>
       <button class="wchip" id="erg-manual-entry-btn">Enter manually</button>
       <span class="erg-saved-msg" id="erg-saved-msg">Saved</span>
     </div>
 
     <div class="erg-upload-panel" id="erg-upload-panel" style="display:none;">
-
-      <div class="erg-form" id="erg-upload-form">
-        <div class="erg-form-row">
-          <label>Photo(s)
-            <input type="file" id="erg-upload-files" accept="image/*" multiple>
-          </label>
-          <label style="max-width:160px;">Device
-            <select id="erg-upload-device">
-              <option value="">Auto-detect</option>
-              <option value="RowErg">RowErg</option>
-              <option value="BikeErg">BikeErg</option>
-            </select>
-          </label>
-        </div>
-        <label class="erg-checkbox-row">
-          <input type="checkbox" id="erg-upload-multi-piece">
-          <span>Each photo is its own separate piece (e.g. 2x20:00/4:00r recorded as two standalone efforts, not one interval-mode workout)</span>
-        </label>
-        <p class="erg-hint">Extraction runs locally (OCR, no API calls). For best results, fill the frame with the screen, shoot straight-on, and avoid glare over the numbers.</p>
-        <div class="erg-form-actions">
-          <button class="wchip active" id="erg-upload-extract-btn" type="button">Extract</button>
-          <button class="wchip" id="erg-upload-cancel-btn" type="button">Cancel</button>
-        </div>
-      </div>
 
       <div id="erg-review-section" style="display:none;">
         <div id="erg-review-warnings"></div>
@@ -1085,6 +1056,9 @@ const STREAM_DEFS = [
   {key:'hr', label:'HR'},
   {key:'speed', label:'Speed'},
   {key:'watts', label:'Watts'},
+  {key:'split', label:'Split'},
+  {key:'rate', label:'Rate'},
+  {key:'wpb', label:'W/Beat'},
 ];
 function loadStreamVis(){
   try {
@@ -1095,7 +1069,7 @@ function loadStreamVis(){
 function saveStreamVis(v){
   try { localStorage.setItem(STREAM_VIS_KEY, JSON.stringify(v)); } catch(e){ /* storage unavailable */ }
 }
-let streamVis = Object.assign({elev:true, hr:true, speed:true, watts:true}, loadStreamVis());
+let streamVis = Object.assign({elev:true, hr:true, speed:true, watts:true, split:true, rate:true, wpb:true}, loadStreamVis());
 
 
 function renderCountdown(){
@@ -1732,29 +1706,54 @@ function saveWpbWindows(map){
 let wpbWindows = loadWpbWindows();
 
 function wpbEligibleActivities(sel){
-  return sel.filter(a => a.type === 'Rowing' && a.ergCapture && a.ergCapture.device !== 'BikeErg' && a.stream && a.stream.t && a.stream.hr);
+  return sel.filter(a => a.type === 'Rowing' && a.stream && a.stream.t && a.stream.hr &&
+    ((a.ergCapture && a.ergCapture.device !== 'BikeErg') || hasErgDataStream(a)));
 }
 function wpbAvgWatts(ec){
   if(ec.avg_watts != null) return ec.avg_watts;
   return ergIntervalAverages(ec).avg_watts;
 }
-// a.stream.t is elapsed SECONDS (see downsample_stream in build_site.py) —
-// same units as the window start/end below, no conversion needed.
+// Weights each sample by the seconds since the previous one (same convention
+// as zone_minutes in build_site.py) rather than a plain arithmetic mean —
+// Strava's own stream spacing is often very irregular (a real rowing stream
+// can jump from a 10s gap to a 250s gap), so an unweighted mean over a window
+// can skew meaningfully toward whichever stretch happened to get the denser
+// sampling. a.stream.t is elapsed seconds, same units as window start/end.
+function timeWeightedAvg(times, values, windows){
+  let wSum = 0, vwSum = 0;
+  let prevT = null;
+  for(let i = 0; i < times.length; i++){
+    const t = times[i], v = values[i];
+    if(t != null && prevT != null && v != null){
+      const dt = t - prevT;
+      if(dt > 0 && dt < 300 && windows.some(win => t >= win.start && t < win.end)){
+        wSum += dt;
+        vwSum += v * dt;
+      }
+    }
+    if(t != null) prevT = t;
+  }
+  return wSum > 0 ? vwSum / wSum : null;
+}
+// Prefers real per-second watts within the marked windows (ErgData-synced
+// rows) over the erg-capture summary/interval average, since a continuous
+// stream is strictly more accurate than a handful of interval rows.
+function wpbAvgWattsForWindows(a, windows){
+  if(hasErgDataStream(a) && windows && windows.length){
+    const avg = timeWeightedAvg(a.stream.t, a.stream.w, windows);
+    if(avg != null) return avg;
+  }
+  return a.ergCapture ? wpbAvgWatts(a.ergCapture) : null;
+}
 function wpbAvgHr(a, windows){
   if(!windows || !windows.length) return null;
-  const vals = [];
-  a.stream.t.forEach((t, i) => {
-    const hr = a.stream.hr[i];
-    if(t == null || hr == null) return;
-    if(windows.some(w => t >= w.start && t < w.end)) vals.push(hr);
-  });
-  return vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : null;
+  return timeWeightedAvg(a.stream.t, a.stream.hr, windows);
 }
 function wpbDefaultWindows(a){
   return [{start: 0, end: Math.round((a.dur||0)*60)}];
 }
 function wpbUpdateResult(a, windows, resultEl){
-  const watts = wpbAvgWatts(a.ergCapture);
+  const watts = wpbAvgWattsForWindows(a, windows);
   const hr = wpbAvgHr(a, windows);
   resultEl.innerHTML = (watts != null && hr)
     ? `${Math.round(watts)}W / ${hr.toFixed(0)}bpm = <b>${(watts/hr).toFixed(2)}</b> W/beat`
@@ -1974,10 +1973,11 @@ function anRenderTrendChart(){
     if(metric==='dur') return a.dur;
     if(metric==='decoupling') return a.decoupling ? a.decoupling.value : null;
     if(metric==='wpb'){
-      if(a.type !== 'Rowing' || !a.ergCapture || a.ergCapture.device === 'BikeErg') return null;
+      const eligible = (a.ergCapture && a.ergCapture.device !== 'BikeErg') || hasErgDataStream(a);
+      if(a.type !== 'Rowing' || !eligible) return null;
       const windows = wpbWindows[a.id];
       if(!windows || !windows.length) return null;
-      const watts = wpbAvgWatts(a.ergCapture);
+      const watts = wpbAvgWattsForWindows(a, windows);
       const hr = wpbAvgHr(a, windows);
       return (watts != null && hr) ? Math.round(watts/hr*100)/100 : null;
     }
@@ -2289,9 +2289,18 @@ function ergIntervalAverages(ec){
   }
   return { avg_split_sec: acrossPieces('avg_split_sec'), avg_spm: acrossPieces('avg_spm'), avg_watts: acrossPieces('avg_watts') };
 }
+// A rowing activity synced via ErgData carries real per-second watts+HR (unlike
+// a plain Concept2-only recording, which reports HR only) — see hasErgDataStream.
+function hasErgDataStream(a){
+  return a.type === 'Rowing' && a.stream && a.stream.w && a.stream.w.some(v => v != null) && a.stream.hr && a.stream.hr.some(v => v != null);
+}
 function renderPM5Panel(a){
   const ec = a.ergCapture;
   const pm5 = document.getElementById('pm5-readout');
+  const srcEl = document.getElementById('pm5-src');
+  const expandBtn = document.getElementById('pm5-expand-btn');
+  const editBtn = document.getElementById('pm5-edit-btn');
+
   if(ec){
     const ivAvg = ergIntervalAverages(ec);
     let digits;
@@ -2318,19 +2327,50 @@ function renderPM5Panel(a){
       `<div class="pm5-digit"><div class="pm5-label">${d.label}</div><div class="pm5-value">${d.val}</div></div>`
     ).join('');
     pm5.style.display = '';
+    srcEl.textContent = 'from erg screen';
 
-    const expandBtn = document.getElementById('pm5-expand-btn');
     if(ec.intervals && ec.intervals.length){
       expandBtn.style.display = '';
       expandBtn.onclick = () => openIntervalOverlay(ec);
     } else {
       expandBtn.style.display = 'none';
     }
-
-    const editBtn = document.getElementById('pm5-edit-btn');
     if(SERVER_MODE || GITHUB_MODE){
       editBtn.style.display = '';
       editBtn.onclick = () => openErgEditForm(ec);
+    } else {
+      editBtn.style.display = 'none';
+    }
+  } else if(hasErgDataStream(a)){
+    // No manual/OCR entry exists, but ErgData already gave Strava everything
+    // a screenshot upload used to be needed for — synthesize the same digit
+    // readout directly from the activity's own summary fields.
+    const meters = a.dist != null ? a.dist * 1609.34 : null;
+    const splitSec = a.watts ? 500 * Math.pow(2.80 / a.watts, 1/3) : null;
+    const digits = [
+      {label:'Time', val: fmtErgTime(a.dur != null ? a.dur * 60 : null)},
+      {label:'Meters', val: meters ? Math.round(meters).toLocaleString() : '—'},
+      {label:'/500m', val: fmtErgSplit(splitSec)},
+      {label:'S/M', val: a.cadence ? a.cadence.toFixed(0) : '—'},
+    ];
+    document.getElementById('pm5-digits').innerHTML = digits.map(d =>
+      `<div class="pm5-digit"><div class="pm5-label">${d.label}</div><div class="pm5-value">${d.val}</div></div>`
+    ).join('');
+    pm5.style.display = '';
+    srcEl.textContent = 'via ErgData';
+    expandBtn.style.display = 'none';
+
+    if(SERVER_MODE || GITHUB_MODE){
+      editBtn.style.display = '';
+      // Seed manual entry with the auto-derived values so overriding means
+      // adjusting a sensible starting point, not retyping from scratch.
+      editBtn.onclick = () => openErgEditForm({
+        device: 'RowErg',
+        total_time_sec: a.dur != null ? a.dur * 60 : null,
+        total_meters: meters,
+        avg_split_sec: splitSec,
+        avg_spm: a.cadence,
+      });
     } else {
       editBtn.style.display = 'none';
     }
@@ -2536,24 +2576,51 @@ function openModal(id){
       x:{grid:{display:false}, ticks:{color:ac.title, font:{family:'IBM Plex Mono', size:9}, maxTicksLimit:6}, title:{display:true, text:'min', color:ac.title}},
     };
 
-    if(hasVariation(s.alt)){
-      datasets.push({
-        _key:'elev', label:'Elevation (ft)', data:s.alt, borderColor:'transparent', backgroundColor:th.textDim+'33',
-        fill:true, pointRadius:0, tension:0.3, yAxisID:'yElev', order:-1, hidden: !streamVis.elev,
-      });
-      scales.yElev = {position:'right', grid:{display:false}, ticks:{color:ac.title, font:{family:'IBM Plex Mono', size:9}}, title:{display:true, text:'ft', color:ac.title}};
-    }
-    if(hasReal(s.hr)){
-      datasets.push({_key:'hr', label:'HR (bpm)', data:s.hr, borderColor:th.amber, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'y', hidden: !streamVis.hr});
-      scales.y = {position:'left', grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}}, title:{display:true, text:'bpm', color:ac.title}};
-    }
-    if(hasVariation(s.v)){
-      datasets.push({_key:'speed', label:'Speed (mph)', data:s.v, borderColor:th.ride, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'ySpeed', hidden: !streamVis.speed});
-      scales.ySpeed = {display:false};
-    }
-    if(hasVariation(s.w)){
-      datasets.push({_key:'watts', label:'Watts', data:s.w, borderColor:th.other, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'yWatts', hidden: !streamVis.watts});
-      scales.yWatts = {display:false};
+    if(hasErgDataStream(a)){
+      // ErgData-synced row: real per-second watts+HR+stroke-rate. Split (not
+      // raw watts) is the rowing-idiomatic display, converted via the same
+      // Concept2 formula used everywhere else in this app; the split axis is
+      // reversed so a harder push reads as "up", same visual direction as
+      // the HR/rate lines, instead of dipping when you're working hardest.
+      const splitArr = s.w.map(w => (w != null && w > 0) ? +(500 * Math.pow(2.80 / w, 1/3)).toFixed(1) : null);
+      const wpbArr = s.w.map((w, i) => (w != null && s.hr[i]) ? +(w / s.hr[i]).toFixed(2) : null);
+
+      if(hasReal(s.hr)){
+        datasets.push({_key:'hr', label:'HR (bpm)', data:s.hr, borderColor:th.amber, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'y', hidden: !streamVis.hr});
+        scales.y = {position:'left', grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}}, title:{display:true, text:'bpm', color:ac.title}};
+      }
+      if(hasVariation(splitArr)){
+        datasets.push({_key:'split', label:'Split (/500m)', data:splitArr, borderColor:th.row, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'ySplit', hidden: !streamVis.split});
+        scales.ySplit = {display:false, reverse:true};
+      }
+      if(hasVariation(s.cad)){
+        datasets.push({_key:'rate', label:'Rate (s/m)', data:s.cad, borderColor:th.ride, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'yRate', hidden: !streamVis.rate});
+        scales.yRate = {display:false};
+      }
+      if(hasVariation(wpbArr)){
+        datasets.push({_key:'wpb', label:'W/Beat', data:wpbArr, borderColor:th.other, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'yWpb', hidden: !streamVis.wpb});
+        scales.yWpb = {display:false};
+      }
+    } else {
+      if(hasVariation(s.alt)){
+        datasets.push({
+          _key:'elev', label:'Elevation (ft)', data:s.alt, borderColor:'transparent', backgroundColor:th.textDim+'33',
+          fill:true, pointRadius:0, tension:0.3, yAxisID:'yElev', order:-1, hidden: !streamVis.elev,
+        });
+        scales.yElev = {position:'right', grid:{display:false}, ticks:{color:ac.title, font:{family:'IBM Plex Mono', size:9}}, title:{display:true, text:'ft', color:ac.title}};
+      }
+      if(hasReal(s.hr)){
+        datasets.push({_key:'hr', label:'HR (bpm)', data:s.hr, borderColor:th.amber, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'y', hidden: !streamVis.hr});
+        scales.y = {position:'left', grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}}, title:{display:true, text:'bpm', color:ac.title}};
+      }
+      if(hasVariation(s.v)){
+        datasets.push({_key:'speed', label:'Speed (mph)', data:s.v, borderColor:th.ride, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'ySpeed', hidden: !streamVis.speed});
+        scales.ySpeed = {display:false};
+      }
+      if(hasVariation(s.w)){
+        datasets.push({_key:'watts', label:'Watts', data:s.w, borderColor:th.other, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'yWatts', hidden: !streamVis.watts});
+        scales.yWatts = {display:false};
+      }
     }
 
     if(datasets.length){
@@ -2629,15 +2696,6 @@ function base64ToUtf8(b64){
   const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
   return new TextDecoder().decode(bytes);
 }
-function fileToBase64(file){
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 async function ghApi(path, opts){
   opts = opts || {};
   const resp = await fetch(`${GH_API}${path}`, {
@@ -2690,30 +2748,6 @@ async function ghWaitForWorkflowRun(workflowFile, sinceISO, onTick){
     if(run && run.status === 'completed') return run;
   }
   throw new Error(`Timed out waiting for the "${workflowFile}" GitHub Actions run to finish`);
-}
-
-async function ghExtractFlow(activityId, files, device, multiPiece, onProgress){
-  onProgress('Uploading photo(s)…');
-  for(const file of files){
-    const b64 = await fileToBase64(file);
-    await ghPutFile(`uploads/${activityId}/${file.name}`, b64, `Upload erg photo for activity ${activityId}`);
-  }
-
-  onProgress('Starting extraction…');
-  const dispatchedAt = new Date().toISOString();
-  await ghDispatchWorkflow('extract_erg.yml', {activity_id: activityId, device: device || '', multi_piece: !!multiPiece});
-
-  const run = await ghWaitForWorkflowRun('extract_erg.yml', dispatchedAt, r => {
-    onProgress(r ? `Extracting… (${r.status})` : 'Extracting… starting');
-  });
-  if(run.conclusion !== 'success'){
-    throw new Error(`Extraction workflow finished with status "${run.conclusion}" — check the repo's Actions tab`);
-  }
-
-  onProgress('Fetching result…');
-  const pending = await ghGetFile(`data/pending/${activityId}.json`);
-  if(!pending) throw new Error('Extraction finished but no result file was found — check the Actions tab for errors');
-  return JSON.parse(base64ToUtf8(pending.content));
 }
 
 async function ghSaveTitleFlow(activityId, title){
@@ -2876,20 +2910,12 @@ document.getElementById('strava-sync-btn').addEventListener('click', async () =>
 function resetErgUploadUI(){
   document.getElementById('erg-upload-panel').style.display = 'none';
   document.getElementById('erg-review-section').style.display = 'none';
-  document.getElementById('erg-upload-form').style.display = '';
-  document.getElementById('erg-upload-files').value = '';
-  document.getElementById('erg-upload-device').value = '';
-  document.getElementById('erg-upload-multi-piece').checked = false;
   document.getElementById('erg-review-warnings').innerHTML = '';
   document.getElementById('erg-int-table').querySelectorAll('.erg-int-row:not(.header)').forEach(r => r.remove());
   document.getElementById('erg-upload-row').style.display = (SERVER_MODE || GITHUB_MODE) ? '' : 'none';
   document.getElementById('erg-saved-msg').classList.remove('show');
 }
 
-document.getElementById('erg-upload-launcher-btn').addEventListener('click', () => {
-  document.getElementById('erg-upload-row').style.display = 'none';
-  document.getElementById('erg-upload-panel').style.display = '';
-});
 document.getElementById('erg-manual-entry-btn').addEventListener('click', () => {
   document.getElementById('erg-upload-row').style.display = 'none';
   document.getElementById('erg-upload-panel').style.display = '';
@@ -2901,7 +2927,6 @@ function openErgEditForm(ec){
   document.getElementById('erg-upload-panel').style.display = '';
   populateErgReview(ec, [], 'Edit erg data');
 }
-document.getElementById('erg-upload-cancel-btn').addEventListener('click', resetErgUploadUI);
 document.getElementById('erg-review-cancel-btn').addEventListener('click', resetErgUploadUI);
 
 function addErgIntervalRow(iv){
@@ -2942,44 +2967,8 @@ function populateErgReview(data, warnings, title){
   (data.intervals || []).forEach(iv => addErgIntervalRow(iv));
 
   document.getElementById('erg-review-section').dataset.sourceImage = data.source_image || '';
-  document.getElementById('erg-upload-form').style.display = 'none';
   document.getElementById('erg-review-section').style.display = '';
 }
-
-document.getElementById('erg-upload-extract-btn').addEventListener('click', async () => {
-  const filesInput = document.getElementById('erg-upload-files');
-  if(!filesInput.files.length){ alert('Choose at least one photo first'); return; }
-  if(!currentModalActivityId) return;
-
-  const btn = document.getElementById('erg-upload-extract-btn');
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  const device = document.getElementById('erg-upload-device').value;
-  const multiPiece = document.getElementById('erg-upload-multi-piece').checked;
-
-  try {
-    if(SERVER_MODE){
-      btn.textContent = 'Extracting…';
-      const fd = new FormData();
-      fd.append('activity_id', currentModalActivityId);
-      Array.from(filesInput.files).forEach(f => fd.append('photos', f));
-      if(device) fd.append('device', device);
-      if(multiPiece) fd.append('multi_piece', '1');
-      const resp = await fetch('/api/extract', {method:'POST', body: fd});
-      const json = await resp.json();
-      if(!resp.ok) throw new Error(json.error || 'Extraction failed');
-      populateErgReview(json.data, json.warnings || []);
-    } else if(GITHUB_MODE){
-      const json = await ghExtractFlow(currentModalActivityId, Array.from(filesInput.files), device, multiPiece, msg => { btn.textContent = msg; });
-      populateErgReview(json.data, json.warnings || []);
-    }
-  } catch(e) {
-    alert('Extraction failed: ' + e.message);
-  } finally {
-    btn.textContent = originalText;
-    btn.disabled = false;
-  }
-});
 
 document.getElementById('erg-review-save-btn').addEventListener('click', async () => {
   if(!currentModalActivityId) return;
