@@ -4465,5 +4465,22 @@
     "hr": null
    }
   ]
+ },
+ "20186995396": {
+  "device": "RowErg",
+  "intervals": [
+   {
+    "label": "2",
+    "split_sec": 115.4,
+    "spm": 24,
+    "hr": null
+   },
+   {
+    "label": "3",
+    "split_sec": 114.5,
+    "spm": 24,
+    "hr": null
+   }
+  ]
  }
 }
