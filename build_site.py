@@ -103,29 +103,75 @@ def power_hr_decoupling(rows):
 
 
 def downsample_stream(rows, n=48):
+    """Buckets the raw stream into n equal-duration time windows and averages
+    each field within a bucket, rather than picking single points by index.
+    Strava's own sample spacing is often very irregular (a real rowing stream
+    can jump from a 10s gap to a 250s gap), so index-based point-picking can
+    quietly over- or under-represent whole stretches of a workout — enough to
+    meaningfully skew a derived average (e.g. Watts/Beat) even though the
+    chart it draws looks fine. Time-bucketed averaging fixes that for every
+    consumer of this data, not just the chart."""
     if not rows:
         return None
-    L = len(rows)
-    idx = sorted(set(int(i * (L - 1) / (n - 1)) for i in range(n))) if L > n else list(range(L))
 
-    def safe(v):
+    def to_float(v):
         try:
-            return round(float(v), 1)
+            return float(v)
         except (TypeError, ValueError):
             return None
 
-    def safe_conv(v, factor):
-        try:
-            return round(float(v) * factor, 1)
-        except (TypeError, ValueError):
-            return None
+    times = [to_float(r.get("time")) for r in rows]
+    valid = [i for i, t in enumerate(times) if t is not None]
+    if not valid:
+        return None
+    t_min, t_max = times[valid[0]], times[valid[-1]]
+    span = (t_max - t_min) or 1.0
+
+    # Weight each sample by the seconds since the previous valid sample (same
+    # convention as zone_minutes) so a bucket straddling both a dense, fast-
+    # changing stretch and a long quiet gap still reflects the real time
+    # split between them, instead of treating every point in it as equal.
+    weights = [0.0] * len(rows)
+    prev_i = None
+    for i in valid:
+        if prev_i is not None:
+            dt = times[i] - times[prev_i]
+            if 0 < dt < 300:
+                weights[i] = dt
+        prev_i = i
+    if len(valid) > 1 and weights[valid[0]] == 0:
+        weights[valid[0]] = weights[valid[1]]
+
+    if len(valid) <= n:
+        buckets = [[i] for i in valid]
+    else:
+        buckets = [[] for _ in range(n)]
+        for i in valid:
+            bi = min(n - 1, int((times[i] - t_min) / span * n))
+            buckets[bi].append(i)
+        buckets = [b for b in buckets if b]
+
+    def avg_field(field, factor=1.0):
+        out = []
+        for b in buckets:
+            w_sum, vw_sum = 0.0, 0.0
+            for i in b:
+                v = to_float(rows[i].get(field))
+                if v is None:
+                    continue
+                w = weights[i] or 1.0
+                w_sum += w
+                vw_sum += v * w
+            out.append(round(vw_sum / w_sum * factor, 1) if w_sum > 0 else None)
+        return out
 
     return {
-        "t": [safe(rows[i]["time"]) for i in idx],
-        "hr": [safe(rows[i]["heartrate"]) for i in idx],
-        "alt": [safe_conv(rows[i].get("altitude"), M_TO_FT) for i in idx],  # Strava altitude is meters -> ft
-        "w": [safe(rows[i]["watts"]) for i in idx],
-        "v": [safe_conv(rows[i].get("velocity_smooth"), MPS_TO_MPH) for i in idx],  # m/s -> mph
+        "t": [round(sum(times[i] for i in b) / len(b), 1) for b in buckets],
+        "hr": avg_field("heartrate"),
+        "alt": avg_field("altitude", M_TO_FT),  # Strava altitude is meters -> ft
+        "w": avg_field("watts"),
+        "v": avg_field("velocity_smooth", MPS_TO_MPH),  # m/s -> mph
+        "cad": avg_field("cadence"),  # bike RPM or, for an ErgData-connected row, stroke rate
     }
 
 
@@ -189,9 +235,15 @@ def build_data():
         rows = load_stream(aid)
         stream_has_watts = False
         if rows:
-            entry["stream"] = downsample_stream(rows)
-            entry["zones"] = zone_minutes(rows)
             stream_has_watts = any(r.get("watts") for r in rows)
+            # ErgData-synced rowing streams are short (a few hundred points for
+            # a typical workout) and feed the Watts/Beat calculation, where
+            # even well-weighted downsampling loses real accuracy against
+            # Strava's own highly irregular sample spacing — send them at full
+            # resolution instead of the usual 48-point chart-sized downsample.
+            is_ergdata_row = m["activity_type"] == "Rowing" and stream_has_watts
+            entry["stream"] = downsample_stream(rows, n=len(rows) if is_ergdata_row else 48)
+            entry["zones"] = zone_minutes(rows)
             title = m["title"] or ""
             is_aerobic_row = m["activity_type"] == "Rowing" and AEROBIC_KW.search(title) and dur >= 20
             is_steady_ride = m["activity_type"] in ("Ride", "GravelRide") and stream_has_watts and dur >= 40
