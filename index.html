@@ -200,7 +200,7 @@
   .an-wpb-chart-box{height:130px; margin-bottom:6px; cursor:crosshair;}
   .an-wpb-instructions{font-family:var(--sans); font-size:11.5px; color:var(--amber); min-height:16px; margin-bottom:6px;}
   .an-wpb-toolbar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;}
-  .an-wpb-manual-end input{
+  .an-wpb-manual-start input, .an-wpb-manual-end input{
     width:70px; font-size:11.5px; padding:5px 6px; font-family:var(--sans);
     color:var(--text); background:var(--panel); border:1px solid var(--border); border-radius:5px;
   }
@@ -1788,6 +1788,10 @@ function wpbRenderRow(a){
   toolbar.className = 'an-wpb-toolbar';
   toolbar.innerHTML = `
     <button type="button" class="an-btn an-wpb-mark-btn">[ Mark work window</button>
+    <span class="an-wpb-manual-start" style="display:none;">
+      <input type="text" class="an-wpb-manual-start-input" placeholder="0:00">
+      <button type="button" class="an-btn an-wpb-manual-start-btn">[ Set start</button>
+    </span>
     <span class="an-wpb-manual-end" style="display:none;">
       <input type="text" class="an-wpb-manual-end-input" placeholder="10:00">
       <button type="button" class="an-btn an-wpb-manual-end-btn">] Set end</button>
@@ -1804,6 +1808,9 @@ function wpbRenderRow(a){
   const markBtn = toolbar.querySelector('.an-wpb-mark-btn');
   const cancelBtn = toolbar.querySelector('.an-wpb-cancel-btn');
   const clearBtn = toolbar.querySelector('.an-wpb-clear-btn');
+  const manualStartSpan = toolbar.querySelector('.an-wpb-manual-start');
+  const manualStartInput = toolbar.querySelector('.an-wpb-manual-start-input');
+  const manualStartBtn = toolbar.querySelector('.an-wpb-manual-start-btn');
   const manualEndSpan = toolbar.querySelector('.an-wpb-manual-end');
   const manualEndInput = toolbar.querySelector('.an-wpb-manual-end-input');
   const manualEndBtn = toolbar.querySelector('.an-wpb-manual-end-btn');
@@ -1815,7 +1822,7 @@ function wpbRenderRow(a){
   let pendingStart = null;
 
   function setInstructions(){
-    instructionsEl.textContent = pickMode === 'start' ? 'Click the chart to set the start of the work window.'
+    instructionsEl.textContent = pickMode === 'start' ? 'Click the chart to set the start — or type a time and click "Set start".'
       : pickMode === 'end' ? 'Click the chart to set the end — or type a time and click "Set end".'
       : '';
   }
@@ -1835,8 +1842,19 @@ function wpbRenderRow(a){
     pickMode = null; pendingStart = null;
     markBtn.style.display = '';
     cancelBtn.style.display = 'none';
+    manualStartSpan.style.display = 'none';
     manualEndSpan.style.display = 'none';
     setInstructions();
+  }
+  function beginEndPick(startSec){
+    pendingStart = startSec;
+    pickMode = 'end';
+    manualStartSpan.style.display = 'none';
+    manualEndSpan.style.display = '';
+    manualEndInput.value = '';
+    manualEndInput.focus();
+    setInstructions();
+    chart.update('none');
   }
   function finalizeWindow(startSec, endSec){
     const s = Math.max(0, Math.min(startSec, endSec));
@@ -1855,6 +1873,8 @@ function wpbRenderRow(a){
     pickMode = 'start'; pendingStart = null;
     markBtn.style.display = 'none';
     cancelBtn.style.display = '';
+    manualStartSpan.style.display = '';
+    manualStartInput.value = '';
     manualEndSpan.style.display = 'none';
     setInstructions();
     chart.update('none');
@@ -1868,6 +1888,13 @@ function wpbRenderRow(a){
     wpbUpdateResult(a, windows, resultEl);
     chart.update('none');
   });
+  manualStartBtn.addEventListener('click', () => {
+    if(pickMode !== 'start') return;
+    const s = parseTimeToSec(manualStartInput.value);
+    if(s == null) return;
+    beginEndPick(Math.max(0, Math.min(s, totalSec)));
+  });
+  manualStartInput.addEventListener('keydown', e => { if(e.key === 'Enter') manualStartBtn.click(); });
   manualEndBtn.addEventListener('click', () => {
     const e = parseTimeToSec(manualEndInput.value);
     if(e == null || pendingStart == null) return;
@@ -1900,13 +1927,7 @@ function wpbRenderRow(a){
         if(xVal == null) return;
         const clamped = Math.max(0, Math.min(xVal, totalSec));
         if(pickMode === 'start'){
-          pendingStart = clamped;
-          pickMode = 'end';
-          manualEndSpan.style.display = '';
-          manualEndInput.value = '';
-          manualEndInput.focus();
-          setInstructions();
-          ch.update('none');
+          beginEndPick(clamped);
         } else if(pickMode === 'end'){
           finalizeWindow(pendingStart, clamped);
         }
