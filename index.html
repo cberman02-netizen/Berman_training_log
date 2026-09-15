@@ -2631,7 +2631,16 @@ function openModal(id){
           responsive:true, maintainAspectRatio:false,
           interaction:{mode:'index', intersect:false},
           scales,
-          plugins:{legend:{display:false}}
+          plugins:{
+            legend:{display:false},
+            tooltip:{callbacks:{
+              label: item => {
+                const key = datasets[item.datasetIndex]._key;
+                if(key === 'split') return `Split (/500m): ${fmtErgSplit(item.parsed.y)}`;
+                return `${item.dataset.label}: ${item.formattedValue}`;
+              }
+            }}
+          }
         }
       });
 
