@@ -1058,7 +1058,6 @@ const STREAM_DEFS = [
   {key:'watts', label:'Watts'},
   {key:'split', label:'Split'},
   {key:'rate', label:'Rate'},
-  {key:'wpb', label:'W/Beat'},
 ];
 function loadStreamVis(){
   try {
@@ -1069,7 +1068,7 @@ function loadStreamVis(){
 function saveStreamVis(v){
   try { localStorage.setItem(STREAM_VIS_KEY, JSON.stringify(v)); } catch(e){ /* storage unavailable */ }
 }
-let streamVis = Object.assign({elev:true, hr:true, speed:true, watts:true, split:true, rate:true, wpb:true}, loadStreamVis());
+let streamVis = Object.assign({elev:true, hr:true, speed:true, watts:true, split:true, rate:true}, loadStreamVis());
 
 
 function renderCountdown(){
@@ -2583,7 +2582,6 @@ function openModal(id){
       // reversed so a harder push reads as "up", same visual direction as
       // the HR/rate lines, instead of dipping when you're working hardest.
       const splitArr = s.w.map(w => (w != null && w > 0) ? +(500 * Math.pow(2.80 / w, 1/3)).toFixed(1) : null);
-      const wpbArr = s.w.map((w, i) => (w != null && s.hr[i]) ? +(w / s.hr[i]).toFixed(2) : null);
 
       if(hasReal(s.hr)){
         datasets.push({_key:'hr', label:'HR (bpm)', data:s.hr, borderColor:th.amber, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'y', hidden: !streamVis.hr});
@@ -2596,10 +2594,6 @@ function openModal(id){
       if(hasVariation(s.cad)){
         datasets.push({_key:'rate', label:'Rate (s/m)', data:s.cad, borderColor:th.ride, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'yRate', hidden: !streamVis.rate});
         scales.yRate = {display:false};
-      }
-      if(hasVariation(wpbArr)){
-        datasets.push({_key:'wpb', label:'W/Beat', data:wpbArr, borderColor:th.other, pointRadius:0, tension:0.3, borderWidth:1.5, yAxisID:'yWpb', hidden: !streamVis.wpb});
-        scales.yWpb = {display:false};
       }
     } else {
       if(hasVariation(s.alt)){
