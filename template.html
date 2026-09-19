@@ -2765,7 +2765,7 @@ async function ghWaitForWorkflowRun(workflowFile, sinceISO, onTick){
     await new Promise(r => setTimeout(r, 4000));
     let run = null;
     try {
-      const data = await ghApi(`/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${workflowFile}/runs?per_page=5`);
+      const data = await ghApi(`/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${workflowFile}/runs?per_page=5`, {cache: 'no-store'});
       run = data.workflow_runs.find(r => new Date(r.created_at) >= new Date(sinceISO)) || null;
     } catch(e) { /* transient — keep polling */ }
     if(onTick) onTick(run);
@@ -2827,7 +2827,30 @@ async function ghSaveFlow(activityId, entry){
   } catch(e) { /* best-effort cleanup */ }
 }
 
+async function ghGetMainSha(){
+  // no-store: GitHub's API answers GETs with max-age=60, and this gets polled right after a push.
+  const data = await ghApi(`/repos/${GH_OWNER}/${GH_REPO}/commits/main`, {cache: 'no-store'});
+  return data.sha;
+}
+// A rebuild workflow finishing only means index.html was committed — GitHub Pages
+// then runs its own, separate deploy (~45s more). Reloading before it lands serves
+// the previous site, which is why a sync used to need a second click to "show up".
+async function ghWaitForPagesDeploy(sha, onTick){
+  for(let i = 0; i < 50; i++){
+    let build = null;
+    try { build = await ghApi(`/repos/${GH_OWNER}/${GH_REPO}/pages/builds/latest`, {cache: 'no-store'}); }
+    catch(e) { /* transient — keep polling */ }
+    if(onTick) onTick(build);
+    if(build && build.commit === sha && build.status === 'built') return true;
+    await new Promise(r => setTimeout(r, 3000));
+  }
+  return false;
+}
+
+// Resolves true if the sync brought in new data and the rebuilt site is now live,
+// false if there was nothing new to pull.
 async function ghSyncStravaFlow(onStatus){
+  const shaBefore = await ghGetMainSha();
   const dispatchedAt = new Date().toISOString();
   await ghDispatchWorkflow('sync_strava.yml', {});
   onStatus('Syncing on GitHub Actions…');
@@ -2837,13 +2860,22 @@ async function ghSyncStravaFlow(onStatus){
   if(syncRun.conclusion !== 'success'){
     throw new Error(`Sync workflow finished with status "${syncRun.conclusion}" — check the repo's Actions tab`);
   }
+
+  // The workflow only commits (and then dispatches a rebuild) when it found something
+  // new, so an unchanged main means there's nothing to wait for.
+  if(await ghGetMainSha() === shaBefore) return false;
+
   onStatus('Rebuilding site…');
   try {
     await ghWaitForWorkflowRun('rebuild_site.yml', dispatchedAt, r => {
       onStatus(r ? `Rebuilding… (${r.status})` : 'Rebuilding…');
     });
-  } catch(e) { /* best-effort — reload regardless */ }
-  onStatus('Done — reloading…');
+  } catch(e) { /* best-effort — still wait on whatever ended up on main */ }
+
+  const liveSha = await ghGetMainSha();
+  onStatus('Deploying site…');
+  await ghWaitForPagesDeploy(liveSha);
+  return true;
 }
 
 function updateActionVisibility(){
@@ -2920,8 +2952,17 @@ document.getElementById('strava-sync-btn').addEventListener('click', async () =>
     }
   } else if(GITHUB_MODE){
     try {
-      await ghSyncStravaFlow(msg => { status.textContent = msg; });
-      setTimeout(() => location.reload(), 800);
+      const changed = await ghSyncStravaFlow(msg => { status.textContent = msg; });
+      if(changed){
+        status.textContent = 'Done — reloading…';
+        // Pages reports "built" a beat before the CDN serves the new page everywhere.
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        btn.textContent = 'Sync Strava';
+        btn.disabled = false;
+        status.textContent = 'Up to date';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      }
     } catch(e) {
       btn.textContent = 'Sync Strava';
       btn.disabled = false;

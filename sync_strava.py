@@ -1,6 +1,7 @@
 """
-Pulls any new Strava activities (since the most recent one already in the
-master CSV), appends them, and pulls their time-series streams — the
+Pulls any Strava activities not yet in the master CSV (looking back
+LOOKBACK_DAYS before the newest saved one, to catch late uploads), appends
+them, and pulls their time-series streams — the
 on-demand, single-click counterpart to update.yml's daily rebuild.
 
 Credentials come from training-log/.env (STRAVA_CLIENT_ID,
@@ -21,7 +22,7 @@ import csv
 import os
 import statistics
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 
@@ -32,6 +33,7 @@ REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 ENV_PATH = os.path.join(REPO_ROOT, ".env")
 
 MAX_NEW_PER_SYNC = 25  # safety cap so one click can't turn into a huge, slow backfill
+LOOKBACK_DAYS = 30  # how far behind the newest saved activity to look for late uploads
 API_BASE = "https://www.strava.com/api/v3"
 TOKEN_URL = "https://www.strava.com/oauth/token"
 
@@ -181,10 +183,15 @@ def sync_new_activities():
     if "start_date_local" not in fieldnames:
         fieldnames = list(fieldnames) + ["start_date_local"]
 
+    # Strava's `after` filters on an activity's START time, not when it was
+    # uploaded — so an activity a watch syncs days late has an older start than
+    # ones already saved and would never be fetched if we only looked past the
+    # latest one. Look back a fixed window instead; known_ids keeps this cheap
+    # (only genuinely new activities cost a detail + streams request).
     after_epoch = 0
     if existing_rows:
         latest = max(datetime.fromisoformat(r["start_date"]) for r in existing_rows)
-        after_epoch = int(latest.timestamp())
+        after_epoch = int((latest - timedelta(days=LOOKBACK_DAYS)).timestamp())
 
     all_new_ids = get_new_activity_ids(access_token, after_epoch, known_ids)
     capped = len(all_new_ids) > MAX_NEW_PER_SYNC
