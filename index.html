@@ -345,6 +345,16 @@
   }
   .m-title-input:focus{outline:none; border-color:var(--amber);}
   .modal .modal-meta{font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-bottom:10px;}
+  .m-type-row{
+    display:flex; align-items:center; gap:8px; margin-bottom:10px;
+    font-family:var(--sans); font-size:12.5px; color:var(--text-dim);
+  }
+  .m-type-row select{
+    font-family:var(--sans); font-size:12.5px; color:var(--text); background:var(--panel-alt);
+    border:1px solid var(--border); border-radius:6px; padding:3px 8px; cursor:pointer;
+  }
+  .m-type-row select:focus{outline:none; border-color:var(--amber);}
+  .m-type-row select:disabled{cursor:default; opacity:0.6;}
   .m-commute-row{
     display:flex; align-items:center; gap:7px; margin-bottom:16px; cursor:pointer;
     font-family:var(--sans); font-size:12.5px; color:var(--text-dim);
@@ -751,6 +761,11 @@
       </span>
     </div>
     <div class="modal-meta" id="m-meta"></div>
+    <div class="m-type-row" id="m-type-row" style="display:none;">
+      <span>Sport</span>
+      <select id="m-type-select"></select>
+      <span class="m-commute-saved" id="m-type-saved">Saved</span>
+    </div>
     <label class="m-commute-row" id="m-commute-row">
       <input type="checkbox" id="m-commute-checkbox">
       <span>Commute (excluded from "training hours" stats)</span>
@@ -1540,11 +1555,14 @@ anRenderSavedList();
 function anPopulateTypes(){
   const types = [...new Set(DATA.activities.map(a=>a.type))].sort();
   const sel = document.getElementById('an-type');
+  const keep = sel.value;
+  while(sel.options.length > 1) sel.remove(1);   // keep the leading "All types"
   types.forEach(t => {
     const opt = document.createElement('option');
     opt.value = t; opt.textContent = t;
     sel.appendChild(opt);
   });
+  sel.value = keep;
 }
 
 function anFilterActivities(){
@@ -2412,6 +2430,51 @@ function openModal(id){
   resetErgUploadUI();
   document.getElementById('m-meta').textContent = `${a.date} · ${fmtTimeOfDay(a.ts)} (EST) · ${a.type}${a.gear? ' · '+a.gear : ''}`;
 
+  // Sport: Strava's own type unless overridden here. Saves on change, like the commute box.
+  const typeRow = document.getElementById('m-type-row');
+  const typeSelect = document.getElementById('m-type-select');
+  const typeSavedEl = document.getElementById('m-type-saved');
+  const stravaType = a.origType || a.type;
+  typeRow.style.display = (SERVER_MODE || GITHUB_MODE) ? '' : 'none';
+  typeSavedEl.classList.remove('show');
+  const knownTypes = ['Rowing','Ride','VirtualRide','GravelRide','Run','TrailRun','WeightTraining','Workout','Yoga','NordicSki','Walk','Hike','Swim'];
+  const typeChoices = [...new Set([...knownTypes, ...DATA.activities.map(x => x.type), a.type, stravaType])];
+  typeSelect.innerHTML = typeChoices.map(t => `<option value="${t}">${t}${t === stravaType && t !== a.type ? ' (Strava\u2019s)' : ''}</option>`).join('');
+  typeSelect.value = a.type;
+  typeSelect.onchange = async () => {
+    const newType = typeSelect.value;
+    typeSelect.disabled = true;
+    try {
+      // Only store a difference from Strava's type; picking it again just clears the override.
+      const override = newType === stravaType ? null : newType;
+      if(SERVER_MODE){
+        const resp = await fetch('/api/save-type', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({activity_id: id, type: override}),
+        });
+        const json = await resp.json();
+        if(!resp.ok) throw new Error(json.error || 'Save failed');
+      } else if(GITHUB_MODE){
+        await ghSaveTypeFlow(id, override);
+      }
+      if(override) a.origType = stravaType; else delete a.origType;
+      a.type = newType;
+      anPopulateTypes();
+      renderCalendar();
+      renderVolumeChart();
+      // Chart lines, the erg readout and the header all depend on sport, so rebuild the popup.
+      openModal(id);
+      const saved = document.getElementById('m-type-saved');
+      saved.classList.add('show');
+      setTimeout(() => saved.classList.remove('show'), 2000);
+    } catch(e) {
+      typeSelect.value = a.type;
+      alert('Failed to save: ' + e.message);
+    } finally {
+      typeSelect.disabled = false;
+    }
+  };
+
   const commuteCheckbox = document.getElementById('m-commute-checkbox');
   const commuteSavedEl = document.getElementById('m-commute-saved');
   commuteCheckbox.checked = !!a.isCommute;
@@ -2789,6 +2852,19 @@ async function ghSaveTitleFlow(activityId, title){
     'data/title_overrides.json',
     utf8ToBase64(JSON.stringify(overrides, null, 1)),
     `Rename activity ${activityId}`,
+    current ? current.sha : undefined,
+  );
+}
+
+async function ghSaveTypeFlow(activityId, sport){
+  const current = await ghGetFile('data/type_overrides.json');
+  const overrides = current ? JSON.parse(base64ToUtf8(current.content)) : {};
+  if(sport) overrides[activityId] = sport;
+  else delete overrides[activityId];
+  await ghPutFile(
+    'data/type_overrides.json',
+    utf8ToBase64(JSON.stringify(overrides, null, 1)),
+    sport ? `Set activity ${activityId} sport to ${sport}` : `Restore Strava's sport for activity ${activityId}`,
     current ? current.sha : undefined,
   );
 }
