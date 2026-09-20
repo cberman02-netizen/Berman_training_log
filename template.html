@@ -994,11 +994,16 @@ function ymd(y,m,d){
 }
 
 const actsByDate = {};
-const trainingDates = new Set();
 DATA.activities.forEach(a => {
   (actsByDate[a.date] = actsByDate[a.date] || []).push(a);
-  if(!a.isCommute) trainingDates.add(a.date);
 });
+// Derived on demand, not cached at load: toggling a commute flag in a ride's popup
+// has to move the rest-day boundary right away, not after the next page reload.
+function trainingDateSet(){
+  const s = new Set();
+  DATA.activities.forEach(a => { if(!a.isCommute) s.add(a.date); });
+  return s;
+}
 const lastActDate = new Date(DATA.activities[DATA.activities.length-1].ts);
 const lastActDateOnly = new Date(lastActDate.getFullYear(), lastActDate.getMonth(), lastActDate.getDate());
 
@@ -1120,6 +1125,7 @@ function windowRange(id){
     // A day counts as a rest day if it has no training activity — a day whose
     // only activity is flagged as a commute still counts as rest, regardless
     // of the "Count commuting time" stats toggle.
+    const trainingDates = trainingDateSet();
     let d = new Date(end);
     d.setDate(d.getDate()-1);
     let guard = 0;
@@ -2428,6 +2434,7 @@ function openModal(id){
       a.isCommute = newVal;
       renderStats();
       renderVolumeChart();
+      renderZonesChart();
       commuteSavedEl.classList.add('show');
       setTimeout(() => commuteSavedEl.classList.remove('show'), 2000);
     } catch(e) {
