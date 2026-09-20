@@ -6,6 +6,7 @@ id,title,description,activity_type,start_date,duration_moving_min,duration_elaps
 15321542553,Ride w/ Zeke and Isaac,Had to hurry back for lunch. Good cap on a good week,Ride,2025-08-02 11:31:38+00:00,231.5,311.1,60.26,1956,146.7,17.5,184,121.7,,,,,15.62,31.61,,2329,165,Garmin Forerunner 245,Not Available,2025-08-02 07:31:38
 15340629769,1x SS,First time rowing in ages,Rowing,2025-08-04 11:22:09+00:00,70.6,74.1,7.06,424.9,128.3,15.8,152,,,,,,6,8.57,35.4,838,20,Garmin Forerunner 245,Not Available,2025-08-04 07:22:09
 15354112142,Morning Workout,,Workout,2025-08-04 14:30:45+00:00,51.7,95.4,2.2,44.3,98.2,10.1,129,,,,,,2.55,7.22,53.4,447,6,Garmin Forerunner 245,Not Available,2025-08-04 10:30:45
+15346395208,Touring the area,W/ Livia!,Ride,2025-08-04 20:52:21+00:00,106.5,110.1,23.32,603.7,,,,91.2,,,,,13.14,33.42,,650.0,,Wahoo ELEMNT BOLT,Not Available,2025-08-04 16:52:21
 15354145730,4x8’/6’r,Low rate. Not very fast but I feel like I’m rowing decently,Rowing,2025-08-05 11:31:12+00:00,78.9,100.2,7.55,282.8,112.8,14.8,150,,,,,,5.74,9.89,53.4,606,14,Garmin Forerunner 245,Not Available,2025-08-05 07:31:12
 15357655784,Afternoon Ride w/ Livia,This area is not as nice as I hoped for biking.,Ride,2025-08-05 17:52:49+00:00,102,153.2,22.54,481,130.1,11.3,155,74.4,,,,,13.25,23.31,,812,26,Garmin Forerunner 245,Not Available,2025-08-05 13:52:49
 15390656237,"Drills, SS, some intensity",Bit of a smorgasbord. Catches are better when I think about them but not muscle memory yet,Rowing,2025-08-06 11:38:07+00:00,82.5,101,6.48,254.9,115.9,11.3,144,,,,,,4.71,10.81,60.3,802,14,Garmin Forerunner 245,Not Available,2025-08-06 07:38:07
@@ -28,6 +29,7 @@ id,title,description,activity_type,start_date,duration_moving_min,duration_elaps
 15610878988,Morning Ride,Mott’s really needs to step up its game. Way behind Welch in the chew department,Ride,2025-08-27 10:46:41+00:00,137.4,138.9,33.88,2508.5,144.1,11.5,168,143.9,,,,,14.79,44.92,,1254,75,Garmin Forerunner 245,Not Available,2025-08-27 06:46:41
 15616971294,40’ Pyramid (8’@18->22->18),Debut of the CC HPG,Rowing,2025-08-28 13:00:53+00:00,57.9,57.9,0,0,166.9,31.4,194,,,,206.1326153,119.3,0,0,19.6,834,111,Garmin Forerunner 245,Not Available,2025-08-28 09:00:53
 15626079882,Morning Ride,"If I’m going to get up in time for the sunrise, I should really stop starting my rides to the west",Ride,2025-08-29 10:23:30+00:00,124.7,129.9,33.29,1895.7,148.7,9.9,174,146.1,,,,,16.01,39.15,,1266,87,Garmin Forerunner 245,Not Available,2025-08-29 06:23:30
+15678085619,A Livia Birthday Ride!,"Since I don’t have Instagram, gotta get something out there",Ride,2025-08-30 14:33:26+00:00,132.9,176.6,26.28,2962.6,,,,142.5,,,,,11.87,30.24,,1267.0,,Wahoo ELEMNT BOLT,Not Available,2025-08-30 10:33:26
 15672145835,Afternoon Run,,Run,2025-09-01 21:50:58+00:00,37.3,38.5,3.36,63.6,132.1,17.6,159,,,,,,5.4,8.01,74.7,444,10,Garmin Forerunner 245,Nike Pegasus,2025-09-01 17:50:58
 15672169338,2x30’,,Rowing,2025-09-02 13:24:49+00:00,62.1,62.1,0,0,155.9,13.6,170,,,,167.2847728,127.9,0,0,18.9,775,70,Garmin Forerunner 245,Not Available,2025-09-02 09:24:49
 15695258839,2x20',Ran out of time but 4am wakeup yesterday made me not unhappy to stop,Rowing,2025-09-03 13:07:30+00:00,42.1,42.1,0,0,158.8,14.3,170,,,,165.7250181,128.3,0,0,18.3,597,55,Garmin Forerunner 245,Not Available,2025-09-03 09:07:30
@@ -64,25 +66,51 @@ id,title,description,activity_type,start_date,duration_moving_min,duration_elaps
 16165701061,10k UT1.5(?),Realizing that there’s several hours between the end of work and bedtime being underutilized,Rowing,2025-10-16 22:15:15+00:00,41.3,41.3,0,0,153.5,17.7,170,,,,184.9093813,123.7,0,0,20.1,577,44,Garmin Forerunner 245,Not Available,2025-10-16 18:15:15
 16174029937,Viva BGBC,Way better than I could’ve reasonably expected,Rowing,2025-10-17 17:58:53+00:00,68.8,78.2,7.64,20.7,120.4,24.3,173,,,,,,6.67,11.31,51.1,584,20,Garmin Forerunner 245,Not Available,2025-10-17 13:58:53
 16244291700,HOCR Alum 8,Great time. Wonder what’s in the tank for next year,Rowing,2025-10-18 14:21:25+00:00,76,130.1,8.5,30.8,70.3,18.3,117,,,,,,6.71,11.59,59.3,336,4,Garmin Forerunner 245,Not Available,2025-10-18 10:21:25
+16215680266,Afternoon Ride,Absolutely beautiful fall day,Ride,2025-10-21 19:18:45+00:00,122.3,123.2,31.17,2772.3,,,,167.3,,,,,15.29,41.16,,1487.0,,COROS DURA,Not Available,2025-10-21 15:18:45
 16244300980,3x20’ UT2,,Rowing,2025-10-23 20:08:26+00:00,64.1,64.1,0,0,151.2,13.3,166,,,,,,0,0,19.9,819,55,Garmin Forerunner 245,Not Available,2025-10-23 16:08:26
 16244304071,3x12’/6’r r22,Lots of fun!,Rowing,2025-10-24 17:22:03+00:00,63.3,63.3,0,0,158.8,28.4,197,,,,253.8531468,111.3,0,0,21.7,814,91,Garmin Forerunner 245,Not Available,2025-10-24 13:22:03
+16274793550,Squats/Bench 1.1,Crazy hypoglycemic lift. Getting back on the horse,WeightTraining,2025-10-27 18:15:55+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-10-27 14:15:55
+16276559997,60’ Z2,Finally got the trainer set up,Ride,2025-10-27 22:45:32+00:00,60.0,60.0,15.76,0.0,,,,184.0,184,281,,,15.75,20.36,84.7,722.0,,COROS DURA,Not Available,2025-10-27 18:45:32
 16283528583,Morning Run,"Spent the first 20’ on the arboretum jogging trails, which are very nice, if a bit hilly",TrailRun,2025-10-28 13:13:48+00:00,49.7,50.5,5.22,650.9,163.2,16.7,183,,,,,,6.29,9.21,79,746,68,Garmin Forerunner 245,Nike Pegasus,2025-10-28 09:13:48
 16285417288,3x20’,HR and splits both weirdly high,Rowing,2025-10-28 18:55:21+00:00,64.1,64.1,0,0,162.1,17.2,173,,,,171.2707415,126.9,0,0,20,931,93,Garmin Forerunner 245,Not Available,2025-10-28 14:55:21
+16293080055,Clean tech and vanity lift,Gotta see some more coach representation at the empty varsity weight room slots,WeightTraining,2025-10-29 14:05:00+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-10-29 10:05:00
 16296207683,45’,,Rowing,2025-10-29 20:05:32+00:00,45,45,0,0,159.6,17.6,169,,,,174.9671062,126,0,0,20.1,668,61,Garmin Forerunner 245,Not Available,2025-10-29 16:05:32
 16305665582,3x12’/6’r r22,Came in pretty flat but surprised myself on the effort. 0.5 faster than last week,Rowing,2025-10-30 15:51:47+00:00,62.1,62.1,0,0,164.9,26.3,201,,,,257.3053185,110.8,0,0,21.8,863,105,Garmin Forerunner 245,Not Available,2025-10-30 11:51:47
+16316010456,Cleans and Deadlifts,,WeightTraining,2025-10-31 20:05:00+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-10-31 16:05:00
+16315992524,60’ Z2,Keeping RPE low. Turns out all you need post lift is a fairlife shake and two bags of Mott’s,Ride,2025-10-31 22:05:23+00:00,60.0,60.0,15.79,0.0,,,,184.3,185,290,,,15.78,22.59,84.3,724.0,,COROS DURA,Not Available,2025-10-31 18:05:23
 16342740441,Cambridge 13.1 w/ Livia,Very fun run with Livia but my joints are definitely feeling it. Also things got super gritty in the cafe bathroom post run.,Run,2025-11-02 12:25:11+00:00,141.9,144.1,13.22,135.8,146.4,8.9,168,,,,,,5.59,9.22,78,1769,63,Garmin Forerunner 245,Nike Pegasus,2025-11-02 07:25:11
+16354969951,Squats/Bench,Joints still feel pretty terrible but I think the squats might've helped a bit. Hopefully an easy bike later will get everything right,WeightTraining,2025-11-04 15:15:00+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-11-04 10:15:00
 16375491474,60’ Z2,Just getting in some work before Zamboni lessons,Ride,2025-11-04 22:21:21+00:00,60.1,60.1,0,0,152.7,14.4,165,,,,,,0,0,,788,55,Garmin Forerunner 245,Not Available,2025-11-04 17:21:21
+16357801095,60’ Z2,Gotta leave my windows open before I leave for work. Makes for a much more enjoyable bike when the room is cold,Ride,2025-11-04 22:21:22+00:00,60.0,60.0,15.7,0.0,,,,184.3,184,345,,,15.69,19.69,84.0,724.0,,COROS DURA,Not Available,2025-11-04 17:21:22
 16375491445,Lunch Row,,Rowing,2025-11-05 16:10:08+00:00,46.9,46.9,0,0,153.7,15.2,169,,,,174.5511782,126.1,0,0,20.1,640,47,Garmin Forerunner 245,Not Available,2025-11-05 11:10:08
 16379486840,Evening Ride,Padding the stats,Ride,2025-11-06 23:39:15+00:00,60.1,60.1,0,0,143,15.2,155,,,,,,0,0,,670,35,Garmin Forerunner 245,Not Available,2025-11-06 18:39:15
 16387454988,3x12’/6’r r22,,Rowing,2025-11-07 17:09:13+00:00,82,82,0,0,154.7,26.2,199,,,,255.9169835,111,0,0,21.4,997,99,Garmin Forerunner 245,Not Available,2025-11-07 12:09:13
+16426464628,Squats/Bench,Think the emphasis on explosive squats is paying off. Top set of 10@290,WeightTraining,2025-11-10 16:25:58+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-11-10 11:25:58
 16426151847,3x20’ steady,RPE pretty low so I’ll take it,Rowing,2025-11-10 19:37:12+00:00,64,64,0,0,157.5,17.3,169,,,,175.3843567,125.9,0,0,20.1,885,79,Garmin Forerunner 245,Not Available,2025-11-10 14:37:12
 16426184771,3x12’/6’r r22,,Rowing,2025-11-11 14:06:29+00:00,61.8,61.8,0,0,166.3,26.5,200,,,,259.4067128,110.5,0,0,21.9,857,111,Garmin Forerunner 245,Not Available,2025-11-11 09:06:29
 16430441817,70’ Z2,,Ride,2025-11-11 22:03:32+00:00,70,70,0,0,149.3,9.7,164,,,,,,0,0,,840,54,Garmin Forerunner 245,Not Available,2025-11-11 17:03:32
+16441128313,Cleans/Deadlifts,"Cleans: 5@145,3@165,1@185
+Deadlifts: 5@260,3@295,3@330
+GHR: 3x5@BW
+GHR sit-ups: 3x15@12.5",WeightTraining,2025-11-12 14:05:00+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-11-12 09:05:00
 16441160035,60’ Z2,,Ride,2025-11-12 23:27:24+00:00,60,60,0,0,145,16.8,157,,,,,,0,0,,701,40,Garmin Forerunner 245,Not Available,2025-11-12 18:27:24
 16446033185,40’,C? UT1? AT? Who knows,Rowing,2025-11-13 13:21:19+00:00,47.1,47.1,0,0,172.2,28.6,203,,,,225.3940079,115.8,0,0,24.5,747,109,Garmin Forerunner 245,Not Available,2025-11-13 08:21:19
+16508589012,Clean tech/hypertrophy,"Pin cleans: 3x3@95
+3 position cleans: 3x3@95
+Cleans: 3@95,2x3@135
+Incline DB/Pullups: 4x10@50/10@bw
+DB overhead/db curls; 4x10@35/10@25
+Ab wheel: 3x14",WeightTraining,2025-11-13 18:05:05+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-11-13 13:05:05
 16458945334,"4x6’/4’r (2’@24,26,28)",Felt pretty good to rip it. Perks of being large,Rowing,2025-11-14 18:50:03+00:00,71.1,71.1,0,0,145.2,26.4,200,,,,291.3857109,106.3,0,0,24.2,787,65,Garmin Forerunner 245,Not Available,2025-11-14 13:50:03
+16508558893,Squats/Bench,"Squats: 5x5@220, 1@250, 10@270
+Bench/DB row: 5@155/12@80,5@175/12@80,10@200/12@80
+Ab wheel: 3x15",WeightTraining,2025-11-17 19:20:14+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-11-17 14:20:14
 16489742441,2x40’ Z2,Finally got my hr strap working,Ride,2025-11-17 22:15:43+00:00,82,82,21.43,0,146.9,5.8,160,185.9,189,317,,,15.68,20.13,85.9,997,57,COROS DURA,Not Available,2025-11-17 17:15:43
 16495656004,3x20’,6 eggs and a smoothie is entirely too much before steady,Rowing,2025-11-18 14:13:04+00:00,64,64,0,0,158.3,14.3,169,,,,,,0,0,20.3,829,89,Garmin Forerunner 245,Not Available,2025-11-18 09:13:04
+16508541781,Cleans/DL,"Cleans: 3@125,3@145,3@165
+DL: 5@230,5@265,5@300
+GHR: 1x5, 2x3 (eccentric)
+GHD sit-ups: 3x10@20",WeightTraining,2025-11-18 18:00:36+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2025-11-18 13:00:36
 16506416914,"5x10’/3’r (20,22,22,24,26)",Think the beet root powder is giving me crazy indigestion,Rowing,2025-11-19 14:23:52+00:00,84.2,84.2,0,0,158.6,33.1,197,,,,240.6458158,113.3,0,0,22.4,1057,134,Garmin Forerunner 245,Not Available,2025-11-19 09:23:52
 16517431492,"3x24’ (6’@20,6’@22)",,Rowing,2025-11-20 17:16:07+00:00,77.1,77.1,0,0,155.5,16,169,,,,186.7148304,123.3,0,0,21,940,95,Garmin Forerunner 245,Not Available,2025-11-20 12:16:07
 16526531797,1x SS,W/ Isaac Berman,Rowing,2025-11-21 15:09:04+00:00,78.8,82.6,8.92,0,156.5,17.7,176,,,,,,6.79,8.8,57,897,100,Garmin Forerunner 245,Not Available,2025-11-21 10:09:04
@@ -91,6 +119,7 @@ id,title,description,activity_type,start_date,duration_moving_min,duration_elaps
 16565957471,6x10’/3’r (20/22/22/24/24/26),"Usually when my HR stays this low, it means my HR monitor is broken",Rowing,2025-11-25 19:05:35+00:00,84.7,84.7,0,0,163.1,23.8,195,,,,251.8114423,111.6,0,0,22.6,1133,138,Garmin Forerunner 245,Not Available,2025-11-25 14:05:35
 16578140034,3x24’,"First two 6’@20/22, last one 4’@20/22/24. Gotta eat more if I’m gonna erg this soon after lifting",Rowing,2025-11-26 18:38:39+00:00,77.1,77.1,0,0,159.6,16.8,173,,,,200.5342618,120.4,0,0,21.4,1078,111,Garmin Forerunner 245,Not Available,2025-11-26 13:38:39
 16584132188,40’ MI,Legs were pretty cooked but got it done. Onto the feast!,Rowing,2025-11-27 16:07:12+00:00,49.2,49.2,0,0,167.7,24.9,188,,,,245.8161866,112.5,0,0,24.5,767,98,Garmin Forerunner 245,Not Available,2025-11-27 11:07:12
+16615420623,60' Z2,Needed to get something in after I self sabotaged my training Fri and Sat but was really hoping to get started a bit earlier,VirtualRide,2025-12-01 00:53:28+00:00,60.5,60.5,16.95,0.0,,,,203.8,204,319,,,16.82,32.17,81.0,705.0,,Zwift,Not Available,2025-11-30 19:53:28
 16623447890,70' Z2 (1/2),Zwift died 45’ in so had to switch over to my bike computer,VirtualRide,2025-12-01 22:11:18+00:00,47.1,75.7,14.18,984.3,148.7,18,163,188.3,190,340,,,18.05,32.21,81,507,44,Zwift,Not Available,2025-12-01 17:11:18
 16623440398,70’ Z2 (2/2),,Ride,2025-12-01 22:58:18+00:00,25,25,6.76,0,155.9,5.2,163,194,193,307,,,16.2,22.37,81.7,318,31,COROS DURA,Not Available,2025-12-01 17:58:18
 16629061852,6x10’/4’r (22/22/24/24/26/26+),I am not a morning person,Rowing,2025-12-02 13:15:49+00:00,93.1,93.1,0,0,167.8,23.4,196,,,,254.5386185,111.2,0,0,,0,187,Strava App,Not Available,2025-12-02 08:15:49
@@ -102,6 +131,7 @@ id,title,description,activity_type,start_date,duration_moving_min,duration_elaps
 16697612783,6x10’/4’r,"22,24,24,24,26,28
 
 Gritty. Sorta glad I won’t have to do 6x10 ever again",Rowing,2025-12-09 19:16:50+00:00,92.5,92.5,0,0,166.6,29.4,198,,,,260.8203702,110.3,0,0,,0,189,Strava App,Not Available,2025-12-09 14:16:50
+16717468928,40’ Z2,Been sick since Tuesday night so just getting a bit of a sweat,Ride,2025-12-11 22:20:34+00:00,40.0,40.0,10.24,0.0,,,,181.7,181,275,,,15.36,19.24,82.7,475.0,,COROS DURA,Not Available,2025-12-11 17:20:34
 16724206740,50’ MI,Definitely still a little sick,Rowing,2025-12-12 17:11:17+00:00,79.8,79.8,0,0,167.6,27.8,199,,,,238.7443212,113.6,0,0,,0,165,Strava App,Not Available,2025-12-12 12:11:17
 16751998650,2x30’ UT2,Thinking podcasts are the way to go for steady,Rowing,2025-12-15 19:23:20+00:00,62.2,62.2,0,0,152.6,12.2,168,,,,175.3843567,125.9,0,0,20.1,737,65,Garmin Forerunner 245,Not Available,2025-12-15 14:23:20
 16762215988,"5x10’/4’r (24,24,26,26,28)",I’ve done too many sessions in socks. Feet are a bit tender to be erging barefoot rn,Rowing,2025-12-16 20:48:35+00:00,79.2,79.2,0,0,173.1,26.1,200,,,,262.9601803,110,0,0,24.9,1159,188,Garmin Forerunner 245,Not Available,2025-12-16 15:48:35
@@ -137,11 +167,15 @@ I’m sure throwing up between pieces sucks but getting the hiccups in between i
 17063294830,566cal TT,"38:50, 333.2w, 14.3cal/min",Workout,2026-01-15 21:18:09+00:00,39,39,0,0,185,9.6,201,333,,,,,0,0,,0,129,Strava App,Not Available,2026-01-15 16:18:09
 17153540670,Afternoon Ride,,Ride,2026-01-16 19:04:00+00:00,40.1,40.1,0,0,145.7,9.2,169,,,,,,0,0,,472,26,Garmin Forerunner 245,Not Available,2026-01-16 14:04:00
 17277942458,Evening Ride,,Ride,2026-01-20 00:40:41+00:00,84.8,84.8,20.09,0,150.1,10.4,166,161.6,167,651,,,14.22,18.34,80,896,75,COROS DURA,Not Available,2026-01-19 19:40:41
+17153575627,Evening Ride,,Ride,2026-01-20 00:40:44+00:00,84.5,84.5,0.0,0.0,150.1,11.7,166.0,,,,,,0.0,0.0,,978.0,74.0,Garmin Forerunner 245,Not Available,2026-01-19 19:40:44
 17153579742,Afternoon Ride,,Ride,2026-01-20 21:12:31+00:00,45,45,0,0,148.7,7.9,158,,,,,,0,0,,558,31,Garmin Forerunner 245,Not Available,2026-01-20 16:12:31
 17153587679,Lunch Row,,Rowing,2026-01-21 17:47:19+00:00,64.5,64.5,0,0,153.2,15,169,,,,171.2707415,126.9,0,0,20.2,796,70,Garmin Forerunner 245,Not Available,2026-01-21 12:47:19
 17277942464,Evening Ride,,Ride,2026-01-23 00:40:46+00:00,65.2,65.2,14.77,0,145.8,8.1,159,144.5,145,320,,,13.6,17.22,73.8,616,41,COROS DURA,Not Available,2026-01-22 19:40:46
+17153591210,Evening Ride,,Ride,2026-01-23 00:40:51+00:00,65.0,65.0,0.0,0.0,145.9,9.2,159.0,,,,,,0.0,0.0,,729.0,41.0,Garmin Forerunner 245,Not Available,2026-01-22 19:40:51
 17209770295,Lunch Row,,Rowing,2026-01-25 17:13:54+00:00,97.6,97.6,0,0,149.6,13.5,167,,,,173.3112771,126.4,0,0,20.3,1038,84,Garmin Forerunner 245,Not Available,2026-01-25 12:13:54
+17209775723,Evening Ride,,Ride,2026-01-27 23:19:01+00:00,72.1,72.1,0.0,0.0,140.7,12.3,165.0,,,,,,0.0,0.0,,691.0,38.0,Garmin Forerunner 245,Not Available,2026-01-27 18:19:01
 17277942459,Evening Ride,,Ride,2026-01-27 23:19:02+00:00,72,72,17.43,0,140.3,10.3,165,165.4,169,304,,,14.51,18.12,79.6,780,38,COROS DURA,Not Available,2026-01-27 18:19:02
+17212358381,Afternoon Ride,,Ride,2026-01-28 22:30:16+00:00,60.0,60.0,0.0,0.0,157.8,17.2,182.0,,,,,,0.0,0.0,,824.0,77.0,Garmin Forerunner 245,Not Available,2026-01-28 17:30:16
 17277942664,Afternoon Ride,,Ride,2026-01-28 22:30:17+00:00,60,60,16.2,0,157.7,15.1,182,203.9,210,321,,,16.19,21.7,81.7,801,77,COROS DURA,Not Available,2026-01-28 17:30:17
 17228242129,Lunch Ride,,Ride,2026-01-29 17:29:07+00:00,45,45,0,0,171.4,16.4,187,,,,,,0,0,,726,95,Garmin Forerunner 245,Not Available,2026-01-29 12:29:07
 17228246625,Morning Ride,,Ride,2026-01-30 13:44:57+00:00,45.1,45.1,0,0,153.6,7.8,160,,,,,,0,0,,589,48,Garmin Forerunner 245,Not Available,2026-01-30 08:44:57
@@ -168,6 +202,7 @@ I’m sure throwing up between pieces sucks but getting the hiccups in between i
 17546599354,Afternoon Ride,,Ride,2026-02-27 22:29:35+00:00,60,60,0,0,141.5,7.5,154,,,,,,0,0,,739,33,Garmin Forerunner 245,Not Available,2026-02-27 17:29:35
 17557811523,Afternoon Ride,,Ride,2026-02-28 19:29:57+00:00,130.7,134.8,31.32,2772.3,152.5,12.4,183,161.3,,,,,14.38,41.38,,1555,127,COROS DURA,Not Available,2026-02-28 14:29:57
 17582406592,Evening Ride,,Ride,2026-03-02 23:28:08+00:00,60.3,60.3,14.42,0,135.7,4.7,146,161.3,162,383,,,14.35,17.9,90.3,636,16,COROS DURA,Not Available,2026-03-02 18:28:08
+17623133570,Morning Ride,,Ride,2026-03-03 12:01:43+00:00,60.0,60.0,0.0,0.0,137.4,6.8,150.0,,,,,,0.0,0.0,,669.0,20.0,Garmin Forerunner 245,Not Available,2026-03-03 07:01:43
 17587562271,Morning Ride,,Ride,2026-03-03 12:01:49+00:00,59.9,59.9,14.62,0,137.4,5.6,150,165.6,167,307,,,14.64,18.57,87.1,649,19,COROS DURA,Not Available,2026-03-03 07:01:49
 17607630942,Evening Ride,,Ride,2026-03-04 23:32:58+00:00,40,40,9.83,0,134.6,7.7,146,168.1,168,269,,,14.74,18.57,93.2,440,11,COROS DURA,Not Available,2026-03-04 18:32:58
 17623148420,Afternoon Row,,Rowing,2026-03-05 21:12:02+00:00,107.5,107.5,0,0,160.2,20.1,199,,,,,,0,0,26.5,1422,154,Garmin Forerunner 245,Not Available,2026-03-05 16:12:02
@@ -185,6 +220,7 @@ I’m sure throwing up between pieces sucks but getting the hiccups in between i
 17847399917,Evening Ride,,Ride,2026-03-24 22:46:28+00:00,45,45,10.77,0,134.5,5,147,159.4,159,251,,,14.36,17,89.4,470,11,COROS DURA,Not Available,2026-03-24 18:46:28
 17860343733,Evening Ride,,Ride,2026-03-25 23:50:04+00:00,60.5,60.5,14.42,0,135.5,6.3,146,158.3,159,274,,,14.3,21.92,89.9,627,18,COROS DURA,Not Available,2026-03-25 19:50:04
 18005707546,Evening Ride,,Ride,2026-03-26 23:47:14+00:00,65.3,65.3,0,0,137.2,10.6,149,,,,,,0,0,,758,23,Garmin Forerunner 245,Not Available,2026-03-26 19:47:14
+17872096554,Evening Ride,,Ride,2026-03-26 23:47:15+00:00,65.2,65.2,14.48,0.0,,,,142.3,143,257,,,13.32,16.33,85.7,607.0,,COROS DURA,Not Available,2026-03-26 19:47:15
 18005717367,Lunch Ride,,Ride,2026-03-30 16:18:38+00:00,71,71,0,0,135.9,8.4,148,146,,,,,0,0,,790,21,Garmin Forerunner 245,Not Available,2026-03-30 12:18:38
 18005830186,Afternoon Ride,,Ride,2026-03-31 20:12:17+00:00,60.1,60.1,0,0,142.9,7.6,157,147,,,,,0,0,,771,35,Garmin Forerunner 245,Not Available,2026-03-31 16:12:17
 18005835665,Morning Ride,,Ride,2026-04-02 10:43:59+00:00,60,60,0,0,133.5,12.8,154,,,,,,0,0,,688,20,Garmin Forerunner 245,Not Available,2026-04-02 06:43:59
@@ -214,15 +250,24 @@ I’m sure throwing up between pieces sucks but getting the hiccups in between i
 18365915187,Afternoon Ride,,Ride,2026-05-03 21:33:59+00:00,73.8,75,15.21,1076.1,147.6,11.3,179,114.8,,,,,12.37,40.04,,833,56,COROS DURA,Not Available,2026-05-03 17:33:59
 18371497608,Morning Ride,,Ride,2026-05-04 11:37:22+00:00,67.4,68.9,15.2,1053.1,144.2,12.1,173,128.5,,,,,13.52,38.7,,733,42,COROS DURA,Not Available,2026-05-04 07:37:22
 18391527624,Afternoon Ride,,Ride,2026-05-05 20:52:39+00:00,68.7,69,15.2,1017.1,141.4,8.9,168,123.9,,,,,13.27,38.92,,724,33,COROS DURA,Not Available,2026-05-05 16:52:39
+18763838065,Afternoon Ride,,Ride,2026-05-05 20:55:24+00:00,66.0,66.3,14.56,882.9,141.7,8.8,168.0,113.5,,,,,13.24,37.27,,757.0,32.0,Garmin Forerunner 245,Not Available,2026-05-05 16:55:24
 18763847523,Lunch Ride,,Ride,2026-05-06 15:05:09+00:00,68.7,70.2,15.14,974.4,144.8,11.6,172,120.9,,,,,13.24,35.75,,834,42,Garmin Forerunner 245,Not Available,2026-05-06 11:05:09
+18405293121,Lunch Ride,,Ride,2026-05-06 15:05:15+00:00,68.5,70.0,15.15,1168.0,144.8,10.7,172.0,132.2,,,,,13.27,34.0,,751.0,42.0,COROS DURA,Not Available,2026-05-06 11:05:15
 18418866238,Afternoon Ride,,Ride,2026-05-07 21:52:19+00:00,66.3,66.3,15.2,1040,148.5,13.6,176,129.2,,,,,13.75,39.59,,756,56,COROS DURA,Not Available,2026-05-07 17:52:19
 18471360916,Evening Ride,,Ride,2026-05-12 00:26:26+00:00,60,60,12.96,0,138.4,4.2,151,139.4,139,145,,,12.96,17,86.2,547,22,COROS DURA,Not Available,2026-05-11 20:26:26
+18763860841,Evening Ride,,Ride,2026-05-12 00:26:27+00:00,60.6,60.6,0.0,0.0,138.3,4.5,152.0,,,,,,0.0,0.0,,687.0,22.0,Garmin Forerunner 245,Not Available,2026-05-11 20:26:27
+18769322875,Afternoon Ride,,Ride,2026-05-12 21:29:54+00:00,75.2,75.2,15.18,935.0,138.2,9.6,166.0,101.0,,,,,12.1,38.36,,797.0,30.0,Garmin Forerunner 245,Not Available,2026-05-12 17:29:54
 18483778252,Afternoon Ride,,Ride,2026-05-12 21:29:55+00:00,75.2,75.2,15.18,1010.5,138.2,9,166,107.7,,,,,12.11,39.59,,764,30,COROS DURA,Not Available,2026-05-12 17:29:55
 18769329089,Afternoon Ride,,Ride,2026-05-14 18:11:02+00:00,40.4,40.4,0,0,153.5,7.2,163,,,,,,0,0,,620,43,Garmin Forerunner 245,Not Available,2026-05-14 14:11:02
+18535381681,1st powerlifting meet- 90kg,"7/9, missed first squat and last bench. 515kg/1,133lb total. Pretty happy! Lifetime PR in squat at 175/385, fine bench at 125/275 and tied deadlift PR at 215/473. Thanks Livia for handling!",WeightTraining,2026-05-16 18:30:00+00:00,240.0,240.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2026-05-16 14:30:00
 18549541765,Evening Ride,,Ride,2026-05-17 23:19:17+00:00,60,60,13.54,0,130.1,4.4,141,145.9,146,303,,,13.53,24.16,85.8,573,13,COROS DURA,Not Available,2026-05-17 19:19:17
 18561165973,Afternoon Ride,,Ride,2026-05-18 21:48:50+00:00,77,77.7,15.17,1010.5,153.1,12.2,182,104.1,,,,,11.81,38.92,,922,79,COROS DURA,Not Available,2026-05-18 17:48:50
 18574705592,Afternoon Ride,,Ride,2026-05-19 21:45:40+00:00,60,60,14.32,0,138,4.7,150,139.4,139,192,,,14.31,18.12,88.4,547,21,COROS DURA,Not Available,2026-05-19 17:45:40
+18769341372,Afternoon Ride,,Ride,2026-05-19 21:45:43+00:00,60.0,60.0,0.0,0.0,137.9,5.8,150.0,,,,,,0.0,0.0,,665.0,20.0,Garmin Forerunner 245,Not Available,2026-05-19 17:45:43
 18602262329,Afternoon Ride,,Ride,2026-05-21 20:59:33+00:00,112.1,178,23.34,1496.1,146,12.7,175,108.6,,,,,12.49,29.08,,1245,76,COROS DURA,Not Available,2026-05-21 16:59:33
+18614569167,Connecticut College Men’s Rowing Coaching Staff Bikepacking Retreat,Minus Cian,Ride,2026-05-22 19:46:51+00:00,146.8,269.8,27.55,2424.5,,,,114.6,,,,,11.27,38.7,,1280.0,,COROS DURA,Not Available,2026-05-22 15:46:51
+18623819255,Ride Back,"Fueled by leftover pizza, coffee and a donut",Ride,2026-05-23 13:05:58+00:00,133.3,184.7,26.61,2342.5,,,,123.9,,,,,11.98,37.58,,1232.0,,COROS DURA,Not Available,2026-05-23 09:05:58
+18769341520,Evening Ride,,Ride,2026-05-25 23:12:03+00:00,51.2,51.2,0.0,0.0,133.0,5.3,145.0,,,,,,0.0,0.0,,505.0,12.0,Garmin Forerunner 245,Not Available,2026-05-25 19:12:03
 18668026389,Evening Ride,,Ride,2026-05-25 23:12:05+00:00,51.2,51.2,12.83,0,133.1,4.4,145,136.1,138,145,,,15.05,21.25,86.9,456,12,COROS DURA,Not Available,2026-05-25 19:12:05
 18668026362,Afternoon Ride,,Ride,2026-05-26 21:23:29+00:00,102.7,109.4,22.4,1460,135.6,10.7,163,116.9,,,,,13.09,30.42,,1006,37,COROS DURA,Not Available,2026-05-26 17:23:29
 18674408519,Morning Ride,,Ride,2026-05-27 11:15:52+00:00,64.9,65.4,13.87,1056.4,133.2,12.1,159,124.3,,,,,12.82,37.58,,618,22,COROS DURA,Not Available,2026-05-27 07:15:52
@@ -250,6 +295,17 @@ I’m sure throwing up between pieces sucks but getting the hiccups in between i
 19049366071,Morning Ride,"Probably closer to 1:20, with about 20' of meandering around Boston streets to get onto the trail. HRM apparently has low battery, so bear in mind when looking at HR data",Ride,2026-06-24 11:27:11+00:00,122.3,129.8,27.81,557.7,126.7,9.5,148,156.5,,,,,13.64,21.25,,1101,27,COROS DURA,SBC Gravel,2026-06-24 07:27:11
 19066070663,Afternoon Ride,1mph faster than 6/4 when I did this last. 5bpm higher on average but otherwise was pretty relaxed. Quite pleased,Ride,2026-06-25 18:46:20+00:00,84,84,19.54,1273,140.9,8,163,129.5,,,,,13.95,33.55,,932,39,COROS DURA,Not Available,2026-06-25 14:46:20
 19073292913,Morning Ride,"Same HR as 6/4, 0.6mph faster. Remember that it takes a sec to warmup on the bike",Ride,2026-06-26 11:07:37+00:00,87.7,87.7,19.66,1286.1,136.2,6.9,157,124.6,,,,,13.45,34.23,,917,28,COROS DURA,Not Available,2026-06-26 07:07:37
+19099692528,Morning Weight Training,"Just moving about
+
+Jump- 3x1@bw (hands on hips)
+Squats- 3x8@185,205,205
+Bench- 3x8@135,155,155
+Pullups- 3x8@bw
+Tricep pulldowns- 3x15@65
+Hammer curls- 3x10@25
+Back extensions- 2x20@bw
+Ab wheel- 2x15@bw
+Calf raises- 2x20@bw",WeightTraining,2026-06-27 13:10:00+00:00,60.0,60.0,0.0,0.0,,,,,,,,,0.0,0.0,,0,,Not Available,Not Available,2026-06-27 09:10:00
 19099525373,Evening Ride,"Using wrist HR. W/ Livia and Hannah. Super chill ride, just tacking on a few minutes to round out the week",Ride,2026-06-27 23:05:24+00:00,52.7,71.3,11.08,325.1,111.9,7.9,133,82.1,,,,,12.62,22.74,,380,8,Garmin Forerunner 245,Not Available,2026-06-27 19:05:24
 19110175421,Morning Row,,Rowing,2026-06-29 12:56:15+00:00,10,10,0,0,151.2,12.5,169,,,,170.8664835,127,0,0,20.1,149,9,Garmin Forerunner 245,Not Available,2026-06-29 08:56:15
 19112780563,Morning Row,Legs felt a bit heavy and it seemed like HR came up a bit faster and higher on 500s but attributing that to squatting on Saturday. Still solid execution and it felt like it went by reasonably quickly.,Rowing,2026-06-29 13:10:57+00:00,57.9,57.9,0,0,168.3,13.3,186,,,,240.0097479,113.4,0,0,26,931,110,Garmin Forerunner 245,Not Available,2026-06-29 09:10:57
