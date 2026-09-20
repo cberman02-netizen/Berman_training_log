@@ -185,6 +185,7 @@ def f(x):
 ERG_CAPTURES_PATH = os.path.join(DATA_DIR, "erg_captures.json")
 TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
 COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
+TYPE_OVERRIDES_PATH = os.path.join(DATA_DIR, "type_overrides.json")
 
 
 def build_data():
@@ -209,6 +210,11 @@ def build_data():
         with open(COMMUTE_OVERRIDES_PATH) as fh:
             commute_overrides = json.load(fh)
 
+    type_overrides = {}
+    if os.path.exists(TYPE_OVERRIDES_PATH):
+        with open(TYPE_OVERRIDES_PATH) as fh:
+            type_overrides = json.load(fh)
+
     activities = []
     for m in master:
         aid = m["id"]
@@ -219,8 +225,11 @@ def build_data():
         dt = datetime.fromisoformat(m.get("start_date_local") or m["start_date"])
         dur = f(m["duration_moving_min"]) or 0
         spd = f(m["average_speed_mph"])
+        # A hand-picked sport (see type_overrides.json) beats Strava's — and has to be
+        # what the rowing-specific checks below see too, not just what gets displayed.
+        atype = type_overrides.get(aid) or m["activity_type"]
         entry = {
-            "id": aid, "title": title_overrides.get(aid) or m["title"], "type": m["activity_type"],
+            "id": aid, "title": title_overrides.get(aid) or m["title"], "type": atype,
             "desc": m.get("description") or "",
             "isCommute": bool(commute_overrides.get(aid)),
             "date": dt.strftime("%Y-%m-%d"), "ts": dt.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -232,6 +241,9 @@ def build_data():
             "effort": f(m.get("strava_relative_effort")),
         }
 
+        if atype != m["activity_type"]:
+            entry["origType"] = m["activity_type"]
+
         rows = load_stream(aid)
         stream_has_watts = False
         if rows:
@@ -241,12 +253,12 @@ def build_data():
             # even well-weighted downsampling loses real accuracy against
             # Strava's own highly irregular sample spacing — send them at full
             # resolution instead of the usual 48-point chart-sized downsample.
-            is_ergdata_row = m["activity_type"] == "Rowing" and stream_has_watts
+            is_ergdata_row = atype == "Rowing" and stream_has_watts
             entry["stream"] = downsample_stream(rows, n=len(rows) if is_ergdata_row else 48)
             entry["zones"] = zone_minutes(rows)
             title = m["title"] or ""
-            is_aerobic_row = m["activity_type"] == "Rowing" and AEROBIC_KW.search(title) and dur >= 20
-            is_steady_ride = m["activity_type"] in ("Ride", "GravelRide") and stream_has_watts and dur >= 40
+            is_aerobic_row = atype == "Rowing" and AEROBIC_KW.search(title) and dur >= 20
+            is_steady_ride = atype in ("Ride", "GravelRide") and stream_has_watts and dur >= 40
             if is_aerobic_row:
                 d = hr_drift(rows)
                 if d is not None:

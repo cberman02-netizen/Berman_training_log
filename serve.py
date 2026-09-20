@@ -7,8 +7,8 @@ so localhost:5055 looks and behaves identically to training-log.html, with
 several added capabilities, all wired up client-side in template.html and
 only shown when /api/health succeeds (the static GitHub Pages build has no
 backend and so never shows them): entering erg data manually, a "Sync
-Strava" button, editable activity titles, and a commute checkbox per
-activity.
+Strava" button, editable activity titles, an editable sport type, and a commute
+checkbox per activity.
 
 Run:
     venv/bin/python serve.py
@@ -32,6 +32,7 @@ DATA_DIR = os.path.join(REPO_ROOT, "data")
 ERG_CAPTURES_PATH = os.path.join(DATA_DIR, "erg_captures.json")
 TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
 COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
+TYPE_OVERRIDES_PATH = os.path.join(DATA_DIR, "type_overrides.json")
 
 app = Flask(__name__)
 
@@ -72,6 +73,14 @@ def load_commute_overrides():
 
 def save_commute_overrides(overrides):
     _save_json(COMMUTE_OVERRIDES_PATH, overrides)
+
+
+def load_type_overrides():
+    return _load_json(TYPE_OVERRIDES_PATH)
+
+
+def save_type_overrides(overrides):
+    _save_json(TYPE_OVERRIDES_PATH, overrides)
 
 
 @app.route("/")
@@ -128,6 +137,24 @@ def api_save_commute():
     save_commute_overrides(overrides)
 
     return jsonify({"ok": True, "is_commute": is_commute})
+
+
+@app.route("/api/save-type", methods=["POST"])
+def api_save_type():
+    payload = request.get_json(force=True, silent=True) or {}
+    activity_id = str(payload.get("activity_id", "")).strip()
+    sport = str(payload.get("type") or "").strip()  # empty = go back to Strava's own type
+    if not activity_id:
+        return jsonify({"error": "missing activity_id"}), 400
+
+    overrides = load_type_overrides()
+    if sport:
+        overrides[activity_id] = sport
+    else:
+        overrides.pop(activity_id, None)
+    save_type_overrides(overrides)
+
+    return jsonify({"ok": True, "type": sport or None})
 
 
 @app.route("/api/save", methods=["POST"])
