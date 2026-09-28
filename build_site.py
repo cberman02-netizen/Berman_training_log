@@ -186,6 +186,9 @@ ERG_CAPTURES_PATH = os.path.join(DATA_DIR, "erg_captures.json")
 TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
 COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
 TYPE_OVERRIDES_PATH = os.path.join(DATA_DIR, "type_overrides.json")
+WEEK_CONFIG_PATH = os.path.join(DATA_DIR, "week_config.json")
+
+DEFAULT_WEEK_CONFIG = {"schedule": [{"from": "1970-01-01", "startWeekday": 1}], "overrides": {}}
 
 
 def build_data():
@@ -214,6 +217,11 @@ def build_data():
     if os.path.exists(TYPE_OVERRIDES_PATH):
         with open(TYPE_OVERRIDES_PATH) as fh:
             type_overrides = json.load(fh)
+
+    week_config = DEFAULT_WEEK_CONFIG
+    if os.path.exists(WEEK_CONFIG_PATH):
+        with open(WEEK_CONFIG_PATH) as fh:
+            week_config = json.load(fh)
 
     activities = []
     for m in master:
@@ -289,6 +297,7 @@ def build_data():
         "phases": PHASES,
         "target_event": TARGET_EVENT,
         "max_hr": MAX_HR,
+        "week_config": week_config,
     }
 
 

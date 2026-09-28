@@ -7,8 +7,8 @@ so localhost:5055 looks and behaves identically to training-log.html, with
 several added capabilities, all wired up client-side in template.html and
 only shown when /api/health succeeds (the static GitHub Pages build has no
 backend and so never shows them): entering erg data manually, a "Sync
-Strava" button, editable activity titles, an editable sport type, and a commute
-checkbox per activity.
+Strava" button, editable activity titles, an editable sport type, a commute
+checkbox per activity, and configurable training-week boundaries.
 
 Run:
     venv/bin/python serve.py
@@ -24,7 +24,7 @@ import os
 
 from flask import Flask, Response, jsonify, request
 
-from build_site import TEMPLATE_PATH, build_data
+from build_site import DEFAULT_WEEK_CONFIG, TEMPLATE_PATH, build_data
 from sync_strava import sync_new_activities
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -33,6 +33,7 @@ ERG_CAPTURES_PATH = os.path.join(DATA_DIR, "erg_captures.json")
 TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
 COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
 TYPE_OVERRIDES_PATH = os.path.join(DATA_DIR, "type_overrides.json")
+WEEK_CONFIG_PATH = os.path.join(DATA_DIR, "week_config.json")
 
 app = Flask(__name__)
 
@@ -81,6 +82,17 @@ def load_type_overrides():
 
 def save_type_overrides(overrides):
     _save_json(TYPE_OVERRIDES_PATH, overrides)
+
+
+def load_week_config():
+    if not os.path.exists(WEEK_CONFIG_PATH):
+        return DEFAULT_WEEK_CONFIG
+    with open(WEEK_CONFIG_PATH) as fh:
+        return json.load(fh)
+
+
+def save_week_config(config):
+    _save_json(WEEK_CONFIG_PATH, config)
 
 
 @app.route("/")
@@ -155,6 +167,20 @@ def api_save_type():
     save_type_overrides(overrides)
 
     return jsonify({"ok": True, "type": sport or None})
+
+
+@app.route("/api/save-week-config", methods=["POST"])
+def api_save_week_config():
+    payload = request.get_json(force=True, silent=True) or {}
+    schedule = payload.get("schedule")
+    overrides = payload.get("overrides")
+    if not isinstance(schedule, list) or not schedule or not isinstance(overrides, dict):
+        return jsonify({"error": "invalid week config"}), 400
+
+    config = {"schedule": schedule, "overrides": overrides}
+    save_week_config(config)
+
+    return jsonify({"ok": True, "week_config": config})
 
 
 @app.route("/api/save", methods=["POST"])

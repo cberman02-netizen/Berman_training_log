@@ -363,6 +363,26 @@
   .m-commute-row input:disabled{cursor:default;}
   .m-commute-saved{color:var(--amber); opacity:0; transition:opacity 0.3s; font-size:11px;}
   .m-commute-saved.show{opacity:1;}
+  .wk-section{margin-bottom:20px;}
+  .wk-section:last-child{margin-bottom:0;}
+  .wk-section-title{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-dim); margin-bottom:8px;
+  }
+  .wk-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-family:var(--mono); font-size:11.5px; color:var(--text); padding:7px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .wk-row:last-child{border-bottom:none;}
+  .wk-row-del{
+    background:none; border:none; color:var(--text-faint); cursor:pointer;
+    font-size:15px; line-height:1; padding:0 4px;
+  }
+  .wk-row-del:hover{color:#e06c6c;}
+  .wk-empty{font-family:var(--mono); font-size:11px; color:var(--text-faint); padding:4px 0 10px;}
+  .wk-saved{color:var(--amber); opacity:0; transition:opacity 0.3s; font-size:11px; margin-left:8px;}
+  .wk-saved.show{opacity:1;}
   .modal-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;}
   .m-notes-section{margin-bottom:18px;}
   .m-notes-label{
@@ -550,7 +570,10 @@
   <section class="panel">
     <div class="chart-header">
       <div class="section-title" id="volume-title">Volume by Sport</div>
-      <div class="window-row" id="metric-chips"></div>
+      <div class="window-row" style="align-items:center;">
+        <button class="wchip" id="week-settings-btn" style="display:none;" title="Configure the training week used for weekly grouping">Training Week</button>
+        <div class="window-row" id="metric-chips"></div>
+      </div>
     </div>
     <div class="window-row" id="split-chips" style="margin-bottom:12px;"></div>
     <div class="chart-box"><canvas id="volume-chart"></canvas></div>
@@ -922,6 +945,57 @@
   </div>
 </div>
 
+<div class="modal-bg" id="week-modal-bg">
+  <div class="modal">
+    <button class="close-btn" id="week-modal-close">&times;</button>
+    <h3>Training Week</h3>
+    <div class="modal-meta">Weekly charts group activities into training weeks. Set the standard start day going forward, or fix one week that ran differently.</div>
+
+    <div class="wk-section">
+      <div class="wk-section-title">Standard week start</div>
+      <div id="wk-schedule-list"></div>
+      <div class="plan-form">
+        <label>Starting from<input type="date" id="wk-sched-from"></label>
+        <label>Week starts on
+          <select id="wk-sched-day">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </label>
+      </div>
+      <div class="plan-form-actions">
+        <button class="wchip active" id="wk-sched-add">Add change</button>
+        <span class="wk-saved" id="wk-sched-saved">Saved</span>
+      </div>
+    </div>
+
+    <div class="wk-section">
+      <div class="wk-section-title">Fix an individual week</div>
+      <div id="wk-override-list"></div>
+      <div class="plan-form">
+        <label>Any date in that week<input type="date" id="wk-ov-pick"></label>
+      </div>
+      <div class="plan-form-actions">
+        <button class="wchip" id="wk-ov-load">Load week</button>
+      </div>
+      <div class="plan-form" id="wk-ov-edit" style="display:none; margin-top:14px;">
+        <div class="modal-meta" id="wk-ov-default" style="margin-bottom:0;"></div>
+        <label>Actual start<input type="date" id="wk-ov-start"></label>
+        <label>Actual end<input type="date" id="wk-ov-end"></label>
+      </div>
+      <div class="plan-form-actions" id="wk-ov-save-row" style="display:none;">
+        <button class="wchip active" id="wk-ov-save">Save week</button>
+        <span class="wk-saved" id="wk-ov-saved">Saved</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const DATA = /*__DATA__*/;
 
@@ -1120,6 +1194,115 @@ document.getElementById('goal-form-save').addEventListener('click', () => {
   renderCountdown();
 });
 
+// ---- Training week settings modal ----
+function renderWeekModal(){
+  const cfg = weekConfig();
+  const schedList = document.getElementById('wk-schedule-list');
+  const sched = [...cfg.schedule].sort((a,b) => a.from < b.from ? -1 : 1);
+  schedList.innerHTML = sched.length ? sched.map((s,i) => `
+    <div class="wk-row">
+      <span>From ${s.from}: weeks start ${WEEKDAY_NAMES[s.startWeekday]}</span>
+      ${sched.length>1 ? `<button class="wk-row-del" data-i="${i}" title="Remove">&times;</button>` : ''}
+    </div>
+  `).join('') : '<div class="wk-empty">No schedule set.</div>';
+  schedList.querySelectorAll('.wk-row-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const from = sched[Number(btn.dataset.i)].from;
+      cfg.schedule = cfg.schedule.filter(s => s.from !== from);
+      persistWeekConfig(renderWeekModal);
+    });
+  });
+
+  const ovList = document.getElementById('wk-override-list');
+  const ovKeys = Object.keys(cfg.overrides).sort();
+  ovList.innerHTML = ovKeys.length ? ovKeys.map(k => {
+    const ov = cfg.overrides[k];
+    return `
+    <div class="wk-row">
+      <span>Week of ${k}: now ${ov.start} – ${ov.end}</span>
+      <button class="wk-row-del" data-k="${k}" title="Remove">&times;</button>
+    </div>`;
+  }).join('') : '<div class="wk-empty">No individual weeks fixed.</div>';
+  ovList.querySelectorAll('.wk-row-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      delete cfg.overrides[btn.dataset.k];
+      persistWeekConfig(renderWeekModal);
+    });
+  });
+}
+
+function persistWeekConfig(onDone, savedEl){
+  saveWeekConfigFlow(weekConfig())
+    .then(() => {
+      renderVolumeChart();
+      if(onDone) onDone();
+      if(savedEl){ savedEl.classList.add('show'); setTimeout(() => savedEl.classList.remove('show'), 2000); }
+    })
+    .catch(e => alert('Failed to save: ' + e.message));
+}
+
+async function saveWeekConfigFlow(config){
+  if(SERVER_MODE){
+    const resp = await fetch('/api/save-week-config', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(config),
+    });
+    const json = await resp.json();
+    if(!resp.ok) throw new Error(json.error || 'Save failed');
+  } else if(GITHUB_MODE){
+    await ghSaveWeekConfigFlow(config);
+  }
+}
+
+document.getElementById('week-settings-btn').addEventListener('click', () => {
+  const today = new Date();
+  document.getElementById('wk-sched-from').value = ymd(today.getFullYear(), today.getMonth(), today.getDate());
+  document.getElementById('wk-sched-day').value = '1';
+  document.getElementById('wk-ov-pick').value = '';
+  document.getElementById('wk-ov-edit').style.display = 'none';
+  document.getElementById('wk-ov-save-row').style.display = 'none';
+  renderWeekModal();
+  document.getElementById('week-modal-bg').classList.add('open');
+});
+document.getElementById('week-modal-close').addEventListener('click', () => document.getElementById('week-modal-bg').classList.remove('open'));
+document.getElementById('week-modal-bg').addEventListener('click', e => { if(e.target.id==='week-modal-bg') e.currentTarget.classList.remove('open'); });
+
+document.getElementById('wk-sched-add').addEventListener('click', () => {
+  const from = document.getElementById('wk-sched-from').value;
+  const startWeekday = Number(document.getElementById('wk-sched-day').value);
+  if(!from) return;
+  const cfg = weekConfig();
+  cfg.schedule = cfg.schedule.filter(s => s.from !== from);
+  cfg.schedule.push({from, startWeekday});
+  cfg.schedule.sort((a,b) => a.from < b.from ? -1 : 1);
+  persistWeekConfig(renderWeekModal, document.getElementById('wk-sched-saved'));
+});
+
+let wkOvDefaultKey = null;
+document.getElementById('wk-ov-load').addEventListener('click', () => {
+  const picked = document.getElementById('wk-ov-pick').value;
+  if(!picked) return;
+  const def = defaultWeekStart(new Date(picked+'T00:00:00'));
+  const defEnd = new Date(def); defEnd.setDate(defEnd.getDate()+6);
+  wkOvDefaultKey = ymd(def.getFullYear(), def.getMonth(), def.getDate());
+  const defEndKey = ymd(defEnd.getFullYear(), defEnd.getMonth(), defEnd.getDate());
+  const existing = weekConfig().overrides[wkOvDefaultKey];
+  document.getElementById('wk-ov-default').textContent = `Standard week: ${wkOvDefaultKey} – ${defEndKey}`;
+  document.getElementById('wk-ov-start').value = existing ? existing.start : wkOvDefaultKey;
+  document.getElementById('wk-ov-end').value = existing ? existing.end : defEndKey;
+  document.getElementById('wk-ov-edit').style.display = '';
+  document.getElementById('wk-ov-save-row').style.display = '';
+});
+
+document.getElementById('wk-ov-save').addEventListener('click', () => {
+  if(!wkOvDefaultKey) return;
+  const start = document.getElementById('wk-ov-start').value;
+  const end = document.getElementById('wk-ov-end').value;
+  if(!start || !end || end < start){ alert('Enter a valid start/end (end on or after start).'); return; }
+  weekConfig().overrides[wkOvDefaultKey] = {start, end};
+  persistWeekConfig(renderWeekModal, document.getElementById('wk-ov-saved'));
+});
+
 // ---- Time window selector ----
 const WINDOWS = [
   {id:'since_rest', label:'Since Rest Day'},
@@ -1313,6 +1496,38 @@ document.querySelectorAll('#split-chips .wchip').forEach(chip => {
   });
 });
 
+// ---- Training week config: when a week starts, plus one-off fixes for a single week ----
+const WEEKDAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function weekConfig(){
+  if(!DATA.week_config) DATA.week_config = {schedule:[{from:'1970-01-01', startWeekday:1}], overrides:{}};
+  return DATA.week_config;
+}
+function scheduleStartWeekdayFor(dateStr){
+  const sched = weekConfig().schedule;
+  let best = sched[0];
+  sched.forEach(s => { if(s.from <= dateStr) best = s; });
+  return best.startWeekday;
+}
+// The week a date would fall into under the standard schedule, ignoring any one-off override.
+function defaultWeekStart(date){
+  const dstr = ymd(date.getFullYear(), date.getMonth(), date.getDate());
+  const wd = scheduleStartWeekdayFor(dstr);
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diff = (d.getDay() - wd + 7) % 7;
+  d.setDate(d.getDate() - diff);
+  return d;
+}
+// The actual boundaries of the week a date falls into, applying a one-off override if that
+// week (identified by its standard-schedule start) has one.
+function weekBoundsFor(date){
+  const def = defaultWeekStart(date);
+  const defKey = ymd(def.getFullYear(), def.getMonth(), def.getDate());
+  const ov = weekConfig().overrides[defKey];
+  if(ov) return {start: new Date(ov.start+'T00:00:00'), end: new Date(ov.end+'T00:00:00'), key: ov.start};
+  const end = new Date(def); end.setDate(end.getDate()+6);
+  return {start: def, end, key: defKey};
+}
+
 function granularityFor(days){
   if(days<28) return 'day';
   if(days<=180) return 'week';
@@ -1320,10 +1535,7 @@ function granularityFor(days){
 }
 function bucketKey(d, gran){
   if(gran==='day') return ymd(d.getFullYear(), d.getMonth(), d.getDate());
-  if(gran==='week'){
-    const w = new Date(d); w.setDate(w.getDate()-w.getDay());
-    return ymd(w.getFullYear(), w.getMonth(), w.getDate());
-  }
+  if(gran==='week') return weekBoundsFor(d).key;
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
@@ -1344,8 +1556,15 @@ function renderVolumeChart(){
   if(gran==='day'){
     for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)) keys.push(ymd(d.getFullYear(),d.getMonth(),d.getDate()));
   } else if(gran==='week'){
-    let d = new Date(start); d.setDate(d.getDate()-d.getDay());
-    while(d<=end){ keys.push(ymd(d.getFullYear(),d.getMonth(),d.getDate())); d.setDate(d.getDate()+7); }
+    // Walk day by day (bounded to ~180 days by granularityFor) rather than jumping by
+    // each week's computed end — a schedule change's effective date can make that end
+    // overshoot into a span where later dates resolve to an earlier, different week.
+    const seenWeeks = new Set();
+    for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+      const k = weekBoundsFor(d).key;
+      if(!seenWeeks.has(k)){ seenWeeks.add(k); keys.push(k); }
+    }
+    keys.sort();
   } else {
     let d = new Date(start.getFullYear(), start.getMonth(), 1);
     while(d<=end){ keys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); d.setMonth(d.getMonth()+1); }
@@ -2869,6 +3088,16 @@ async function ghSaveTypeFlow(activityId, sport){
   );
 }
 
+async function ghSaveWeekConfigFlow(config){
+  const current = await ghGetFile('data/week_config.json');
+  await ghPutFile(
+    'data/week_config.json',
+    utf8ToBase64(JSON.stringify(config, null, 1)),
+    'Update training week config',
+    current ? current.sha : undefined,
+  );
+}
+
 async function ghSaveCommuteFlow(activityId, isCommute){
   const current = await ghGetFile('data/commute_overrides.json');
   const overrides = current ? JSON.parse(base64ToUtf8(current.content)) : {};
@@ -2966,6 +3195,7 @@ function updateActionVisibility(){
   document.getElementById('erg-upload-row').style.display = active ? '' : 'none';
   document.getElementById('strava-sync-btn').style.display = active ? '' : 'none';
   document.getElementById('gh-connect-btn').style.display = active ? 'none' : '';
+  document.getElementById('week-settings-btn').style.display = active ? '' : 'none';
 }
 
 fetch('/api/health').then(r => r.ok ? r.json() : Promise.reject())
