@@ -9,6 +9,7 @@ on:
       - 'data/commute_overrides.json'
       - 'data/type_overrides.json'
       - 'data/week_config.json'
+      - 'data/body_metrics.json'
       - 'data/strava_activities_*.csv'
       - 'data/streams/**'
       - 'template.html'

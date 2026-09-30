@@ -571,10 +571,12 @@
     <div class="chart-header">
       <div class="section-title" id="volume-title">Volume by Sport</div>
       <div class="window-row" style="align-items:center;">
+        <button class="wchip" id="body-metrics-btn" style="display:none;" title="Log resting HR and weight for a day">Log Body Metrics</button>
         <button class="wchip" id="week-settings-btn" style="display:none;" title="Configure the training week used for weekly grouping">Training Week</button>
-        <div class="window-row" id="metric-chips"></div>
       </div>
     </div>
+    <div class="window-row" id="view-chips" style="margin-bottom:10px;"></div>
+    <div class="window-row" id="metric-chips" style="margin-bottom:10px;"></div>
     <div class="window-row" id="split-chips" style="margin-bottom:12px;"></div>
     <div class="chart-box"><canvas id="volume-chart"></canvas></div>
   </section>
@@ -996,6 +998,23 @@
   </div>
 </div>
 
+<div class="modal-bg" id="body-metrics-modal-bg">
+  <div class="modal">
+    <button class="close-btn" id="bm-modal-close">&times;</button>
+    <h3>Body Metrics</h3>
+    <div class="modal-meta">Log a resting heart rate and/or weight for any day. Leave a field blank to clear it.</div>
+    <div class="plan-form">
+      <label>Date<input type="date" id="bm-date"></label>
+      <label>Resting HR (bpm)<input type="number" id="bm-resting-hr" min="0" step="1" placeholder="e.g. 52"></label>
+      <label>Weight (lb)<input type="number" id="bm-weight" min="0" step="0.1" placeholder="e.g. 178.5"></label>
+    </div>
+    <div class="plan-form-actions">
+      <button class="wchip active" id="bm-save">Save</button>
+      <span class="wk-saved" id="bm-saved">Saved</span>
+    </div>
+  </div>
+</div>
+
 <script>
 const DATA = /*__DATA__*/;
 
@@ -1303,6 +1322,64 @@ document.getElementById('wk-ov-save').addEventListener('click', () => {
   persistWeekConfig(renderWeekModal, document.getElementById('wk-ov-saved'));
 });
 
+// ---- Body metrics modal: resting HR + weight, logged per calendar day ----
+function loadBodyMetricsForDate(){
+  const date = document.getElementById('bm-date').value;
+  const entry = (DATA.body_metrics || {})[date] || {};
+  document.getElementById('bm-resting-hr').value = entry.restingHr != null ? entry.restingHr : '';
+  document.getElementById('bm-weight').value = entry.weight != null ? entry.weight : '';
+}
+
+document.getElementById('body-metrics-btn').addEventListener('click', () => {
+  const today = new Date();
+  document.getElementById('bm-date').value = ymd(today.getFullYear(), today.getMonth(), today.getDate());
+  loadBodyMetricsForDate();
+  document.getElementById('body-metrics-modal-bg').classList.add('open');
+});
+document.getElementById('bm-modal-close').addEventListener('click', () => document.getElementById('body-metrics-modal-bg').classList.remove('open'));
+document.getElementById('body-metrics-modal-bg').addEventListener('click', e => { if(e.target.id==='body-metrics-modal-bg') e.currentTarget.classList.remove('open'); });
+document.getElementById('bm-date').addEventListener('change', loadBodyMetricsForDate);
+
+async function saveBodyMetricsFlow(date, restingHr, weight){
+  if(SERVER_MODE){
+    const resp = await fetch('/api/save-body-metrics', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({date, resting_hr: restingHr, weight}),
+    });
+    const json = await resp.json();
+    if(!resp.ok) throw new Error(json.error || 'Save failed');
+  } else if(GITHUB_MODE){
+    await ghSaveBodyMetricsFlow(date, restingHr, weight);
+  }
+}
+
+document.getElementById('bm-save').addEventListener('click', () => {
+  const date = document.getElementById('bm-date').value;
+  if(!date) return;
+  const hrVal = document.getElementById('bm-resting-hr').value;
+  const wVal = document.getElementById('bm-weight').value;
+  const restingHr = hrVal !== '' ? Number(hrVal) : null;
+  const weight = wVal !== '' ? Number(wVal) : null;
+
+  saveBodyMetricsFlow(date, restingHr, weight)
+    .then(() => {
+      if(!DATA.body_metrics) DATA.body_metrics = {};
+      if(restingHr != null || weight != null){
+        const entry = {};
+        if(restingHr != null) entry.restingHr = restingHr;
+        if(weight != null) entry.weight = weight;
+        DATA.body_metrics[date] = entry;
+      } else {
+        delete DATA.body_metrics[date];
+      }
+      if(currentView === 'body') renderVolumeChart();
+      const saved = document.getElementById('bm-saved');
+      saved.classList.add('show');
+      setTimeout(() => saved.classList.remove('show'), 2000);
+    })
+    .catch(e => alert('Failed to save: ' + e.message));
+});
+
 // ---- Time window selector ----
 const WINDOWS = [
   {id:'since_rest', label:'Since Rest Day'},
@@ -1316,8 +1393,9 @@ const WINDOWS = [
 ];
 let currentWindow = 'since_rest';
 
-function windowRange(id){
-  const end = new Date(lastActDate.getFullYear(), lastActDate.getMonth(), lastActDate.getDate());
+function windowRange(id, refDate){
+  refDate = refDate || lastActDate;
+  const end = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
   let start;
   if(id==='since_rest'){
     // A day counts as a rest day if it has no training activity — a day whose
@@ -1458,6 +1536,24 @@ renderPhaseBar();
 // ---- Monthly volume chart (window + metric aware) ----
 let volumeChart = null;
 
+const VIEWS = [
+  {id:'training', label:'Training Load'},
+  {id:'body', label:'Resting HR & Weight'},
+];
+let currentView = 'training';
+
+document.getElementById('view-chips').innerHTML = VIEWS.map(v =>
+  `<button class="wchip${v.id===currentView?' active':''}" data-v="${v.id}">${v.label}</button>`
+).join('');
+document.querySelectorAll('#view-chips .wchip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#view-chips .wchip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    currentView = chip.dataset.v;
+    renderVolumeChart();
+  });
+});
+
 const METRICS = [
   {id:'hours', label:'Hours'},
   {id:'effort', label:'Relative Effort'},
@@ -1540,7 +1636,15 @@ function bucketKey(d, gran){
 }
 
 function renderVolumeChart(){
-  const {start,end} = windowRange(currentWindow);
+  // Every other window is anchored to the last synced Strava activity, but body metrics
+  // are logged independently of activities — extend the window through today so a metric
+  // logged after the last sync (or on an untracked rest day) still shows up.
+  let volumeRefDate = lastActDate;
+  if(currentView === 'body'){
+    const todayOnly = new Date(); todayOnly.setHours(0,0,0,0);
+    if(todayOnly > lastActDate) volumeRefDate = todayOnly;
+  }
+  const {start,end} = windowRange(currentWindow, volumeRefDate);
   const endInclusive = new Date(end.getTime()+86400000-1);
   const days = Math.round((end-start)/86400000)+1;
   const gran = granularityFor(days);
@@ -1574,6 +1678,13 @@ function renderVolumeChart(){
     const [y,m,dd] = k.split('-').map(Number);
     return new Date(y,m-1,dd).toLocaleDateString('en-US',{month:'short',day:'numeric'});
   };
+
+  document.getElementById('metric-chips').style.display = currentView==='body' ? 'none' : '';
+  document.getElementById('split-chips').style.display = currentView==='body' ? 'none' : '';
+  if(currentView === 'body'){
+    renderBodyMetricsChart(start, endInclusive, keys, gran, labelFmt);
+    return;
+  }
 
   let datasets, yLabel, titleText;
 
@@ -1625,6 +1736,49 @@ function renderVolumeChart(){
       scales:{
         x:{stacked:true, grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}, maxRotation:0, autoSkip:true}},
         y:{stacked:true, grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}}, title:{display:true, text:yLabel, color:ac.title}}
+      },
+      plugins:{legend:{labels:{color:ac.tick, font:{family:'IBM Plex Mono', size:11}}}}
+    }
+  });
+}
+
+// Averages each bucket's logged resting HR / weight — most buckets at 'day' granularity
+// hold at most one entry, but 'week'/'month' buckets can span several logged days.
+function renderBodyMetricsChart(start, endInclusive, keys, gran, labelFmt){
+  const bm = DATA.body_metrics || {};
+  const hrSums = {}, hrCounts = {}, wSums = {}, wCounts = {};
+  Object.keys(bm).forEach(dateStr => {
+    const d = new Date(dateStr + 'T00:00:00');
+    if(d < start || d > endInclusive) return;
+    const k = bucketKey(d, gran);
+    const entry = bm[dateStr];
+    if(entry.restingHr != null){ hrSums[k] = (hrSums[k]||0) + entry.restingHr; hrCounts[k] = (hrCounts[k]||0) + 1; }
+    if(entry.weight != null){ wSums[k] = (wSums[k]||0) + entry.weight; wCounts[k] = (wCounts[k]||0) + 1; }
+  });
+  const hrData = keys.map(k => hrCounts[k] ? +(hrSums[k]/hrCounts[k]).toFixed(1) : null);
+  const wData = keys.map(k => wCounts[k] ? +(wSums[k]/wCounts[k]).toFixed(1) : null);
+
+  document.getElementById('volume-title').textContent = 'Resting HR & Weight';
+
+  if(volumeChart) volumeChart.destroy();
+  const ac = chartAxisColors();
+  const th = theme();
+  volumeChart = new Chart(document.getElementById('volume-chart'), {
+    type:'line',
+    data:{
+      labels: keys.map(labelFmt),
+      datasets: [
+        {label:'Resting HR (bpm)', data: hrData, borderColor: th.amber, yAxisID:'y', spanGaps:true, tension:0.25, pointRadius:3, pointBackgroundColor: th.amber, borderWidth:2},
+        {label:'Weight (lb)', data: wData, borderColor: th.other, yAxisID:'y1', spanGaps:true, tension:0.25, pointRadius:3, pointBackgroundColor: th.other, borderWidth:2},
+      ],
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      scales:{
+        x:{grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}, maxRotation:0, autoSkip:true}},
+        y:{position:'left', grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}}, title:{display:true, text:'bpm', color:ac.title}},
+        y1:{position:'right', grid:{display:false}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:10}}, title:{display:true, text:'lb', color:ac.title}},
       },
       plugins:{legend:{labels:{color:ac.tick, font:{family:'IBM Plex Mono', size:11}}}}
     }
@@ -3098,6 +3252,22 @@ async function ghSaveWeekConfigFlow(config){
   );
 }
 
+async function ghSaveBodyMetricsFlow(date, restingHr, weight){
+  const current = await ghGetFile('data/body_metrics.json');
+  const metrics = current ? JSON.parse(base64ToUtf8(current.content)) : {};
+  const entry = {};
+  if(restingHr != null) entry.restingHr = restingHr;
+  if(weight != null) entry.weight = weight;
+  if(Object.keys(entry).length) metrics[date] = entry;
+  else delete metrics[date];
+  await ghPutFile(
+    'data/body_metrics.json',
+    utf8ToBase64(JSON.stringify(metrics, null, 1)),
+    `Log body metrics for ${date}`,
+    current ? current.sha : undefined,
+  );
+}
+
 async function ghSaveCommuteFlow(activityId, isCommute){
   const current = await ghGetFile('data/commute_overrides.json');
   const overrides = current ? JSON.parse(base64ToUtf8(current.content)) : {};
@@ -3196,6 +3366,7 @@ function updateActionVisibility(){
   document.getElementById('strava-sync-btn').style.display = active ? '' : 'none';
   document.getElementById('gh-connect-btn').style.display = active ? 'none' : '';
   document.getElementById('week-settings-btn').style.display = active ? '' : 'none';
+  document.getElementById('body-metrics-btn').style.display = active ? '' : 'none';
 }
 
 fetch('/api/health').then(r => r.ok ? r.json() : Promise.reject())

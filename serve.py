@@ -8,7 +8,8 @@ several added capabilities, all wired up client-side in template.html and
 only shown when /api/health succeeds (the static GitHub Pages build has no
 backend and so never shows them): entering erg data manually, a "Sync
 Strava" button, editable activity titles, an editable sport type, a commute
-checkbox per activity, and configurable training-week boundaries.
+checkbox per activity, configurable training-week boundaries, and logging a
+resting heart rate and weight per calendar day.
 
 Run:
     venv/bin/python serve.py
@@ -34,6 +35,7 @@ TITLE_OVERRIDES_PATH = os.path.join(DATA_DIR, "title_overrides.json")
 COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
 TYPE_OVERRIDES_PATH = os.path.join(DATA_DIR, "type_overrides.json")
 WEEK_CONFIG_PATH = os.path.join(DATA_DIR, "week_config.json")
+BODY_METRICS_PATH = os.path.join(DATA_DIR, "body_metrics.json")
 
 app = Flask(__name__)
 
@@ -93,6 +95,14 @@ def load_week_config():
 
 def save_week_config(config):
     _save_json(WEEK_CONFIG_PATH, config)
+
+
+def load_body_metrics():
+    return _load_json(BODY_METRICS_PATH)
+
+
+def save_body_metrics(metrics):
+    _save_json(BODY_METRICS_PATH, metrics)
 
 
 @app.route("/")
@@ -181,6 +191,31 @@ def api_save_week_config():
     save_week_config(config)
 
     return jsonify({"ok": True, "week_config": config})
+
+
+@app.route("/api/save-body-metrics", methods=["POST"])
+def api_save_body_metrics():
+    payload = request.get_json(force=True, silent=True) or {}
+    date = str(payload.get("date", "")).strip()
+    if not date:
+        return jsonify({"error": "missing date"}), 400
+
+    resting_hr = payload.get("resting_hr")
+    weight = payload.get("weight")
+
+    metrics = load_body_metrics()
+    entry = {}
+    if isinstance(resting_hr, (int, float)):
+        entry["restingHr"] = resting_hr
+    if isinstance(weight, (int, float)):
+        entry["weight"] = weight
+    if entry:
+        metrics[date] = entry
+    else:
+        metrics.pop(date, None)
+    save_body_metrics(metrics)
+
+    return jsonify({"ok": True, "date": date, "entry": entry or None})
 
 
 @app.route("/api/save", methods=["POST"])
