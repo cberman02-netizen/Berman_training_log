@@ -4482,5 +4482,28 @@
     "hr": null
    }
   ]
+ },
+ "20478797759": {
+  "device": "RowErg",
+  "intervals": [
+   {
+    "label": "1",
+    "split_sec": 117,
+    "spm": 22,
+    "hr": null
+   },
+   {
+    "label": "2",
+    "split_sec": 113.2,
+    "spm": 24,
+    "hr": null
+   },
+   {
+    "label": "3",
+    "split_sec": 108.7,
+    "spm": 27,
+    "hr": null
+   }
+  ]
  }
 }
