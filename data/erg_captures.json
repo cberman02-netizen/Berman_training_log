@@ -4508,10 +4508,11 @@
  },
  "20570772123": {
   "device": "RowErg",
-  "total_time_sec": 2190,
-  "total_meters": 9977.908,
-  "avg_split_sec": 109.9,
-  "avg_spm": 26.6,
+  "workout_type": "10k",
+  "total_time_sec": 2189.9,
+  "total_meters": 10000,
+  "avg_split_sec": 109.4,
+  "avg_spm": 26,
   "intervals": [
    {
     "label": "1",
