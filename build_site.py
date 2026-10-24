@@ -24,6 +24,7 @@ from datetime import datetime
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(REPO_ROOT, "data")
+HR_GRID_STEP = 20  # seconds per entry in each activity's stream.hrs
 STREAMS_DIR = os.path.join(DATA_DIR, "streams")
 TEMPLATE_PATH = os.path.join(REPO_ROOT, "template.html")
 OUTPUT_PATH = os.path.join(REPO_ROOT, "index.html")
@@ -79,6 +80,29 @@ def zone_minutes(rows):
                         break
         prev_t = t
     return [round(z, 2) for z in zones]
+
+
+def hr_grid(rows, step=HR_GRID_STEP):
+    """Time-weighted heart rate on a fixed grid (one int per `step` seconds), so the
+    Analysis tab can average HR over a hand-marked section of a workout far more
+    precisely than the 48-point chart stream allows. Entry g covers
+    ((g-1)*step, g*step]; None where the strap recorded nothing."""
+    sums, weights = {}, {}
+    prev_t = None
+    for r in rows:
+        if not r.get("time"):
+            continue
+        t = float(r["time"])
+        if r.get("heartrate") and prev_t is not None:
+            dt = t - prev_t
+            if 0 < dt < 300:
+                g = int(-(-t // step))  # ceil
+                sums[g] = sums.get(g, 0.0) + float(r["heartrate"]) * dt
+                weights[g] = weights.get(g, 0.0) + dt
+        prev_t = t
+    if not sums:
+        return None
+    return [round(sums[g] / weights[g]) if g in sums else None for g in range(max(sums) + 1)]
 
 
 def hr_drift(rows):
@@ -269,6 +293,9 @@ def build_data():
             # resolution instead of the usual 48-point chart-sized downsample.
             is_ergdata_row = atype == "Rowing" and stream_has_watts
             entry["stream"] = downsample_stream(rows, n=len(rows) if is_ergdata_row else 48)
+            grid = hr_grid(rows)
+            if grid:
+                entry["stream"]["hrs"] = grid
             entry["zones"] = zone_minutes(rows)
             title = m["title"] or ""
             is_aerobic_row = atype == "Rowing" and AEROBIC_KW.search(title) and dur >= 20
@@ -303,6 +330,7 @@ def build_data():
         "phases": PHASES,
         "target_event": TARGET_EVENT,
         "max_hr": MAX_HR,
+        "hr_grid_step": HR_GRID_STEP,
         "week_config": week_config,
         "body_metrics": body_metrics,
     }

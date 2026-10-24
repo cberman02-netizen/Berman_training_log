@@ -187,7 +187,7 @@
   }
   .an-hr-table-header div:nth-child(3), .an-hr-table-header div:nth-child(4){text-align:right;}
 
-  /* watts/beat comparison — click-to-mark work windows on each activity's own HR chart */
+  /* avg HR by section — click-to-mark windows on each activity's own HR chart */
   .an-wpb-row{
     background:var(--panel-alt); border:1px solid var(--border); border-radius:8px;
     padding:12px 14px; margin-bottom:10px;
@@ -745,10 +745,10 @@
 
   <section class="panel">
     <div class="chart-header">
-      <div class="section-title">Watts/Beat Comparison <span class="an-subtitle">— indoor rowing only; click "[ Mark work window", click a start point on the chart, then click an end point (or type a time) to close it — repeat per piece, rest is whatever's left out</span></div>
+      <div class="section-title">Avg HR by Section <span class="an-subtitle">— click "[ Mark section", click a start point on the chart, then click an end point (or type a time) to close it — repeat per piece; the average covers only what you mark</span></div>
     </div>
     <div id="an-wpb-list"></div>
-    <div class="an-empty" id="an-wpb-empty">Select at least one indoor rowing activity with erg data above to compare Watts/Beat.</div>
+    <div class="an-empty" id="an-wpb-empty">Select at least one activity with heart rate data above to check its average HR by section.</div>
   </section>
 
   <section class="panel">
@@ -761,7 +761,7 @@
         <option value="effort">Relative Effort</option>
         <option value="dur">Duration</option>
         <option value="decoupling">Decoupling %</option>
-        <option value="wpb">Watts/Beat</option>
+        <option value="sechr">Avg HR (marked sections)</option>
       </select>
     </div>
     <div class="chart-box"><canvas id="an-trend-chart"></canvas></div>
@@ -2085,13 +2085,11 @@ function anRenderHrSummaryChart(){
   `).join('');
 }
 
-// ---- Watts/Beat comparison — manual work-window marking, replacing the old
-// automatic rest-detection (which guessed piece boundaries from the workout
-// name and was unreliable whenever a recording had extra warmup/cooldown
-// baked in). The user marks which stretches of each selected activity count
-// as "work" by eye (using the overlay chart above for reference); everything
-// else is treated as rest and excluded. Windows persist per-activity in this
-// browser's localStorage.
+// ---- Avg HR by section — manually marked windows. The user marks which
+// stretches of each selected activity to average (by eye, using that
+// activity's own HR chart); everything outside them is ignored. Windows
+// persist per-activity in this browser's localStorage. (Storage key keeps its
+// original "Wpb" name so windows marked before this tool changed still load.)
 const WPB_WINDOWS_KEY = 'trainingLogWpbWindows_v1';
 function loadWpbWindows(){
   try { return JSON.parse(localStorage.getItem(WPB_WINDOWS_KEY) || '{}'); } catch(e){ return {}; }
@@ -2101,20 +2099,27 @@ function saveWpbWindows(map){
 }
 let wpbWindows = loadWpbWindows();
 
-function wpbEligibleActivities(sel){
-  return sel.filter(a => a.type === 'Rowing' && a.stream && a.stream.t && a.stream.hr &&
-    ((a.ergCapture && a.ergCapture.device !== 'BikeErg') || hasErgDataStream(a)));
+// HR over elapsed seconds. Prefers the build's fixed-grid HR (a.stream.hrs, one
+// entry per DATA.hr_grid_step seconds) since the 48-point chart stream is too
+// coarse to average a short section; ErgData rows already carry a full-resolution
+// stream so they use that as-is.
+function sectionHrSeries(a){
+  if(!a.stream) return null;
+  if(a.stream.hrs && !hasErgDataStream(a)){
+    const step = DATA.hr_grid_step || 20;
+    return {t: a.stream.hrs.map((_, i) => i * step), v: a.stream.hrs};
+  }
+  return (a.stream.t && a.stream.hr) ? {t: a.stream.t, v: a.stream.hr} : null;
 }
-function wpbAvgWatts(ec){
-  if(ec.avg_watts != null) return ec.avg_watts;
-  return ergIntervalAverages(ec).avg_watts;
+function wpbEligibleActivities(sel){
+  return sel.filter(a => { const s = sectionHrSeries(a); return s && s.v.some(x => x != null); });
 }
 // Weights each sample by the seconds since the previous one (same convention
 // as zone_minutes in build_site.py) rather than a plain arithmetic mean —
 // Strava's own stream spacing is often very irregular (a real rowing stream
 // can jump from a 10s gap to a 250s gap), so an unweighted mean over a window
 // can skew meaningfully toward whichever stretch happened to get the denser
-// sampling. a.stream.t is elapsed seconds, same units as window start/end.
+// sampling. Times are elapsed seconds, same units as window start/end.
 function timeWeightedAvg(times, values, windows){
   let wSum = 0, vwSum = 0;
   let prevT = null;
@@ -2131,36 +2136,52 @@ function timeWeightedAvg(times, values, windows){
   }
   return wSum > 0 ? vwSum / wSum : null;
 }
-// Prefers real per-second watts within the marked windows (ErgData-synced
-// rows) over the erg-capture summary/interval average, since a continuous
-// stream is strictly more accurate than a handful of interval rows.
-function wpbAvgWattsForWindows(a, windows){
-  if(hasErgDataStream(a) && windows && windows.length){
-    const avg = timeWeightedAvg(a.stream.t, a.stream.w, windows);
-    if(avg != null) return avg;
-  }
-  return a.ergCapture ? wpbAvgWatts(a.ergCapture) : null;
-}
 function wpbAvgHr(a, windows){
-  if(!windows || !windows.length) return null;
-  return timeWeightedAvg(a.stream.t, a.stream.hr, windows);
+  const s = sectionHrSeries(a);
+  if(!s || !windows || !windows.length) return null;
+  return timeWeightedAvg(s.t, s.v, windows);
+}
+// Total time covered by the windows, counting any overlap only once.
+function wpbMarkedSec(windows){
+  const sorted = windows.map(w => [w.start, w.end]).sort((x, y) => x[0] - y[0]);
+  let total = 0, curStart = null, curEnd = null;
+  sorted.forEach(([s0, e0]) => {
+    if(curEnd == null || s0 > curEnd){
+      if(curEnd != null) total += curEnd - curStart;
+      curStart = s0; curEnd = e0;
+    } else if(e0 > curEnd){
+      curEnd = e0;
+    }
+  });
+  if(curEnd != null) total += curEnd - curStart;
+  return total;
+}
+// x-axis / clamp length: the stream runs on elapsed time, which can outlast moving time.
+function wpbTotalSec(a){
+  const s = sectionHrSeries(a);
+  const lastT = s && s.t.length ? s.t[s.t.length - 1] : 0;
+  return Math.round(Math.max((a.dur || 0) * 60, lastT || 0));
 }
 function wpbDefaultWindows(a){
-  return [{start: 0, end: Math.round((a.dur||0)*60)}];
+  return [{start: 0, end: wpbTotalSec(a)}];
 }
 function wpbUpdateResult(a, windows, resultEl){
-  const watts = wpbAvgWattsForWindows(a, windows);
   const hr = wpbAvgHr(a, windows);
-  resultEl.innerHTML = (watts != null && hr)
-    ? `${Math.round(watts)}W / ${hr.toFixed(0)}bpm = <b>${(watts/hr).toFixed(2)}</b> W/beat`
-    : 'Not enough data';
+  resultEl.innerHTML = hr != null
+    ? `<b>${hr.toFixed(0)}</b> bpm avg · ${formatSecToTime(wpbMarkedSec(windows))} marked`
+    : (windows && windows.length ? 'No HR data in marked sections' : 'Mark a section to see its avg HR');
 }
-function wpbChipsHtml(windows){
-  return windows.map((w, idx) => `<span class="an-wpb-chip" data-idx="${idx}">${formatSecToTime(w.start)}&ndash;${formatSecToTime(w.end)}<button type="button" class="an-wpb-chip-del" data-idx="${idx}" title="Remove window">&times;</button></span>`).join('');
+function wpbChipsHtml(a, windows){
+  const s = sectionHrSeries(a);
+  return windows.map((w, idx) => {
+    const hr = s ? timeWeightedAvg(s.t, s.v, [w]) : null;
+    const hrLabel = hr != null ? ` · ${hr.toFixed(0)} bpm` : '';
+    return `<span class="an-wpb-chip" data-idx="${idx}">${formatSecToTime(w.start)}&ndash;${formatSecToTime(w.end)}${hrLabel}<button type="button" class="an-wpb-chip-del" data-idx="${idx}" title="Remove section">&times;</button></span>`;
+  }).join('');
 }
 function wpbRenderRow(a){
   const windows = wpbWindows[a.id] || (wpbWindows[a.id] = wpbDefaultWindows(a));
-  const totalSec = Math.round((a.dur||0)*60);
+  const totalSec = wpbTotalSec(a);
   const row = document.createElement('div');
   row.className = 'an-wpb-row';
   row.dataset.id = a.id;
@@ -2184,7 +2205,7 @@ function wpbRenderRow(a){
   const toolbar = document.createElement('div');
   toolbar.className = 'an-wpb-toolbar';
   toolbar.innerHTML = `
-    <button type="button" class="an-btn an-wpb-mark-btn">[ Mark work window</button>
+    <button type="button" class="an-btn an-wpb-mark-btn">[ Mark section</button>
     <span class="an-wpb-manual-start" style="display:none;">
       <input type="text" class="an-wpb-manual-start-input" placeholder="0:00">
       <button type="button" class="an-btn an-wpb-manual-start-btn">[ Set start</button>
@@ -2224,7 +2245,7 @@ function wpbRenderRow(a){
       : '';
   }
   function redrawChips(){
-    chipsEl.innerHTML = wpbChipsHtml(windows);
+    chipsEl.innerHTML = wpbChipsHtml(a, windows);
     chipsEl.querySelectorAll('.an-wpb-chip-del').forEach(btn => {
       btn.addEventListener('click', () => {
         windows.splice(+btn.dataset.idx, 1);
@@ -2302,7 +2323,8 @@ function wpbRenderRow(a){
 
   const ac = chartAxisColors();
   const amberC = theme().amber;
-  const pts = a.stream.t.map((t,i) => ({x:t, y:a.stream.hr[i]})).filter(p=>p.y!=null && p.x!=null);
+  const hrSeries = sectionHrSeries(a);
+  const pts = hrSeries.t.map((t,i) => ({x:t, y:hrSeries.v[i]})).filter(p=>p.y!=null && p.x!=null);
 
   const chart = new Chart(canvas, {
     type:'line',
@@ -2331,7 +2353,7 @@ function wpbRenderRow(a){
       }
     },
     plugins: [{
-      id: 'wpb-marks',
+      id: 'section-marks',
       afterDraw(ch){
         const {ctx, chartArea, scales} = ch;
         const x = scales.x;
@@ -2389,14 +2411,11 @@ function anRenderTrendChart(){
     if(metric==='effort') return a.effort;
     if(metric==='dur') return a.dur;
     if(metric==='decoupling') return a.decoupling ? a.decoupling.value : null;
-    if(metric==='wpb'){
-      const eligible = (a.ergCapture && a.ergCapture.device !== 'BikeErg') || hasErgDataStream(a);
-      if(a.type !== 'Rowing' || !eligible) return null;
+    if(metric==='sechr'){
       const windows = wpbWindows[a.id];
       if(!windows || !windows.length) return null;
-      const watts = wpbAvgWattsForWindows(a, windows);
       const hr = wpbAvgHr(a, windows);
-      return (watts != null && hr) ? Math.round(watts/hr*100)/100 : null;
+      return hr != null ? Math.round(hr) : null;
     }
     return null;
   };
@@ -2406,7 +2425,7 @@ function anRenderTrendChart(){
   if(anTrendChart){ anTrendChart.destroy(); anTrendChart=null; }
   if(!pts.length){
     emptyEl.classList.add('show'); canvasEl.style.display='none';
-    if(metric==='wpb') emptyEl.textContent = 'Mark work windows in the Watts/Beat Comparison panel above for the selected activities to see this trend.';
+    if(metric==='sechr') emptyEl.textContent = 'Mark sections in the Avg HR by Section panel above for the selected activities to see this trend.';
     else emptyEl.textContent = 'Select at least one activity above to see this chart.';
     return;
   }
@@ -2414,7 +2433,7 @@ function anRenderTrendChart(){
 
   const ac = chartAxisColors();
   const amberC = theme().amber;
-  const yLabel = {hr:'bpm', watts:'watts', pace:'/500m (sec)', effort:'relative effort', dur:'minutes', decoupling:'%', wpb:'W/beat'}[metric];
+  const yLabel = {hr:'bpm', watts:'watts', pace:'/500m (sec)', effort:'relative effort', dur:'minutes', decoupling:'%', sechr:'bpm'}[metric];
 
   anTrendChart = new Chart(canvasEl, {
     type:'line',
@@ -2929,6 +2948,8 @@ function openModal(id){
       }
       a.title = newTitle;
       enterTitleViewMode(newTitle);
+      renderCalendar();
+      anRenderResults();
     } catch(e) {
       alert('Failed to save title: ' + e.message);
     } finally {
