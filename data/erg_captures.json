@@ -4575,5 +4575,32 @@
     "hr": null
    }
   ]
+ },
+ "20764419400": {
+  "device": "RowErg",
+  "total_time_sec": 3840,
+  "total_meters": 14323.126,
+  "avg_split_sec": 126,
+  "avg_spm": 20,
+  "intervals": [
+   {
+    "label": "1",
+    "split_sec": 125.4,
+    "spm": 20,
+    "hr": null
+   },
+   {
+    "label": "2",
+    "split_sec": 126,
+    "spm": 20,
+    "hr": null
+   },
+   {
+    "label": "3",
+    "split_sec": 126.6,
+    "spm": 20,
+    "hr": null
+   }
+  ]
  }
 }
