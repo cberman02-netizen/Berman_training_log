@@ -9,7 +9,7 @@ only shown when /api/health succeeds (the static GitHub Pages build has no
 backend and so never shows them): entering erg data manually, a "Sync
 Strava" button, editable activity titles, an editable sport type, a commute
 checkbox per activity, configurable training-week boundaries, and logging a
-resting heart rate and weight per calendar day.
+resting heart rate and weight per calendar day, and saved workout intervals.
 
 Run:
     venv/bin/python serve.py
@@ -36,6 +36,7 @@ COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
 TYPE_OVERRIDES_PATH = os.path.join(DATA_DIR, "type_overrides.json")
 WEEK_CONFIG_PATH = os.path.join(DATA_DIR, "week_config.json")
 BODY_METRICS_PATH = os.path.join(DATA_DIR, "body_metrics.json")
+INTERVALS_PATH = os.path.join(DATA_DIR, "intervals.json")
 
 app = Flask(__name__)
 
@@ -103,6 +104,14 @@ def load_body_metrics():
 
 def save_body_metrics(metrics):
     _save_json(BODY_METRICS_PATH, metrics)
+
+
+def load_intervals():
+    return _load_json(INTERVALS_PATH)
+
+
+def save_intervals(intervals):
+    _save_json(INTERVALS_PATH, intervals)
 
 
 @app.route("/")
@@ -216,6 +225,38 @@ def api_save_body_metrics():
     save_body_metrics(metrics)
 
     return jsonify({"ok": True, "date": date, "entry": entry or None})
+
+
+@app.route("/api/save-intervals", methods=["POST"])
+def api_save_intervals():
+    payload = request.get_json(force=True, silent=True) or {}
+    activity_id = str(payload.get("activity_id", "")).strip()
+    raw = payload.get("intervals")
+    if not activity_id or not isinstance(raw, list):
+        return jsonify({"error": "missing activity_id or intervals"}), 400
+
+    cleaned = []
+    for iv in raw:
+        try:
+            start, end = float(iv["start"]), float(iv["end"])
+        except (KeyError, TypeError, ValueError):
+            return jsonify({"error": "each interval needs numeric start and end"}), 400
+        if start < 0 or end <= start:
+            return jsonify({"error": "interval end must be after start"}), 400
+        entry = {"start": round(start, 1), "end": round(end, 1)}
+        label = str(iv.get("label") or "").strip()
+        if label:
+            entry["label"] = label
+        cleaned.append(entry)
+
+    intervals = load_intervals()
+    if cleaned:
+        intervals[activity_id] = cleaned
+    else:
+        intervals.pop(activity_id, None)
+    save_intervals(intervals)
+
+    return jsonify({"ok": True, "intervals": cleaned})
 
 
 @app.route("/api/save", methods=["POST"])

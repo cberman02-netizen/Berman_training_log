@@ -24,7 +24,7 @@ from datetime import datetime
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(REPO_ROOT, "data")
-HR_GRID_STEP = 20  # seconds per entry in each activity's stream.hrs
+STREAM_GRID_STEP = 20  # seconds per entry in each activity's stream.hrs / .ws / .cads
 STREAMS_DIR = os.path.join(DATA_DIR, "streams")
 TEMPLATE_PATH = os.path.join(REPO_ROOT, "template.html")
 OUTPUT_PATH = os.path.join(REPO_ROOT, "index.html")
@@ -82,25 +82,25 @@ def zone_minutes(rows):
     return [round(z, 2) for z in zones]
 
 
-def hr_grid(rows, step=HR_GRID_STEP):
-    """Time-weighted heart rate on a fixed grid (one int per `step` seconds), so the
-    Analysis tab can average HR over a hand-marked section of a workout far more
-    precisely than the 48-point chart stream allows. Entry g covers
-    ((g-1)*step, g*step]; None where the strap recorded nothing."""
+def stream_grid(rows, field, step=STREAM_GRID_STEP):
+    """Time-weighted `field` (heartrate / watts / cadence) on a fixed grid, one int per
+    `step` seconds, so the Analysis tab can average over a hand-cut interval far more
+    precisely than the 48-point chart stream allows. Entry g covers ((g-1)*step, g*step];
+    None where nothing was recorded. Returns None if the field never has a non-zero value."""
     sums, weights = {}, {}
     prev_t = None
     for r in rows:
         if not r.get("time"):
             continue
         t = float(r["time"])
-        if r.get("heartrate") and prev_t is not None:
+        if r.get(field) and prev_t is not None:
             dt = t - prev_t
             if 0 < dt < 300:
                 g = int(-(-t // step))  # ceil
-                sums[g] = sums.get(g, 0.0) + float(r["heartrate"]) * dt
+                sums[g] = sums.get(g, 0.0) + float(r[field]) * dt
                 weights[g] = weights.get(g, 0.0) + dt
         prev_t = t
-    if not sums:
+    if not sums or not any(sums.values()):
         return None
     return [round(sums[g] / weights[g]) if g in sums else None for g in range(max(sums) + 1)]
 
@@ -212,6 +212,7 @@ COMMUTE_OVERRIDES_PATH = os.path.join(DATA_DIR, "commute_overrides.json")
 TYPE_OVERRIDES_PATH = os.path.join(DATA_DIR, "type_overrides.json")
 WEEK_CONFIG_PATH = os.path.join(DATA_DIR, "week_config.json")
 BODY_METRICS_PATH = os.path.join(DATA_DIR, "body_metrics.json")
+INTERVALS_PATH = os.path.join(DATA_DIR, "intervals.json")
 
 DEFAULT_WEEK_CONFIG = {"schedule": [{"from": "1970-01-01", "startWeekday": 1}], "overrides": {}}
 
@@ -253,6 +254,11 @@ def build_data():
         with open(BODY_METRICS_PATH) as fh:
             body_metrics = json.load(fh)
 
+    intervals = {}
+    if os.path.exists(INTERVALS_PATH):
+        with open(INTERVALS_PATH) as fh:
+            intervals = json.load(fh)
+
     activities = []
     for m in master:
         aid = m["id"]
@@ -293,9 +299,12 @@ def build_data():
             # resolution instead of the usual 48-point chart-sized downsample.
             is_ergdata_row = atype == "Rowing" and stream_has_watts
             entry["stream"] = downsample_stream(rows, n=len(rows) if is_ergdata_row else 48)
-            grid = hr_grid(rows)
-            if grid:
-                entry["stream"]["hrs"] = grid
+            # ErgData rows already ship at full resolution; everything else gets fixed grids
+            if not is_ergdata_row:
+                for key, field in (("hrs", "heartrate"), ("ws", "watts"), ("cads", "cadence")):
+                    grid = stream_grid(rows, field)
+                    if grid:
+                        entry["stream"][key] = grid
             entry["zones"] = zone_minutes(rows)
             title = m["title"] or ""
             is_aerobic_row = atype == "Rowing" and AEROBIC_KW.search(title) and dur >= 20
@@ -330,9 +339,10 @@ def build_data():
         "phases": PHASES,
         "target_event": TARGET_EVENT,
         "max_hr": MAX_HR,
-        "hr_grid_step": HR_GRID_STEP,
+        "stream_grid_step": STREAM_GRID_STEP,
         "week_config": week_config,
         "body_metrics": body_metrics,
+        "intervals": intervals,
     }
 
 

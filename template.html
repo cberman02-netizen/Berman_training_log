@@ -187,7 +187,7 @@
   }
   .an-hr-table-header div:nth-child(3), .an-hr-table-header div:nth-child(4){text-align:right;}
 
-  /* avg HR by section — click-to-mark windows on each activity's own HR chart */
+  /* cut intervals — click-to-mark windows on each activity's own stream chart */
   .an-wpb-row{
     background:var(--panel-alt); border:1px solid var(--border); border-radius:8px;
     padding:12px 14px; margin-bottom:10px;
@@ -195,25 +195,57 @@
   .an-wpb-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
   .an-wpb-title{font-family:var(--sans); font-size:12.5px; color:var(--text); font-weight:600;}
   .an-wpb-title .an-wpb-date{color:var(--text-faint); font-family:var(--mono); font-weight:400; margin-right:6px;}
-  .an-wpb-result{font-family:var(--mono); font-size:11.5px; color:var(--text-dim); white-space:nowrap;}
+  .an-wpb-result{font-family:var(--mono); font-size:11.5px; color:var(--text-dim);}
   .an-wpb-result b{color:var(--amber); font-size:13px;}
-  .an-wpb-chart-box{height:130px; margin-bottom:6px; cursor:crosshair;}
+  .an-wpb-chart-box{height:200px; margin-bottom:6px; cursor:crosshair;}
   .an-wpb-instructions{font-family:var(--sans); font-size:11.5px; color:var(--amber); min-height:16px; margin-bottom:6px;}
   .an-wpb-toolbar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;}
   .an-wpb-manual-start input, .an-wpb-manual-end input{
     width:70px; font-size:11.5px; padding:5px 6px; font-family:var(--sans);
     color:var(--text); background:var(--panel); border:1px solid var(--border); border-radius:5px;
   }
-  .an-wpb-chips{display:flex; flex-wrap:wrap; gap:6px;}
-  .an-wpb-chip{
-    display:inline-flex; align-items:center; gap:5px; background:var(--panel); border:1px solid var(--border);
-    border-radius:20px; padding:3px 4px 3px 10px; font-family:var(--mono); font-size:11px; color:var(--text-dim);
+  .an-wpb-spacer{flex:1;}
+  .an-wpb-status{font-family:var(--mono); font-size:11px; color:var(--text-faint);}
+  .an-wpb-status.dirty{color:var(--amber);}
+  .an-btn:disabled{opacity:0.45; cursor:default;}
+  .an-btn:disabled:hover{border-color:var(--border); color:var(--text-dim);}
+  .iv-scroll{overflow-x:auto;}
+  .iv-table{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11.5px;}
+  .iv-table th{
+    text-align:right; font-size:9.5px; font-weight:400; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--text-faint); padding:4px 6px 6px; white-space:nowrap;
   }
-  .an-wpb-chip-del{
-    background:none; border:none; color:var(--text-faint); width:18px; height:18px; border-radius:50%;
-    cursor:pointer; font-size:11px; padding:0; line-height:1;
+  .iv-table td{text-align:right; padding:5px 6px; border-top:1px solid var(--border); color:var(--text-dim); white-space:nowrap;}
+  .iv-n{color:var(--text-faint); margin-right:7px; font-family:var(--mono);}
+  .iv-list{display:flex; flex-direction:column; gap:8px;}
+  .iv-item{background:var(--panel-alt); border:1px solid var(--border); border-radius:8px; padding:9px 12px;}
+  .iv-item-ref{background:transparent; border-style:dashed;}
+  .iv-item-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+  .iv-item-name{font-family:var(--sans); font-size:13px; color:var(--text); font-weight:600;}
+  .iv-item-ref .iv-item-name{color:var(--text-dim); font-weight:400; font-style:italic;}
+  .iv-item-range{font-family:var(--mono); font-size:11px; color:var(--text-faint);}
+  .iv-stats{display:flex; flex-wrap:wrap; gap:6px 18px;}
+  .iv-stat{display:flex; flex-direction:column;}
+  .iv-stat-l{font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint);}
+  .iv-stat-v{font-family:var(--mono); font-size:13.5px; color:var(--text);}
+  .iv-table .iv-left{text-align:left;}
+  .iv-table tr.iv-ref td{color:var(--text-faint); font-style:italic;}
+  .iv-in{
+    font-family:var(--sans); font-size:11.5px; color:var(--text); background:var(--panel);
+    border:1px solid var(--border); border-radius:5px; padding:3px 6px; box-sizing:border-box;
   }
-  .an-wpb-chip-del:hover{background:var(--panel-alt); color:var(--run);}
+  .iv-in:focus{outline:none; border-color:var(--amber);}
+  .iv-label{width:130px;}
+  .iv-time{width:64px; text-align:right;}
+  .iv-del{background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:15px; line-height:1; padding:0 4px;}
+  .iv-del:hover{color:var(--run);}
+  .iv-panel{margin-top:18px;}
+  .iv-header{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;
+    font-family:var(--mono); font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint);
+  }
+  .iv-empty{font-family:var(--sans); font-size:12.5px; color:var(--text-faint); font-style:italic; padding:6px 0;}
+  .iv-add-row{margin-top:8px;}
 
   /* filters */
   .filters{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;}
@@ -745,10 +777,10 @@
 
   <section class="panel">
     <div class="chart-header">
-      <div class="section-title">Avg HR by Section <span class="an-subtitle">— click "[ Mark section", click a start point on the chart, then click an end point (or type a time) to close it — repeat per piece; the average covers only what you mark</span></div>
+      <div class="section-title">Cut Intervals <span class="an-subtitle">— every stream for each selected workout; click "[ Mark interval", click a start point on the chart, then an end point (or type a time) — repeat per piece. Each interval gets its own averages, and "Save to workout" puts them on the calendar popup</span></div>
     </div>
     <div id="an-wpb-list"></div>
-    <div class="an-empty" id="an-wpb-empty">Select at least one activity with heart rate data above to check its average HR by section.</div>
+    <div class="an-empty" id="an-wpb-empty">Select at least one activity with stream data (HR, watts or cadence) above to cut intervals.</div>
   </section>
 
   <section class="panel">
@@ -874,6 +906,19 @@
     </div>
     <div class="window-row" id="stream-toggle-row" style="margin-top:12px;"></div>
     <div class="modal-chart"><canvas id="m-chart"></canvas></div>
+    <div class="iv-panel" id="iv-panel" style="display:none;">
+      <div class="iv-header">
+        <span>Cut Intervals</span>
+        <span class="m-notes-actions">
+          <span class="m-notes-saved" id="iv-saved">Saved</span>
+          <button class="m-notes-btn" id="iv-edit-btn">Edit</button>
+          <button class="m-notes-btn m-notes-btn-save" id="iv-save-btn" style="display:none;">Save</button>
+          <button class="m-notes-btn" id="iv-cancel-btn" style="display:none;">Cancel</button>
+        </span>
+      </div>
+      <div class="iv-scroll" id="iv-table"></div>
+      <div class="iv-add-row"><button class="m-notes-btn" id="iv-add-btn" style="display:none;">+ Add interval</button></div>
+    </div>
   </div>
 </div>
 
@@ -2085,11 +2130,11 @@ function anRenderHrSummaryChart(){
   `).join('');
 }
 
-// ---- Avg HR by section — manually marked windows. The user marks which
-// stretches of each selected activity to average (by eye, using that
-// activity's own HR chart); everything outside them is ignored. Windows
-// persist per-activity in this browser's localStorage. (Storage key keeps its
-// original "Wpb" name so windows marked before this tool changed still load.)
+// ---- Cut intervals — manually marked sections of a workout. The user cuts a workout's
+// streams (HR, watts/split, SPM) into intervals by eye on each activity's own chart; every
+// interval gets its own averages. Edits live in this browser's localStorage until saved to
+// the workout (data/intervals.json), after which the calendar popup lists them. (The storage
+// key keeps its original "Wpb" name so sections marked before this tool changed still load.)
 const WPB_WINDOWS_KEY = 'trainingLogWpbWindows_v1';
 function loadWpbWindows(){
   try { return JSON.parse(localStorage.getItem(WPB_WINDOWS_KEY) || '{}'); } catch(e){ return {}; }
@@ -2099,27 +2144,43 @@ function saveWpbWindows(map){
 }
 let wpbWindows = loadWpbWindows();
 
-// HR over elapsed seconds. Prefers the build's fixed-grid HR (a.stream.hrs, one
-// entry per DATA.hr_grid_step seconds) since the 48-point chart stream is too
-// coarse to average a short section; ErgData rows already carry a full-resolution
-// stream so they use that as-is.
-function sectionHrSeries(a){
-  if(!a.stream) return null;
-  if(a.stream.hrs && !hasErgDataStream(a)){
-    const step = DATA.hr_grid_step || 20;
-    return {t: a.stream.hrs.map((_, i) => i * step), v: a.stream.hrs};
+// m:ss (or h:mm:ss); tenths only when the value actually has them.
+function ivClock(sec){
+  if(sec == null || isNaN(sec)) return '';
+  const whole = Math.abs(sec - Math.round(sec)) < 0.05;
+  const v = whole ? Math.round(sec) : sec;
+  const h = Math.floor(v / 3600), m = Math.floor((v % 3600) / 60);
+  const s = whole ? String(v % 60).padStart(2, '0') : (v % 60).toFixed(1).padStart(4, '0');
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+}
+
+// One stream (hr / w / cad) over elapsed seconds. Prefers the build's fixed 20s grid
+// (stream.hrs / .ws / .cads) since the 48-point chart stream is too coarse to average a
+// short interval; ErgData rows already carry a full-resolution stream, so they use that.
+const STREAM_GRID_KEYS = {hr: 'hrs', w: 'ws', cad: 'cads'};
+function streamSeries(a, key){
+  const s = a.stream;
+  if(!s) return null;
+  const grid = s[STREAM_GRID_KEYS[key]];
+  if(grid && !hasErgDataStream(a)){
+    const step = DATA.stream_grid_step || 20;
+    return {t: grid.map((_, i) => i * step), v: grid};
   }
-  return (a.stream.t && a.stream.hr) ? {t: a.stream.t, v: a.stream.hr} : null;
+  const full = s[key];
+  return (s.t && full && full.some(v => v != null && v !== 0)) ? {t: s.t, v: full} : null;
+}
+function ivSeriesFor(a){
+  return {hr: streamSeries(a, 'hr'), w: streamSeries(a, 'w'), cad: streamSeries(a, 'cad')};
 }
 function wpbEligibleActivities(sel){
-  return sel.filter(a => { const s = sectionHrSeries(a); return s && s.v.some(x => x != null); });
+  return sel.filter(a => { const s = ivSeriesFor(a); return s.hr || s.w || s.cad; });
 }
-// Weights each sample by the seconds since the previous one (same convention
-// as zone_minutes in build_site.py) rather than a plain arithmetic mean —
-// Strava's own stream spacing is often very irregular (a real rowing stream
-// can jump from a 10s gap to a 250s gap), so an unweighted mean over a window
-// can skew meaningfully toward whichever stretch happened to get the denser
-// sampling. Times are elapsed seconds, same units as window start/end.
+
+// Weights each sample by the seconds since the previous one (same convention as
+// zone_minutes in build_site.py) rather than a plain arithmetic mean — Strava's own stream
+// spacing is often very irregular (a real rowing stream can jump from a 10s gap to a 250s
+// gap), so an unweighted mean can skew toward whichever stretch got the denser sampling.
+// Times are elapsed seconds, same units as interval start/end.
 function timeWeightedAvg(times, values, windows){
   let wSum = 0, vwSum = 0;
   let prevT = null;
@@ -2137,7 +2198,7 @@ function timeWeightedAvg(times, values, windows){
   return wSum > 0 ? vwSum / wSum : null;
 }
 function wpbAvgHr(a, windows){
-  const s = sectionHrSeries(a);
+  const s = streamSeries(a, 'hr');
   if(!s || !windows || !windows.length) return null;
   return timeWeightedAvg(s.t, s.v, windows);
 }
@@ -2156,32 +2217,166 @@ function wpbMarkedSec(windows){
   if(curEnd != null) total += curEnd - curStart;
   return total;
 }
-// x-axis / clamp length: the stream runs on elapsed time, which can outlast moving time.
-function wpbTotalSec(a){
-  const s = sectionHrSeries(a);
-  const lastT = s && s.t.length ? s.t[s.t.length - 1] : 0;
-  return Math.round(Math.max((a.dur || 0) * 60, lastT || 0));
+// x-axis / clamp length: the streams run on elapsed time, which can outlast moving time.
+function wpbTotalSec(a, ser){
+  ser = ser || ivSeriesFor(a);
+  const lastT = Math.max(0, ...['hr', 'w', 'cad'].map(k => ser[k] && ser[k].t.length ? ser[k].t[ser[k].t.length - 1] : 0));
+  return Math.round(Math.max((a.dur || 0) * 60, lastT));
 }
-function wpbDefaultWindows(a){
-  return [{start: 0, end: wpbTotalSec(a)}];
+
+// Per-interval averages. Split is derived from average watts (rowing only) with the same
+// Concept2 formula used everywhere else in the app.
+function ivStats(a, ser, wins){
+  const out = {sec: wpbMarkedSec(wins)};
+  if(ser.hr) out.hr = timeWeightedAvg(ser.hr.t, ser.hr.v, wins);
+  if(ser.w){
+    out.watts = timeWeightedAvg(ser.w.t, ser.w.v, wins);
+    if(a.type === 'Rowing' && out.watts > 0) out.split = 500 * Math.pow(2.80 / out.watts, 1/3);
+  }
+  if(ser.cad) out.cad = timeWeightedAvg(ser.cad.t, ser.cad.v, wins);
+  return out;
 }
-function wpbUpdateResult(a, windows, resultEl){
-  const hr = wpbAvgHr(a, windows);
-  resultEl.innerHTML = hr != null
-    ? `<b>${hr.toFixed(0)}</b> bpm avg · ${formatSecToTime(wpbMarkedSec(windows))} marked`
-    : (windows && windows.length ? 'No HR data in marked sections' : 'Mark a section to see its avg HR');
+function ivColumns(a, ser){
+  const rowing = a.type === 'Rowing';
+  const cols = [];
+  if(ser.w && rowing) cols.push({key: 'split', label: 'Split', fmt: v => fmtErgSplit(v)});
+  if(ser.w) cols.push({key: 'watts', label: 'Watts', fmt: v => String(Math.round(v))});
+  if(ser.cad) cols.push({key: 'cad', label: rowing ? 'SPM' : 'Cad', fmt: v => v.toFixed(1)});
+  if(ser.hr) cols.push({key: 'hr', label: 'HR', fmt: v => String(Math.round(v))});
+  return cols;
 }
-function wpbChipsHtml(a, windows){
-  const s = sectionHrSeries(a);
-  return windows.map((w, idx) => {
-    const hr = s ? timeWeightedAvg(s.t, s.v, [w]) : null;
-    const hrLabel = hr != null ? ` · ${hr.toFixed(0)} bpm` : '';
-    return `<span class="an-wpb-chip" data-idx="${idx}">${formatSecToTime(w.start)}&ndash;${formatSecToTime(w.end)}${hrLabel}<button type="button" class="an-wpb-chip-del" data-idx="${idx}" title="Remove section">&times;</button></span>`;
-  }).join('');
+
+// ---- Interval lists: the saved set lives in DATA.intervals[id]; a working copy (the
+// "draft") lives in wpbWindows[id] so unsaved cuts survive a reload.
+function ivSavedFor(id){ return (DATA.intervals && DATA.intervals[id]) || null; }
+function ivSort(windows){ windows.sort((x, y) => (x.start - y.start) || (x.end - y.end)); }
+function ivCleanWindows(list){
+  return list
+    .filter(w => w && isFinite(w.start) && isFinite(w.end) && w.end > w.start)
+    .map(w => {
+      const out = {start: Math.round(w.start * 10) / 10, end: Math.round(w.end * 10) / 10};
+      const label = (w.label || '').trim();
+      if(label) out.label = label;
+      return out;
+    });
 }
+function ivSame(x, y){
+  const norm = list => JSON.stringify(ivCleanWindows(list || []));
+  return norm(x) === norm(y);
+}
+// Before this tool grew intervals, opening a row auto-created one window spanning the whole
+// workout; don't mistake that leftover for something the user cut.
+function ivIsLegacyDefault(a, windows){
+  return windows.length === 1 && windows[0].start === 0 && windows[0].end >= wpbTotalSec(a) - 1;
+}
+function ivPeekWindows(a){
+  const draft = wpbWindows[a.id];
+  if(draft && !ivIsLegacyDefault(a, draft)) return draft;
+  return ivSavedFor(a.id) || [];
+}
+function ivWorkingWindows(a){
+  const cur = ivPeekWindows(a);
+  const w = cur === wpbWindows[a.id] ? cur : cur.map(x => ({...x}));
+  wpbWindows[a.id] = w;
+  return w;
+}
+function ivCommitSaved(id, clean){
+  if(!DATA.intervals) DATA.intervals = {};
+  if(clean.length) DATA.intervals[id] = clean.map(x => ({...x}));
+  else delete DATA.intervals[id];
+}
+async function saveIntervalsFlow(id, clean){
+  if(SERVER_MODE){
+    const resp = await fetch('/api/save-intervals', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({activity_id: id, intervals: clean}),
+    });
+    const json = await resp.json();
+    if(!resp.ok) throw new Error(json.error || 'Save failed');
+  } else if(GITHUB_MODE){
+    await ghSaveIntervalsFlow(id, clean);
+  } else {
+    throw new Error('Connect GitHub (or run the local server) to save changes');
+  }
+}
+
+// Renders the interval table into `container`. Editable mode adds label / start / end inputs
+// and a delete button, and reports every change through opts.onChange (the caller re-renders).
+// opts.showFull adds a reference row for the whole workout.
+function ivRenderTable(container, a, ser, windows, opts){
+  opts = opts || {};
+  const editable = !!opts.editable;
+  const cols = ivColumns(a, ser);
+  const total = wpbTotalSec(a, ser);
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const statCells = st => cols.map(c => `<td>${st[c.key] != null && !isNaN(st[c.key]) ? c.fmt(st[c.key]) : '—'}</td>`).join('');
+
+  // Read-only mode (the calendar popup) is a list of cards rather than a table: name and
+  // range on top, labelled stat values underneath, wrapping to whatever width there is.
+  if(!editable){
+    const statHtml = st => cols.map(c => `<span class="iv-stat"><span class="iv-stat-l">${c.label}</span><span class="iv-stat-v">${st[c.key] != null && !isNaN(st[c.key]) ? c.fmt(st[c.key]) : '—'}</span></span>`).join('');
+    const card = (name, num, range, st, ref) => `<div class="iv-item${ref ? ' iv-item-ref' : ''}">
+      <div class="iv-item-head"><span class="iv-item-name">${num ? `<span class="iv-n">${num}</span>` : ''}${esc(name)}</span><span class="iv-item-range">${range ? range + ' · ' : ''}${ivClock(st.sec)}</span></div>
+      <div class="iv-stats">${statHtml(st)}</div>
+    </div>`;
+    let html = windows.map((w, i) => card(w.label || `Interval ${i + 1}`, i + 1, `${ivClock(w.start)}&ndash;${ivClock(w.end)}`, ivStats(a, ser, [w]), false)).join('');
+    if(windows.length >= 2) html += card('Combined', 0, '', ivStats(a, ser, windows), true);
+    container.innerHTML = `<div class="iv-list">${html}</div>`;
+    return;
+  }
+
+  const refRow = (label, st) =>
+    `<tr class="iv-ref"><td></td><td class="iv-left">${label}</td><td></td><td></td><td>${ivClock(st.sec)}</td>${statCells(st)}<td></td></tr>`;
+  let body = '';
+  if(opts.showFull) body += refRow('Full workout', ivStats(a, ser, [{start: 0, end: total}]));
+  windows.forEach((w, i) => {
+    const st = ivStats(a, ser, [w]);
+    const name = w.label || `Interval ${i + 1}`;
+    body += `<tr data-i="${i}">
+      <td>${i + 1}</td>
+      <td class="iv-left"><input type="text" class="iv-in iv-label" value="${esc(w.label || '')}" placeholder="${esc(name)}"></td>
+      <td><input type="text" class="iv-in iv-time iv-start" value="${ivClock(w.start)}"></td>
+      <td><input type="text" class="iv-in iv-time iv-end" value="${ivClock(w.end)}"></td>
+      <td>${ivClock(w.end - w.start)}</td>${statCells(st)}
+      <td><button type="button" class="iv-del" title="Remove interval">&times;</button></td>
+    </tr>`;
+  });
+  if(windows.length >= 2) body += refRow('Combined', ivStats(a, ser, windows));
+
+  container.innerHTML = `<table class="iv-table">
+    <thead><tr><th>#</th><th class="iv-left">Interval</th><th>Start</th><th>End</th><th>Time</th>${cols.map(c => `<th>${c.label}</th>`).join('')}<th></th></tr>
+    </thead><tbody>${body}</tbody></table>`;
+
+  if(!editable) return;
+  const changed = () => { if(opts.onChange) opts.onChange(); };
+  container.querySelectorAll('tr[data-i]').forEach(tr => {
+    const i = +tr.dataset.i;
+    const w = windows[i];
+    tr.querySelector('.iv-label').addEventListener('change', e => {
+      const v = e.target.value.trim();
+      if(v) w.label = v; else delete w.label;
+      changed();
+    });
+    const timeEdit = (cls, field) => tr.querySelector(cls).addEventListener('change', e => {
+      const sec = parseTimeToSec(e.target.value);
+      const next = sec == null ? null : Math.max(0, Math.min(sec, total));
+      const ok = next != null && (field === 'start' ? next < w.end : next > w.start);
+      if(ok){ w[field] = Math.round(next * 10) / 10; ivSort(windows); }
+      changed();  // an invalid entry just re-renders, restoring the old value
+    });
+    timeEdit('.iv-start', 'start');
+    timeEdit('.iv-end', 'end');
+    tr.querySelector('.iv-del').addEventListener('click', () => { windows.splice(i, 1); changed(); });
+  });
+}
+
 function wpbRenderRow(a){
-  const windows = wpbWindows[a.id] || (wpbWindows[a.id] = wpbDefaultWindows(a));
-  const totalSec = wpbTotalSec(a);
+  const ser = ivSeriesFor(a);
+  const windows = ivWorkingWindows(a);
+  const totalSec = wpbTotalSec(a, ser);
+  const canSave = SERVER_MODE || GITHUB_MODE;
+  const rowing = a.type === 'Rowing';
+
   const row = document.createElement('div');
   row.className = 'an-wpb-row';
   row.dataset.id = a.id;
@@ -2205,7 +2400,7 @@ function wpbRenderRow(a){
   const toolbar = document.createElement('div');
   toolbar.className = 'an-wpb-toolbar';
   toolbar.innerHTML = `
-    <button type="button" class="an-btn an-wpb-mark-btn">[ Mark section</button>
+    <button type="button" class="an-btn an-wpb-mark-btn">[ Mark interval</button>
     <span class="an-wpb-manual-start" style="display:none;">
       <input type="text" class="an-wpb-manual-start-input" placeholder="0:00">
       <button type="button" class="an-btn an-wpb-manual-start-btn">[ Set start</button>
@@ -2216,16 +2411,21 @@ function wpbRenderRow(a){
     </span>
     <button type="button" class="an-btn an-wpb-cancel-btn" style="display:none;">Cancel</button>
     <button type="button" class="an-btn an-wpb-clear-btn">Clear all</button>
+    <span class="an-wpb-spacer"></span>
+    <span class="an-wpb-status"></span>
+    <button type="button" class="an-btn an-wpb-save-btn" style="display:none;">Save to workout</button>
   `;
   row.appendChild(toolbar);
 
-  const chipsEl = document.createElement('div');
-  chipsEl.className = 'an-wpb-chips';
-  row.appendChild(chipsEl);
+  const tableEl = document.createElement('div');
+  tableEl.className = 'iv-scroll';
+  row.appendChild(tableEl);
 
   const markBtn = toolbar.querySelector('.an-wpb-mark-btn');
   const cancelBtn = toolbar.querySelector('.an-wpb-cancel-btn');
   const clearBtn = toolbar.querySelector('.an-wpb-clear-btn');
+  const statusEl = toolbar.querySelector('.an-wpb-status');
+  const saveBtn = toolbar.querySelector('.an-wpb-save-btn');
   const manualStartSpan = toolbar.querySelector('.an-wpb-manual-start');
   const manualStartInput = toolbar.querySelector('.an-wpb-manual-start-input');
   const manualStartBtn = toolbar.querySelector('.an-wpb-manual-start-btn');
@@ -2233,9 +2433,8 @@ function wpbRenderRow(a){
   const manualEndInput = toolbar.querySelector('.an-wpb-manual-end-input');
   const manualEndBtn = toolbar.querySelector('.an-wpb-manual-end-btn');
 
-  // pickMode: null (idle) | 'start' (waiting for a chart click to open a
-  // window) | 'end' (waiting for a chart click, or the manual input, to
-  // close the one just opened at pendingStart).
+  // pickMode: null (idle) | 'start' (waiting for a chart click to open an interval) |
+  // 'end' (waiting for a chart click, or the manual input, to close the one just opened).
   let pickMode = null;
   let pendingStart = null;
 
@@ -2244,17 +2443,31 @@ function wpbRenderRow(a){
       : pickMode === 'end' ? 'Click the chart to set the end — or type a time and click "Set end".'
       : '';
   }
-  function redrawChips(){
-    chipsEl.innerHTML = wpbChipsHtml(a, windows);
-    chipsEl.querySelectorAll('.an-wpb-chip-del').forEach(btn => {
-      btn.addEventListener('click', () => {
-        windows.splice(+btn.dataset.idx, 1);
-        saveWpbWindows(wpbWindows);
-        redrawChips();
-        wpbUpdateResult(a, windows, resultEl);
-        chart.update('none');
-      });
-    });
+  function updateResult(){
+    if(!windows.length){ resultEl.textContent = 'Mark an interval to see its averages'; return; }
+    const st = ivStats(a, ser, windows);
+    const n = windows.length;
+    resultEl.innerHTML = `${n} interval${n === 1 ? '' : 's'} · ${ivClock(st.sec)} marked` +
+      (st.hr != null ? ` · <b>${st.hr.toFixed(0)}</b> bpm avg` : '');
+  }
+  function updateStatus(){
+    const saved = ivSavedFor(a.id);
+    const dirty = !ivSame(windows, saved);
+    statusEl.textContent = dirty ? 'Unsaved changes' : (saved ? 'Saved to workout' : '');
+    statusEl.classList.toggle('dirty', dirty);
+    saveBtn.style.display = (SERVER_MODE || GITHUB_MODE) ? '' : 'none';
+    saveBtn.disabled = !dirty;
+  }
+  function refresh(){
+    // Only keep a local draft while it differs from what's saved; otherwise a stale copy
+    // could shadow edits saved from another browser or the calendar popup.
+    if(ivSame(windows, ivSavedFor(a.id))) delete wpbWindows[a.id];
+    else wpbWindows[a.id] = windows;
+    saveWpbWindows(wpbWindows);
+    ivRenderTable(tableEl, a, ser, windows, {editable: true, showFull: true, onChange: refresh});
+    updateResult();
+    updateStatus();
+    chart.update('none');
   }
   function resetPicker(){
     pickMode = null; pendingStart = null;
@@ -2279,12 +2492,10 @@ function wpbRenderRow(a){
     const e = Math.min(totalSec, Math.max(startSec, endSec));
     if(e - s >= 1){
       windows.push({start: Math.round(s), end: Math.round(e)});
-      saveWpbWindows(wpbWindows);
-      redrawChips();
-      wpbUpdateResult(a, windows, resultEl);
+      ivSort(windows);
     }
     resetPicker();
-    chart.update('none');
+    refresh();
   }
 
   markBtn.addEventListener('click', () => {
@@ -2300,11 +2511,7 @@ function wpbRenderRow(a){
   cancelBtn.addEventListener('click', () => { resetPicker(); chart.update('none'); });
   clearBtn.addEventListener('click', () => {
     windows.length = 0;
-    windows.push(...wpbDefaultWindows(a));
-    saveWpbWindows(wpbWindows);
-    redrawChips();
-    wpbUpdateResult(a, windows, resultEl);
-    chart.update('none');
+    refresh();
   });
   manualStartBtn.addEventListener('click', () => {
     if(pickMode !== 'start') return;
@@ -2321,27 +2528,70 @@ function wpbRenderRow(a){
   });
   manualEndInput.addEventListener('keydown', e => { if(e.key === 'Enter') manualEndBtn.click(); });
 
+  saveBtn.addEventListener('click', async () => {
+    const label = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try {
+      const clean = ivCleanWindows(windows);
+      await saveIntervalsFlow(a.id, clean);
+      ivCommitSaved(a.id, clean);
+      refresh();
+    } catch(e) {
+      alert('Failed to save intervals: ' + e.message);
+    } finally {
+      saveBtn.textContent = label;
+      updateStatus();
+    }
+  });
+
+  // ---- chart: every stream this workout has, each on its own hidden axis (HR keeps the
+  // visible left axis); click a legend entry to hide/show a stream.
   const ac = chartAxisColors();
-  const amberC = theme().amber;
-  const hrSeries = sectionHrSeries(a);
-  const pts = hrSeries.t.map((t,i) => ({x:t, y:hrSeries.v[i]})).filter(p=>p.y!=null && p.x!=null);
+  const th = theme();
+  const pts = (series, map) => series.t.map((t, i) => ({x: t, y: map ? map(series.v[i]) : series.v[i]})).filter(p => p.y != null && p.x != null);
+  const datasets = [];
+  const scales = {
+    x:{type:'linear', min:0, max:totalSec, grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}, callback:v => ivClock(v)}},
+  };
+  const line = (key, label, color, axis, data) => ({_key:key, label, data, borderColor:color, backgroundColor:color, yAxisID:axis, fill:false, tension:0.2, pointRadius:0, borderWidth:1.5, spanGaps:true});
+  if(ser.hr){
+    datasets.push(line('hr', 'HR (bpm)', th.amber, 'y', pts(ser.hr)));
+    scales.y = {position:'left', grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}}, title:{display:true, text:'bpm', color:ac.title}};
+  }
+  if(ser.w){
+    if(rowing){
+      // Same split conversion as the popup chart; a 4:00+ "split" is just a rest, not rowing.
+      const split = w => (w != null && w > 0) ? +(500 * Math.pow(2.80 / w, 1/3)).toFixed(1) : null;
+      datasets.push(line('split', 'Split (/500m)', th.row, 'ySplit', pts(ser.w, w => { const s = split(w); return s != null && s <= 240 ? s : null; })));
+      scales.ySplit = {display:false, reverse:true};
+    } else {
+      datasets.push(line('watts', 'Watts', th.other, 'yWatts', pts(ser.w)));
+      scales.yWatts = {display:false};
+    }
+  }
+  if(ser.cad){
+    datasets.push(line('cad', rowing ? 'SPM' : 'Cadence', th.ride, 'yCad', pts(ser.cad)));
+    scales.yCad = {display:false};
+  }
 
   const chart = new Chart(canvas, {
     type:'line',
-    data:{ datasets:[{ data: pts, borderColor: amberC, backgroundColor: amberC, fill:false, tension:0.2, pointRadius:0, borderWidth:1.5 }] },
+    data:{ datasets },
     options:{
       responsive:true, maintainAspectRatio:false, animation:false, parsing:false,
-      interaction:{mode:'nearest', intersect:false},
-      scales:{
-        x:{type:'linear', min:0, max:totalSec, grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}, callback:v=>formatSecToTime(v)}},
-        y:{grid:{color:ac.grid}, ticks:{color:ac.tick, font:{family:'IBM Plex Mono', size:9}}}
-      },
+      interaction:{mode:'index', intersect:false, axis:'x'},
+      scales,
       plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{title:()=>'', label:item=>`${item.parsed.y} bpm at ${formatSecToTime(item.parsed.x)}`}}
+        legend:{position:'top', labels:{color:ac.tick, boxWidth:14, boxHeight:2, font:{family:'IBM Plex Mono', size:10}}},
+        tooltip:{callbacks:{
+          title: items => items.length ? ivClock(items[0].parsed.x) : '',
+          label: item => item.dataset._key === 'split' ? `Split ${fmtErgSplit(item.parsed.y)}` : `${item.dataset.label}: ${Math.round(item.parsed.y * 10) / 10}`,
+        }},
       },
       onClick:(evt, elements, ch) => {
         if(pickMode == null) return;
+        if(evt.y < ch.chartArea.top || evt.y > ch.chartArea.bottom) return;  // legend / axis clicks
         const xVal = ch.scales.x.getValueForPixel(evt.x);
         if(xVal == null) return;
         const clamped = Math.max(0, Math.min(xVal, totalSec));
@@ -2353,19 +2603,25 @@ function wpbRenderRow(a){
       }
     },
     plugins: [{
-      id: 'section-marks',
+      id: 'interval-marks',
       afterDraw(ch){
-        const {ctx, chartArea, scales} = ch;
-        const x = scales.x;
+        const {ctx, chartArea, scales: sc} = ch;
+        const x = sc.x;
         ctx.save();
-        windows.forEach(w => {
+        windows.forEach((w, i) => {
           const x0 = x.getPixelForValue(w.start), x1 = x.getPixelForValue(w.end);
-          ctx.fillStyle = amberC + '26';
-          ctx.fillRect(x0, chartArea.top, x1-x0, chartArea.bottom-chartArea.top);
+          ctx.fillStyle = th.amber + '26';
+          ctx.fillRect(x0, chartArea.top, x1 - x0, chartArea.bottom - chartArea.top);
+          if(x1 - x0 > 14){
+            ctx.fillStyle = th.amber;
+            ctx.font = '10px IBM Plex Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(String(i + 1), (x0 + x1) / 2, chartArea.top + 11);
+          }
         });
         if(pendingStart != null){
           const xp = x.getPixelForValue(pendingStart);
-          ctx.strokeStyle = amberC;
+          ctx.strokeStyle = th.amber;
           ctx.setLineDash([4,3]);
           ctx.beginPath(); ctx.moveTo(xp, chartArea.top); ctx.lineTo(xp, chartArea.bottom); ctx.stroke();
           ctx.setLineDash([]);
@@ -2376,8 +2632,7 @@ function wpbRenderRow(a){
   });
   wpbCharts.push(chart);
 
-  redrawChips();
-  wpbUpdateResult(a, windows, resultEl);
+  refresh();
   return row;
 }
 function anRenderWpbSection(){
@@ -2396,6 +2651,78 @@ function anRenderWpbSection(){
   eligible.forEach(a => listEl.appendChild(wpbRenderRow(a)));
 }
 
+// ---- Calendar popup: the workout's saved intervals, with the details and (when you can
+// save) an editor. Stats are always recomputed from the streams, so only the boundaries
+// and labels are stored.
+function renderIntervalsPanel(a){
+  const panel = document.getElementById('iv-panel');
+  const tableEl = document.getElementById('iv-table');
+  const editBtn = document.getElementById('iv-edit-btn');
+  const saveBtn = document.getElementById('iv-save-btn');
+  const cancelBtn = document.getElementById('iv-cancel-btn');
+  const addBtn = document.getElementById('iv-add-btn');
+  const savedEl = document.getElementById('iv-saved');
+  const ser = ivSeriesFor(a);
+  const canEdit = (SERVER_MODE || GITHUB_MODE) && !!(ser.hr || ser.w || ser.cad);
+
+  savedEl.classList.remove('show');
+  if(!ivSavedFor(a.id) && !canEdit){ panel.style.display = 'none'; return; }
+  panel.style.display = '';
+
+  let draft = null;
+  function showView(){
+    draft = null;
+    const list = ivSavedFor(a.id) || [];
+    if(list.length) ivRenderTable(tableEl, a, ser, list, {editable: false});
+    else tableEl.innerHTML = `<div class="iv-empty">No intervals saved for this workout yet.${canEdit ? ' Cut them in the Analysis tab, or add one here.' : ''}</div>`;
+    editBtn.style.display = canEdit ? '' : 'none';
+    saveBtn.style.display = cancelBtn.style.display = addBtn.style.display = 'none';
+  }
+  function showEdit(){
+    draft = (ivSavedFor(a.id) || []).map(x => ({...x}));
+    editBtn.style.display = 'none';
+    saveBtn.style.display = cancelBtn.style.display = addBtn.style.display = '';
+    drawDraft();
+  }
+  function drawDraft(){
+    if(draft.length) ivRenderTable(tableEl, a, ser, draft, {editable: true, onChange: drawDraft});
+    else tableEl.innerHTML = '<div class="iv-empty">No intervals — add one, or Save to clear.</div>';
+  }
+
+  editBtn.onclick = showEdit;
+  cancelBtn.onclick = showView;
+  addBtn.onclick = () => {
+    const total = wpbTotalSec(a, ser);
+    const lastEnd = draft.length ? Math.max(...draft.map(w => w.end)) : 0;
+    const start = lastEnd < total - 1 ? lastEnd : Math.max(0, total - 60);
+    draft.push({start, end: Math.min(total, start + 300)});
+    ivSort(draft);
+    drawDraft();
+  };
+  saveBtn.onclick = async () => {
+    const label = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try {
+      const clean = ivCleanWindows(draft);
+      await saveIntervalsFlow(a.id, clean);
+      ivCommitSaved(a.id, clean);
+      delete wpbWindows[a.id];  // an older Analysis draft must not shadow what was just saved
+      saveWpbWindows(wpbWindows);
+      anRenderWpbSection();
+      showView();
+      savedEl.classList.add('show');
+      setTimeout(() => savedEl.classList.remove('show'), 2000);
+    } catch(e) {
+      alert('Failed to save intervals: ' + e.message);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = label;
+    }
+  };
+  showView();
+}
+
 function anWattsToSplit(w){ return (w==null||w<=0)?null:500*Math.pow(2.80/w,1/3); }
 
 function anRenderTrendChart(){
@@ -2412,8 +2739,8 @@ function anRenderTrendChart(){
     if(metric==='dur') return a.dur;
     if(metric==='decoupling') return a.decoupling ? a.decoupling.value : null;
     if(metric==='sechr'){
-      const windows = wpbWindows[a.id];
-      if(!windows || !windows.length) return null;
+      const windows = ivPeekWindows(a);
+      if(!windows.length) return null;
       const hr = wpbAvgHr(a, windows);
       return hr != null ? Math.round(hr) : null;
     }
@@ -2425,7 +2752,7 @@ function anRenderTrendChart(){
   if(anTrendChart){ anTrendChart.destroy(); anTrendChart=null; }
   if(!pts.length){
     emptyEl.classList.add('show'); canvasEl.style.display='none';
-    if(metric==='sechr') emptyEl.textContent = 'Mark sections in the Avg HR by Section panel above for the selected activities to see this trend.';
+    if(metric==='sechr') emptyEl.textContent = 'Mark intervals in the Cut Intervals panel above for the selected activities to see this trend.';
     else emptyEl.textContent = 'Select at least one activity above to see this chart.';
     return;
   }
@@ -3038,6 +3365,7 @@ function openModal(id){
   ).join('');
 
   renderPM5Panel(a);
+  renderIntervalsPanel(a);
   document.getElementById('pm5-overlay').classList.remove('open');
 
   if(mChart) mChart.destroy();
@@ -3285,6 +3613,19 @@ async function ghSaveBodyMetricsFlow(date, restingHr, weight){
     'data/body_metrics.json',
     utf8ToBase64(JSON.stringify(metrics, null, 1)),
     `Log body metrics for ${date}`,
+    current ? current.sha : undefined,
+  );
+}
+
+async function ghSaveIntervalsFlow(activityId, intervals){
+  const current = await ghGetFile('data/intervals.json');
+  const all = current ? JSON.parse(base64ToUtf8(current.content)) : {};
+  if(intervals.length) all[activityId] = intervals;
+  else delete all[activityId];
+  await ghPutFile(
+    'data/intervals.json',
+    utf8ToBase64(JSON.stringify(all, null, 1)),
+    intervals.length ? `Save ${intervals.length} interval(s) for activity ${activityId}` : `Clear intervals for activity ${activityId}`,
     current ? current.sha : undefined,
   );
 }
