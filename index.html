@@ -2154,6 +2154,16 @@ function ivClock(sec){
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
 }
 
+// Typed interval times: a bare number means minutes ("10" = 10:00, "12.5" = 12:30); anything with
+// a colon reads as m:ss or h:mm:ss. (parseTimeToSec stays seconds-first for the erg-screen form.)
+function ivParseTime(str){
+  str = (str || '').trim();
+  if(!str) return null;
+  if(str.includes(':')) return parseTimeToSec(str);
+  const mins = Number(str);
+  return isFinite(mins) ? mins * 60 : null;
+}
+
 // One stream (hr / w / cad) over elapsed seconds. Prefers the build's fixed 20s grid
 // (stream.hrs / .ws / .cads) since the 48-point chart stream is too coarse to average a
 // short interval; ErgData rows already carry a full-resolution stream, so they use that.
@@ -2358,7 +2368,7 @@ function ivRenderTable(container, a, ser, windows, opts){
       changed();
     });
     const timeEdit = (cls, field) => tr.querySelector(cls).addEventListener('change', e => {
-      const sec = parseTimeToSec(e.target.value);
+      const sec = ivParseTime(e.target.value);
       const next = sec == null ? null : Math.max(0, Math.min(sec, total));
       const ok = next != null && (field === 'start' ? next < w.end : next > w.start);
       if(ok){ w[field] = Math.round(next * 10) / 10; ivSort(windows); }
@@ -2515,13 +2525,13 @@ function wpbRenderRow(a){
   });
   manualStartBtn.addEventListener('click', () => {
     if(pickMode !== 'start') return;
-    const s = parseTimeToSec(manualStartInput.value);
+    const s = ivParseTime(manualStartInput.value);
     if(s == null) return;
     beginEndPick(Math.max(0, Math.min(s, totalSec)));
   });
   manualStartInput.addEventListener('keydown', e => { if(e.key === 'Enter') manualStartBtn.click(); });
   manualEndBtn.addEventListener('click', () => {
-    const e = parseTimeToSec(manualEndInput.value);
+    const e = ivParseTime(manualEndInput.value);
     if(e == null || pendingStart == null) return;
     finalizeWindow(pendingStart, e);
     manualEndInput.value = '';
