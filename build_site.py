@@ -87,6 +87,11 @@ def stream_grid(rows, field, step=STREAM_GRID_STEP):
     `step` seconds, so the Analysis tab can average over a hand-cut interval far more
     precisely than the 48-point chart stream allows. Entry g covers ((g-1)*step, g*step];
     None where nothing was recorded. Returns None if the field never has a non-zero value."""
+    # A pause in recording (an ErgData stream sends nothing during a rest) is not measured time,
+    # and the first sample after it is a start-up artifact, so it gets no weight.
+    times = [float(r["time"]) for r in rows if r.get("time")]
+    diffs = sorted(b - a for a, b in zip(times, times[1:]) if b > a)
+    gap_limit = max(30, 3 * diffs[len(diffs) // 2]) if diffs else 30
     sums, weights = {}, {}
     prev_t = None
     for r in rows:
@@ -95,7 +100,7 @@ def stream_grid(rows, field, step=STREAM_GRID_STEP):
         t = float(r["time"])
         if r.get(field) and prev_t is not None:
             dt = t - prev_t
-            if 0 < dt < 300:
+            if 0 < dt <= gap_limit:
                 g = int(-(-t // step))  # ceil
                 sums[g] = sums.get(g, 0.0) + float(r[field]) * dt
                 weights[g] = weights.get(g, 0.0) + dt

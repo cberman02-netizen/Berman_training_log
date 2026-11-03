@@ -2186,19 +2186,33 @@ function wpbEligibleActivities(sel){
   return sel.filter(a => { const s = ivSeriesFor(a); return s.hr || s.w || s.cad; });
 }
 
-// Weights each sample by the seconds since the previous one (same convention as
-// zone_minutes in build_site.py) rather than a plain arithmetic mean — Strava's own stream
-// spacing is often very irregular (a real rowing stream can jump from a 10s gap to a 250s
-// gap), so an unweighted mean can skew toward whichever stretch got the denser sampling.
-// Times are elapsed seconds, same units as interval start/end.
+// Averages a stream over the windows, weighting each sample by the seconds since the previous
+// one. A pause in recording (an ErgData stream sends nothing during a rest, leaving a gap of
+// minutes) is neither measured time nor a valid span for the sample after it — that first sample
+// is a start-up artifact (e.g. 0 SPM at 438 W) — so a sample following a gap carries no weight.
+// "Gap" is relative to the stream's own typical spacing. Times are elapsed seconds, same units as
+// interval start/end.
+const gapLimitCache = new WeakMap();
+function gapLimitFor(times){
+  let g = gapLimitCache.get(times);
+  if(g == null){
+    const ds = [];
+    for(let i = 1; i < times.length; i++){ const d = times[i] - times[i-1]; if(d > 0) ds.push(d); }
+    ds.sort((x, y) => x - y);
+    g = Math.max(30, 3 * (ds.length ? ds[Math.floor(ds.length / 2)] : 0));
+    gapLimitCache.set(times, g);
+  }
+  return g;
+}
 function timeWeightedAvg(times, values, windows){
+  const gapLimit = gapLimitFor(times);
   let wSum = 0, vwSum = 0;
   let prevT = null;
   for(let i = 0; i < times.length; i++){
     const t = times[i], v = values[i];
     if(t != null && prevT != null && v != null){
       const dt = t - prevT;
-      if(dt > 0 && dt < 300 && windows.some(win => t >= win.start && t < win.end)){
+      if(dt > 0 && dt <= gapLimit && windows.some(win => t >= win.start && t < win.end)){
         wSum += dt;
         vwSum += v * dt;
       }
