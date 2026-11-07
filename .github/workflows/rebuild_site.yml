@@ -19,6 +19,13 @@ on:
 permissions:
   contents: write
 
+# Flagging several commutes in a row makes one commit (and one run) per flag. Without this, each
+# run builds, then loses the push race to the next flag's commit and fails. A newer run always
+# builds from a commit that includes the older one's data, so cancelling the older run is safe.
+concurrency:
+  group: rebuild-site
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -38,4 +45,14 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add index.html
           git diff --quiet --staged || git commit -m "Rebuild site"
-          git push
+          if ! git push; then
+            # Rejected because main moved while this ran (e.g. another commute flag landed). That
+            # newer commit has its own run, built from data that includes this one's, so skipping
+            # is safe. If main did NOT move, the push failed for some other reason: fail loudly.
+            git fetch -q origin main
+            if [ "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]; then
+              echo "::notice::main moved on while this run was building; the newer run will rebuild."
+              exit 0
+            fi
+            exit 1
+          fi
